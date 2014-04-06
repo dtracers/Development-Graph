@@ -1,23 +1,20 @@
 <head>
 	<link rel="stylesheet" href="/testFile.css">
-	<script src = "/readFile.js"></script>
+	<script src = "/parseFile.js"></script>
 	<script>
 	  function handleFileSelect(evt) {
 	    evt.stopPropagation();
 	    evt.preventDefault();
-
+		console.log(evt);
+		console.log(evt.dataTransfer);
 	    var files = evt.dataTransfer.files; // FileList object.
 
 	    // files is a FileList of File objects. List some properties.
 	    var output = [];
 	    for (var i = 0, f; f = files[i]; i++) {
-			/*
-	      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-	                  f.size, ' bytes, last modified: ',
-	                  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-	                  '</li>');
-					  */
-			readFile(f);
+	    	var parser = new DocumentParser();
+	    	parser.setFileToParse(f);
+	    	parser.start();
 	    }
 	  }
 
@@ -28,24 +25,17 @@
 	  }
 
 	  // Setup the dnd listeners.
-	  window.onload = function() {
-	  		var dropZone = document.getElementById('drop_zone');
-	  		dropZone.addEventListener('dragover', handleDragOver, false);
-	  		dropZone.addEventListener('drop', handleFileSelect, false);
+	  function setUpListeners() {
+	  		//var dropZone = document.getElementById('drop_zone');
+	  		//dropZone.addEventListener('dragover', handleDragOver, false);
+	  		//dropZone.addEventListener('drop', handleFileSelect, false);
 	  		document.getElementById('files').addEventListener('change', handleFileSelect, false);
   		}
-		function readFile(file) {
-			var reader = new FileReader();
-
-			reader.onload = function(e) {
-				var contents = e.target.result;
-			};
-			reader.readAsText(file);
-		}
 	</script>
 </head>
-<body>
+<body onload = "setUpListeners();">
 	<div id="drop_zone">
 		<input type="file" id="files" name="files[]" multiple />
+	</div>
 	<div id="list"></div>
 </body>
