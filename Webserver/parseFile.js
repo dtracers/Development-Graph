@@ -29,7 +29,7 @@ function DocumentParser() {
 	 * @StartFields
 	 */
 	var parseFile;
-	var parseString = "";
+	var fileContents = "";
 	var parsing = false;
 	var fileSet = false;
 	var localScope = this;
@@ -39,6 +39,10 @@ function DocumentParser() {
 	/**
 	 * @EndFields
 	 */
+
+	// these are by them selves so that the creation of doc tags to no cause any issues.
+	var TAG_OPEN_DOC = "/**"; // */
+	var TAG_CLOSE_DOC = "*/";
 	
 	/**
 	 * @StartFields
@@ -49,6 +53,9 @@ function DocumentParser() {
 	var TYPE_CLASS = "Class";
 	var TYPE_METHOD = "Method";
 	var TYPE_FIELD = "Field";
+	
+	var OPEN_BRACKET = "{";
+	var CLOSE_BRACKET = "}";
 	/**
 	 * @EndFields
 	 */
@@ -61,7 +68,7 @@ function DocumentParser() {
 			parseFile = file;
 			fileSet = true;
 		} else {
-			throw new Exception("File is already parsed");
+			throw new Error("File is already parsed");
 		}
 	}
 	/**
@@ -88,7 +95,8 @@ function DocumentParser() {
 
 		reader.onload = function(e) {
 			var contents = e.target.result;
-			parseFile(str)
+			fileContents = contents;
+			parseString(fileContents);
 		};
 		reader.readAsText(file);
 	}
@@ -99,12 +107,12 @@ function DocumentParser() {
 	 */
 	function parseString(str) {
 		parsing = true;
-		var leftIndex = str.indexOf("/**") + 3;
-		var rightIndex = str.indexOf("*/", leftIndex);
+		var leftIndex = str.indexOf(TAG_OPEN_DOC) + 3;
+		var rightIndex = str.indexOf(TAG_CLOSE_DOC, leftIndex);
 		if (leftIndex == -1 || rightIndex == -1) {
 			parsing = false;
 			finishedParsing = true;
-			throw new Exception("No comments found in document");
+			throw new Error("No comments found in document");
 		}
 		returnObject = new Object();
 		setTimeout(function() {
@@ -129,15 +137,18 @@ function DocumentParser() {
 		}
 
 		var specificString = str.substring(leftIndex, rightIndex);
+		console.log("Parsing comment");
+		console.log(specificString);
+
 		// do some stuffs
-		var result = createObject(specificString);
+		var result = createObject(specificString, leftIndex, rightIndex, str, level);
 		var nextIndex = result.endingIndex;
 		if (result) {
 			resultingObject[result.name] = result;
 		}
 
-		leftIndex = str.indexOf("/**", nextIndex) + 3;
-		rightIndex = str.indexOf("*/", leftIndex);
+		leftIndex = str.indexOf(TAG_OPEN_DOC, nextIndex) + 3;
+		rightIndex = str.indexOf(TAG_CLOSE_DOC, leftIndex);
 		setTimeout(function() {
 			parseStringRecursively(str, leftIndex, rightIndex, resultingObject, level);
 		}, 20);
@@ -149,8 +160,10 @@ function DocumentParser() {
 	 * @returns the documentation object to add to the end of the list
 	 */
 	function createObject(specificString, leftIndex, rightIndex, totalFile, level) {
-		if (specificString.indexOf(TAG_CLASS, leftIndex) != -1) {
+		if (specificString.indexOf(TAG_CLASS) != -1) {
 			return createClassObject(specificString, leftIndex, rightIndex, totalFile, level);
+		} else {
+			alert("No class tag found");
 		}
 	}
 
@@ -158,27 +171,34 @@ function DocumentParser() {
 	 * @Method
 	 */
 	function createClassObject(commentString, leftIndex, rightIndex, totalFile, level) {
-		var endingBracket = brackCounter(totalFile.substring(rightIndex, totalFile.length()));
-		var startingBracket = totalFile.indexOf("{", rightIndex);
 		var startingIndex = totalFile.indexOf("function", rightIndex);
+		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
+		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length));
 
 		var name = totalFile.substring(startingIndex, startingBracket).trim();
 		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		console.log("class name");
+		console.log(name);
 
-		var classObject = new Object();
+		var classObject = createDocumentationObject();
 		classObject.name = name;
 		classObject.comment = commentString;
 		classObject.startingIndex = startingIndex;
 		classObject.endingIndex = endingBracket;
 
 		var str = totalFile.substring(startingBracket + 1, endingBracket);
-		var subLeftIndex = str.indexOf("/**") + 3;
-		var subRightIndex = str.indexOf("*/", subLeftIndex);
+		var subLeftIndex = str.indexOf(TAG_OPEN_DOC) + 3;
+		var subRightIndex = str.indexOf(TAG_CLOSE_DOC, subLeftIndex);
 
+		console.log("Parsing just the class data");
+		console.log(str);
+		/*
 		setTimeout(function() {
 			parseStringRecursively(str, subLeftIndex, subRightIndex, classObject, level + 1);
 		}, 20);
+		*/
 
+		console.log(classObject);
 		return classObject;
 	}
 
@@ -188,25 +208,43 @@ function DocumentParser() {
 	 * @returns the index that the matching close bracket would occur at.
 	 */
 	function bracketCounter(searchString) {
+		console.log("Counting brackets");
+		console.log(searchString);
 		var currentIndex = 0;
-		if ((currentIndex = searchString.indexOf("{")) == -1) {
+		if ((currentIndex = searchString.indexOf(OPEN_BRACKET)) == -1) {
 			return -1;
 		}
 		var totalCount = 1;
+		var TEMP_INDEX = 0;
 		while (totalCount > 0) {
-			var openIndex = searchString.indexOf("{", currentIndex + 1);
-			var closeIndex = searchString.indexOf("}", currentIndex + 1);
-			if (openIndex < closeIndex) {
+			if (totalCount == 1) {
+				TEMP_INDEX = currentIndex;
+			}
+			console.log(totalCount + " " + currentIndex);
+			var openIndex = searchString.indexOf(OPEN_BRACKET, currentIndex + 1);
+			var closeIndex = searchString.indexOf(CLOSE_BRACKET, currentIndex + 1);
+
+			if (openIndex < closeIndex && openIndex != -1) {
 				totalCount += 1;
 				currentIndex = openIndex;
 			} else {
 				totalCount -= 1;
 				currentIndex = closeIndex;
 			}
-			if (openIndex == -1 || closeIndex == -1) {
-				throw new Exception("mismatch braces exception");
+			alert("totalCount: " + totalCount + searchString.substring(TEMP_INDEX + 1, currentIndex + 1));
+
+			if (openIndex == -1 || closeIndex == -1 && totalCount != 0) {
+				throw new Error("mismatch braces exception");
 			}
 		}
 		return currentIndex;
+	}
+
+	/**
+	 * Creates a documentation object without the needed items
+	 * @Method
+	 */
+	function createDocumentationObject() {
+		return new Object();
 	}
 }
