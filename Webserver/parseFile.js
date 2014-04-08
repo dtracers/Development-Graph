@@ -25,6 +25,7 @@
  * @Class
  */
 function DocumentParser() {
+
 	/**
 	 * @StartFields
 	 */
@@ -36,6 +37,7 @@ function DocumentParser() {
 	var returnObject = false;
 	var finishedParsing = false;
 	var parsingFinishedCallback = false;
+	var parsingLayer = 0;
 	/**
 	 * @EndFields
 	 */
@@ -43,7 +45,7 @@ function DocumentParser() {
 	// these are by them selves so that the creation of doc tags to no cause any issues.
 	var TAG_OPEN_DOC = "/**"; // */
 	var TAG_CLOSE_DOC = "*/";
-	
+
 	/**
 	 * @StartFields
 	 */
@@ -53,7 +55,10 @@ function DocumentParser() {
 	var TYPE_CLASS = "Class";
 	var TYPE_METHOD = "Method";
 	var TYPE_FIELD = "Field";
-	
+	var TYPE_FILE = "File";
+	var TYPE_EMPTY = "EMPTY"
+
+	var FUNCTION = "function";
 	var OPEN_BRACKET = "{";
 	var CLOSE_BRACKET = "}";
 	/**
@@ -71,13 +76,14 @@ function DocumentParser() {
 			throw new Error("File is already parsed");
 		}
 	}
+
 	/**
 	 * @Method
 	 */
 	this.reset = function() {
 		
 	}
-	
+
 	/**
 	 * @Method
 	 */
@@ -102,21 +108,51 @@ function DocumentParser() {
 	}
 
 	/**
+	 * @Method
+	 */
+	function addParsingLayer() {
+		if (!parsing) {
+			parsing = true;
+			parsingLayer = 0;
+		}
+		parsingLayer += 1;
+		console.log("Adding layer " + parsingLayer);
+	}
+
+	/**
+	 * @Method
+	 */
+	function removeParsingLayer() {
+		parsingLayer -= 1;
+		if (parsingLayer == 0) {
+			parsing = false;
+			finishedParsing = true;
+			alert("Done parsing!");
+			console.log(returnObject);
+		}
+		console.log("removing parsing layer" + parsingLayer);
+	}
+
+	/**
 	 * Pauses after every comment is found
 	 * @Method
 	 */
 	function parseString(str) {
-		parsing = true;
+		addParsingLayer();
 		var leftIndex = str.indexOf(TAG_OPEN_DOC) + 3;
 		var rightIndex = str.indexOf(TAG_CLOSE_DOC, leftIndex);
 		if (leftIndex == -1 || rightIndex == -1) {
-			parsing = false;
-			finishedParsing = true;
+			removeParsingLayer();
 			throw new Error("No comments found in document");
 		}
-		returnObject = new Object();
+		returnObject = createDocumentationObject(TYPE_FILE);
+		returnObject.name = parseFile.name;
+		returnObject.location = parseFile.webkitRelativePath; // TODO correct this for other browsers! (or node.js)
+		console.log(parseFile);
 		setTimeout(function() {
-			parseStringRecursively(str, leftIndex, rightIndex, returnObject, 0);
+			parseStringRecursively(str, leftIndex, rightIndex, returnObject);
+			console.log("Finished main parser thread");
+			removeParsingLayer();
 		}, 20);
 	}
 
@@ -125,14 +161,11 @@ function DocumentParser() {
 	 * @param leftIndex the index of the starting comment (starts after /**)
 	 * @param rightIndex
 	 */
-	function parseStringRecursively(str, leftIndex, rightIndex, resultingObject, level) {
-
+	function parseStringRecursively(str, leftIndex, rightIndex, resultingObject) {
+		addParsingLayer();
 		if (leftIndex == -1 || rightIndex == -1) {
-			if (level == 0) {
-				parsing = false;
-				finishedParsing = true;
-			}
 			console.log("completed object!" + resultingObject);
+			removeParsingLayer();
 			return;
 		}
 
@@ -141,16 +174,33 @@ function DocumentParser() {
 		console.log(specificString);
 
 		// do some stuffs
-		var result = createObject(specificString, leftIndex, rightIndex, str, level);
-		var nextIndex = result.endingIndex;
-		if (result) {
-			resultingObject[result.name] = result;
+		var result = createObject(specificString, leftIndex, rightIndex, str);
+		var nextIndex = -1;
+		if (result.isValidObject) {
+			resultingObject.addObject(result);
+			nextIndex = result.endingIndex;
+		} else {
+			alert("Invalid object created");
+			nextIndex = rightIndex + 1;
 		}
 
-		leftIndex = str.indexOf(TAG_OPEN_DOC, nextIndex) + 3;
+		leftIndex = str.indexOf(TAG_OPEN_DOC, nextIndex);
 		rightIndex = str.indexOf(TAG_CLOSE_DOC, leftIndex);
+		if (leftIndex != -1) {
+			leftIndex += 3;
+		}
+
+		if (leftIndex == -1) {
+			// no more comments left
+			removeParsingLayer();
+			return;
+		} else if(rightIndex == -1) {
+			throw new Error("Mismatched doc comments");
+		}
 		setTimeout(function() {
-			parseStringRecursively(str, leftIndex, rightIndex, resultingObject, level);
+			parseStringRecursively(str, leftIndex, rightIndex, resultingObject);
+			console.log("Finished recurse thread");
+			removeParsingLayer(); // happens on tail recursion.
 		}, 20);
 	}
 
@@ -159,28 +209,29 @@ function DocumentParser() {
 	 *
 	 * @returns the documentation object to add to the end of the list
 	 */
-	function createObject(specificString, leftIndex, rightIndex, totalFile, level) {
+	function createObject(specificString, leftIndex, rightIndex, totalFile) {
 		if (specificString.indexOf(TAG_CLASS) != -1) {
-			return createClassObject(specificString, leftIndex, rightIndex, totalFile, level);
-		} else {
-			alert("No class tag found");
+			return createClassObject(specificString, leftIndex, rightIndex, totalFile);
+		} else if (specificString.indexOf(TAG_METHOD) != -1){
+			return createMethodObject(specificString, leftIndex, rightIndex, totalFile);
 		}
+		var object = createDocumentationObject(TYPE_EMPTY);
+		return object;
 	}
 
 	/**
 	 * @Method
 	 */
-	function createClassObject(commentString, leftIndex, rightIndex, totalFile, level) {
-		var startingIndex = totalFile.indexOf("function", rightIndex);
+	function createClassObject(commentString, leftIndex, rightIndex, totalFile) {
+		console.log("CREATING CLASS OBJECT");
+		var startingIndex = totalFile.indexOf(FUNCTION, rightIndex) + FUNCTION.length;
 		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
-		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length));
+		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex;
 
 		var name = totalFile.substring(startingIndex, startingBracket).trim();
 		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
-		console.log("class name");
-		console.log(name);
 
-		var classObject = createDocumentationObject();
+		var classObject = createDocumentationObject(TYPE_CLASS);
 		classObject.name = name;
 		classObject.comment = commentString;
 		classObject.startingIndex = startingIndex;
@@ -190,26 +241,52 @@ function DocumentParser() {
 		var subLeftIndex = str.indexOf(TAG_OPEN_DOC) + 3;
 		var subRightIndex = str.indexOf(TAG_CLOSE_DOC, subLeftIndex);
 
-		console.log("Parsing just the class data");
-		console.log(str);
-		/*
+		addParsingLayer();
 		setTimeout(function() {
-			parseStringRecursively(str, subLeftIndex, subRightIndex, classObject, level + 1);
+			parseStringRecursively(str, subLeftIndex, subRightIndex, classObject);
+			console.log("Finished ");
+			removeParsingLayer(); // happens on tail recursion.
 		}, 20);
-		*/
 
 		console.log(classObject);
 		return classObject;
 	}
 
+	function createMethodObject(commentString, leftIndex, rightIndex, totalFile) {
+		var startingIndex = totalFile.indexOf(FUNCTION, rightIndex) + FUNCTION.length;
+		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
+		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex; // this should not travel far
+
+		var name = totalFile.substring(startingIndex, startingBracket).trim();
+		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		if ( name.length == 0) {
+			var searchString = totalFile.substring(rightIndex, startingIndex);
+			alert("searching for a method name! " + searchString);
+			// we need to look for a . and an =
+			var smallerSearchString = searchString.substring(searchString.indexOf(".") + 1,searchString.indexOf("="));
+			alert("searching for a method name! " + smallerSearchString);
+			name = smallerSearchString.trim();
+			alert("Name found! " + name);
+		}
+		console.log("method name");
+		console.log(name);
+
+		var methodObject = createDocumentationObject(TYPE_METHOD);
+		methodObject.name = name;
+		methodObject.comment = commentString;
+		methodObject.startingIndex = startingIndex;
+		methodObject.endingIndex = endingBracket;
+		return methodObject;
+	}
+	
 	/**
-	 * Finds the matching closing bracket assuming that the opening bracket occurs at zero
+	 * Finds the matching closing bracket assuming that the opening bracket occurs at zero.
+	 *
+	 * (this method has been tested and it works)
 	 * @Method
 	 * @returns the index that the matching close bracket would occur at.
 	 */
 	function bracketCounter(searchString) {
-		console.log("Counting brackets");
-		console.log(searchString);
 		var currentIndex = 0;
 		if ((currentIndex = searchString.indexOf(OPEN_BRACKET)) == -1) {
 			return -1;
@@ -220,7 +297,6 @@ function DocumentParser() {
 			if (totalCount == 1) {
 				TEMP_INDEX = currentIndex;
 			}
-			console.log(totalCount + " " + currentIndex);
 			var openIndex = searchString.indexOf(OPEN_BRACKET, currentIndex + 1);
 			var closeIndex = searchString.indexOf(CLOSE_BRACKET, currentIndex + 1);
 
@@ -231,9 +307,8 @@ function DocumentParser() {
 				totalCount -= 1;
 				currentIndex = closeIndex;
 			}
-			alert("totalCount: " + totalCount + searchString.substring(TEMP_INDEX + 1, currentIndex + 1));
 
-			if (openIndex == -1 || closeIndex == -1 && totalCount != 0) {
+			if (closeIndex == -1 && totalCount != 0) {
 				throw new Error("mismatch braces exception");
 			}
 		}
@@ -243,8 +318,85 @@ function DocumentParser() {
 	/**
 	 * Creates a documentation object without the needed items
 	 * @Method
+	 * @param objectType The type that the object is
 	 */
-	function createDocumentationObject() {
-		return new Object();
+	function createDocumentationObject(objectType) {
+		var object = new DocumentationObject();
+		if (objectType == undefined || objectType == TYPE_EMPTY) {
+			makeValueReadOnly(object,"isValidObject", false);
+			return object; // bail early
+		}
+
+		makeValueReadOnly(object,"isValidObject", true);
+		makeValueReadOnly(object,"type", "" + objectType);
+
+		if (objectType == TYPE_FILE) {
+			object.location = null;
+		}
+		return object;
+	}
+
+	/**
+	 * This nested class represents a documentation object
+	 * @Class
+	 */
+	function DocumentationObject() {
+		var fieldList = {};
+		var classList = {};
+		var methodList = {};
+		this.name = null;
+		this.tempFieldList = fieldList;
+		this.classListList = classList;
+		this.methodListList = methodList;
+
+		/**
+		 * @Method
+		 * Adds an {@link DocumentationObject} to itself.
+		 *
+		 * The object is added to a different list depending on its type.
+		 */
+		this.addObject = function(object) {
+			if (object.type == TYPE_CLASS) {
+				classList[object.name] = object;
+			} else if (object.type == TYPE_METHOD) {
+				methodList[object.name] = object;
+			} if (object.type == TYPE_FIELD) {
+				fieldList[object.name] = object;
+			} 
+		}
+
+		/**
+		 * @Method
+		 */
+		this.getAllClassObjects = function() {
+			return classList.clone();
+		};
+
+		/**
+		 * @Method
+		 */
+		this.getAllMethodObjects = function() {
+			return methodList.clone();
+		};
+
+		/**
+		 * @Method
+		 */
+		this.getAllFieldObjects = function() {
+			return fieldList.clone();
+		};
+	}
+
+	/**
+	 * @Method
+	 */
+	function makeValueReadOnly(obj, property, value) {
+		if (typeof property != "string") {
+			throw new Error("property argument must be a string");
+		}
+		Object.defineProperty(obj, property, {
+		    value: value,
+		    writable: false
+		});
 	}
 }

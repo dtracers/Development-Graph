@@ -12,7 +12,7 @@
 			evt.preventDefault();
 			var eventData = evt.dataTransfer || evt.target;
 			var files = eventData.files; // FileList object; // FileList object.
-			
+
 			// files is a FileList of File objects. List some properties.
 			var output = [];
 			for (var i = 0, f; f = files[i]; i++) {
@@ -21,7 +21,7 @@
 				parser.start();
 			}
 		}
-		
+
 		function handleDragOver(evt) {
 			evt.stopPropagation();
 			evt.preventDefault();
