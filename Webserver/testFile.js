@@ -11,6 +11,11 @@ function globalMethod() {
  * @Class
  */
 function TestClass() {
+	/**
+	 * @Field
+	 */
+	var testField = 0;
+	
 	 /**
 	  * class method version 1
 	  * @Method

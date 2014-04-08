@@ -58,6 +58,7 @@ function DocumentParser() {
 	var TYPE_FILE = "File";
 	var TYPE_EMPTY = "EMPTY"
 
+	var VARIABLE = "var";
 	var FUNCTION = "function";
 	var OPEN_BRACKET = "{";
 	var CLOSE_BRACKET = "}";
@@ -252,6 +253,9 @@ function DocumentParser() {
 		return classObject;
 	}
 
+	/**
+	 * @Method
+	 */
 	function createMethodObject(commentString, leftIndex, rightIndex, totalFile) {
 		var startingIndex = totalFile.indexOf(FUNCTION, rightIndex) + FUNCTION.length;
 		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
@@ -278,7 +282,71 @@ function DocumentParser() {
 		methodObject.endingIndex = endingBracket;
 		return methodObject;
 	}
-	
+
+	/**
+	 * @Method
+	 * Creates a field object
+	 */
+	function createFieldObject(commentString, leftIndex, rightIndex, totalFile) {
+		var startingIndex = totalFile.indexOf(VARIABLE, rightIndex);
+		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
+		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex; // this should not travel far
+
+		var name = totalFile.substring(startingIndex, startingBracket).trim();
+		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		if ( name.length == 0) {
+			var searchString = totalFile.substring(rightIndex, startingIndex);
+			alert("searching for a method name! " + searchString);
+			// we need to look for a . and an =
+			var smallerSearchString = searchString.substring(searchString.indexOf(".") + 1,searchString.indexOf("="));
+			alert("searching for a method name! " + smallerSearchString);
+			name = smallerSearchString.trim();
+			alert("Name found! " + name);
+		}
+		console.log("method name");
+		console.log(name);
+
+		var methodObject = createDocumentationObject(TYPE_METHOD);
+		methodObject.name = name;
+		methodObject.comment = commentString;
+		methodObject.startingIndex = startingIndex;
+		methodObject.endingIndex = endingBracket;
+		return methodObject;
+	}
+
+	/**
+	 * @Method
+	 * To comment a multi field object you can use a one line comment after the field.
+	 * Example:
+	 * var fieldOne = 0;
+	 * var fieldTwo = "hello" // comment about fieldTwo
+	 */
+	function createMultiFieldObject(commentString, leftIndex, rightIndex, totalFile) {
+		var startingIndex = totalFile.indexOf(FUNCTION, rightIndex) + FUNCTION.length;
+		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
+		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex; // this should not travel far
+
+		var name = totalFile.substring(startingIndex, startingBracket).trim();
+		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		if ( name.length == 0) {
+			var searchString = totalFile.substring(rightIndex, startingIndex);
+			alert("searching for a method name! " + searchString);
+			// we need to look for a . and an =
+			var smallerSearchString = searchString.substring(searchString.indexOf(".") + 1,searchString.indexOf("="));
+			alert("searching for a method name! " + smallerSearchString);
+			name = smallerSearchString.trim();
+			alert("Name found! " + name);
+		}
+		console.log("method name");
+		console.log(name);
+
+		var methodObject = createDocumentationObject(TYPE_METHOD);
+		methodObject.name = name;
+		methodObject.comment = commentString;
+		methodObject.startingIndex = startingIndex;
+		methodObject.endingIndex = endingBracket;
+		return methodObject;
+	}
 	/**
 	 * Finds the matching closing bracket assuming that the opening bracket occurs at zero.
 	 *
