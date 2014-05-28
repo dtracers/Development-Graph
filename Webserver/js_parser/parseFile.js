@@ -45,6 +45,7 @@ function DocumentParser() {
 	// these are by them selves so that the creation of doc tags to no cause any issues.
 	var TAG_OPEN_DOC = "/**"; // */
 	var TAG_CLOSE_DOC = "*/";
+	var SEMICOLON = ";";
 
 	/**
 	 * @StartFields
@@ -62,6 +63,8 @@ function DocumentParser() {
 	var FUNCTION = "function";
 	var OPEN_BRACKET = "{";
 	var CLOSE_BRACKET = "}";
+	var OPEN_PARENTH = "(";
+	var CLOSE_PARENTH = ")";
 	/**
 	 * @EndFields
 	 */
@@ -230,7 +233,7 @@ function DocumentParser() {
 		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex;
 
 		var name = totalFile.substring(startingIndex, startingBracket).trim();
-		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		name = name.substring(0, name.indexOf(OPEN_PARENTH)); // the name should only be the actual letters now
 
 		var classObject = createDocumentationObject(TYPE_CLASS);
 		classObject.name = name;
@@ -262,7 +265,7 @@ function DocumentParser() {
 		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex; // this should not travel far
 
 		var name = totalFile.substring(startingIndex, startingBracket).trim();
-		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		name = name.substring(0, name.indexOf(OPEN_PARENTH)); // the name should only be the actual letters now
 		if ( name.length == 0) {
 			var searchString = totalFile.substring(rightIndex, startingIndex);
 			alert("searching for a method name! " + searchString);
@@ -289,11 +292,13 @@ function DocumentParser() {
 	 */
 	function createFieldObject(commentString, leftIndex, rightIndex, totalFile) {
 		var startingIndex = totalFile.indexOf(VARIABLE, rightIndex);
-		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
-		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex; // this should not travel far
-
+		var endingIndex = totalFile.indexOf(SEMICOLON);
+		var fieldString = totalFile.substring
+		var assignIndex = totalFile.indexOf(EQUAL_SIGN);
+		
 		var name = totalFile.substring(startingIndex, startingBracket).trim();
-		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
+		
+		name = name.substring(0, name.indexOf(EQUAL_SIGN)); // the name should only be the actual letters now
 		if ( name.length == 0) {
 			var searchString = totalFile.substring(rightIndex, startingIndex);
 			alert("searching for a method name! " + searchString);
