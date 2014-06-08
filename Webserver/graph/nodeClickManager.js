@@ -81,11 +81,12 @@ function NodeClickManager(graphInstance, managerInstance) {
 	 * <li> a view code node, when this node is clicked code related to this feature will pop up			: viewCode</li>
 	 * <li> edit feature node, when this node is clicked the features of the node will be editable			: edit</li>
 	 * <li> bugs and issue node, when this node is clicked bugs and issues about this feature pop up		: viewIssues</li>
+	 * <li> commit node, when this node is clicked commits about this feature pop up						: viewCommits</li>
 	 * <li> a createNew node is clicked, this will run through the create new node dialog or something.		: newFeature<br>
 	 * 	  This createNewNode node only exists while viewing child nodes</li>
 	 * </ul>
 	 */
-	var actionList = ['feature', 'viewChildren','edit', 'viewCode', 'viewIssues', 'viewDocumentation', 'newFeature'];
+	var actionList = ['feature', 'viewChildren','edit', 'viewCode', 'viewIssues', 'viewDocumentation','viewCommits', 'newFeature'];
 
 	/**
 	 * creates all of the other nodes dynamically for when the feature node is clicked
@@ -94,21 +95,24 @@ function NodeClickManager(graphInstance, managerInstance) {
 		managerInstance.stopForceAtlas2();
 
 		var clickedNode = e.data.node;
-		var viewChildNode = createNewNode(clickedNode, true, -1, 0, 'view children', 'viewChildren', clickedNode.id, '#0f0');
-		var viewDocumentationNode = createNewNode(clickedNode, true, -1, 1, 'view documentation', 'viewDocumentation', clickedNode.id, '#0f0');
-		var viewCodeNode = createNewNode(clickedNode, true, 0, 1, 'view code', 'viewCode', clickedNode.id, '#0f0');
+		var viewChildNode = createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
+		var viewDocumentationNode = createNewNode(clickedNode, true, -1, 1, 'Documentation', 'viewDocumentation', clickedNode.id, '#0f0');
+		var viewCodeNode = createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, '#0f0');
 		var editNode = createNewNode(clickedNode, true, 1, 1, 'edit this feature', 'edit', clickedNode.id, '#0f0');
-		var viewIssuesNode = createNewNode(clickedNode, true, 1, 0, 'view issues/bugs with this feature', 'viewIssues', clickedNode.id, '#0f0');
+		var viewIssuesNode = createNewNode(clickedNode, true, 1, 0, 'Issues/Bugs', 'viewIssues', clickedNode.id, '#0f0');
+		var viewCommitsNode = createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, '#0f0');
 
 		// add all nodes to the graph
-		graphInstance.addNode(viewChildNode).addNode(viewDocumentationNode).addNode(viewCodeNode).addNode(editNode).addNode(viewIssuesNode);
+		graphInstance.addNode(viewChildNode).addNode(viewDocumentationNode).addNode(viewCodeNode)
+				.addNode(editNode).addNode(viewIssuesNode).addNode(viewCommitsNode);
 
 		// add all edges to the graph
 		graphInstance.addEdge(createNewEdge(clickedNode, viewChildNode, true))
-		.addEdge(createNewEdge(clickedNode, viewDocumentationNode, true))
-		.addEdge(createNewEdge(clickedNode, viewCodeNode, true))
-		.addEdge(createNewEdge(clickedNode, editNode, true))
-		.addEdge(createNewEdge(clickedNode, viewIssuesNode, true));
+				.addEdge(createNewEdge(clickedNode, viewDocumentationNode, true))
+				.addEdge(createNewEdge(clickedNode, viewCodeNode, true))
+				.addEdge(createNewEdge(clickedNode, editNode, true))
+				.addEdge(createNewEdge(clickedNode, viewIssuesNode, true))
+				.addEdge(createNewEdge(clickedNode, viewCommitsNode, true));
 
 		managerInstance.refresh();
 		twoSecondMove();
