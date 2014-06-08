@@ -32,8 +32,9 @@ function NodeClickManager(graphInstance, managerInstance) {
 
 		if ((lastNodeClicked != clickedNode || clickedNode.redoClick) && undoNodeClickFunction) {
 			console.log('a different node has been clicked');
-			undoNodeClickFunction(lastNodeClicked, e);
+			var oldUndoClickFunction = undoNodeClickFunction;
 			setUndoClickFunction(undefined); // remove the click function now
+			oldUndoClickFunction(lastNodeClicked, e);
 		}
 
 		if (lastNodeClicked == clickedNode && !clickedNode.redoClick) {
