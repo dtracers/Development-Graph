@@ -16,6 +16,7 @@ function GraphManager() {
 		  	graphInstance = s.graph;
 		  	console.log(graphInstance);
 		  	nodeClickManager = new NodeClickManager(graphInstance, managerInstance);
+		  	/*
 		  	graphInstance.addNode({
 		        // Main attributes:
 		        id: 'n4',
@@ -45,7 +46,7 @@ function GraphManager() {
 				// Reference extremities:
 				source: 'n0',
 				target: 'n4'
-	   	    });
+	   	    });*/
 		  	s.refresh();
 		  	s.startForceAtlas2();
 		  	nodeClickManager.startClickListener();
@@ -95,7 +96,7 @@ function createNewNode(existingNode, dynamicNode, adjustX, adjustY, nodeLabel, a
 		x: nodeX,
 		y: nodeY,
 		actionType: actionLabel,
-		size:1,
+		size: dynamicNode ? 2 : 1,
 		extraData: nodeExtraData,
 	};
 
