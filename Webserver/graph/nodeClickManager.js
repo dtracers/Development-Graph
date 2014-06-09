@@ -31,7 +31,6 @@ function NodeClickManager(graphInstance, managerInstance) {
 		console.log('node ' + clickedNode.label + 'has been clicked');
 
 		if ((lastNodeClicked != clickedNode || clickedNode.redoClick) && undoNodeClickFunction) {
-			console.log('a different node has been clicked');
 			var oldUndoClickFunction = undoNodeClickFunction;
 			setUndoClickFunction(undefined); // remove the click function now
 			oldUndoClickFunction(lastNodeClicked, e);
@@ -42,7 +41,9 @@ function NodeClickManager(graphInstance, managerInstance) {
 		}
 
 		// replace old node with new node
+		var oldNode = lastNodeClicked;
 		lastNodeClicked = clickedNode;
+
 
 		var action = clickedNode.actionType;
 		if (!action || action == undefined) {
@@ -60,7 +61,7 @@ function NodeClickManager(graphInstance, managerInstance) {
 			setUndoClickFunction(undoFunc);
 		}
 		if (clickFunc) {
-			clickFunc(e);
+			clickFunc(e, oldNode);
 		}
 	};
 
@@ -90,16 +91,39 @@ function NodeClickManager(graphInstance, managerInstance) {
 	var actionList = ['feature', 'viewChildren','edit', 'viewCode', 'viewIssues', 'viewDocumentation','viewCommits', 'newFeature'];
 
 	/**
+	 * Drops all of the dynamic nodes from its parent node.
+	 */
+	function removeAllDynamicNodes(parentNode) {
+		managerInstance.stopForceAtlas2();
+		// do some removing things
+		// dynamic nodes
+		for (var i = 0; i < actionList.length; i++) {
+			var id = 'dn' + actionList[i] + parentNode.id;
+			try {
+				graphInstance.dropNode(id);
+			} catch(exception) {
+				console.log(exception);
+			}
+		}
+		managerInstance.refresh();
+	}
+
+	/**
 	 * creates all of the other nodes dynamically for when the feature node is clicked
 	 */
-	function featureNodeAction(e) {
-		managerInstance.stopForceAtlas2();
-
+	function featureNodeAction(e, oldNode) {
 		var clickedNode = e.data.node;
+
+		if (oldNode && oldNode.actionType == 'feature') {
+			removeAllDynamicNodes(oldNode);
+		}
+
+		managerInstance.stopForceAtlas2();
+		
 		var viewChildNode = createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
 		var viewDocumentationNode = createNewNode(clickedNode, true, -1, 1, 'Documentation', 'viewDocumentation', clickedNode.id, '#0f0');
 		var viewCodeNode = createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, '#0f0');
-		var editNode = createNewNode(clickedNode, true, 1, 1, 'edit this feature', 'edit', clickedNode.id, '#0f0');
+		var editNode = createNewNode(clickedNode, true, 1, 1, 'Edit this feature', 'edit', clickedNode.id, '#0f0');
 		var viewIssuesNode = createNewNode(clickedNode, true, 1, 0, 'Issues/Bugs', 'viewIssues', clickedNode.id, '#0f0');
 		var viewCommitsNode = createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, '#0f0');
 
@@ -120,26 +144,6 @@ function NodeClickManager(graphInstance, managerInstance) {
 	}
 
 	/**
-	 * This is called if a different node than the previous feature node is clicked.
-	 * This will remove all of the dynamic nodes from the graph.
-	 */
-	function featureNodeUnclickAction(node) {
-		managerInstance.stopForceAtlas2();
-		// do some removing things
-		// dynamic nodes
-		for (var i = 0; i < actionList.length; i++) {
-			var id = 'dn' + actionList[i] + node.id;
-			try {
-				graphInstance.dropNode(id);
-			} catch(exception) {
-				console.log(exception);
-			}
-		}
-		managerInstance.refresh();
-		twoSecondMove();
-	}
-
-	/**
 	 * All the code in here goes into creating a new feature (node)
 	 */
 
@@ -148,6 +152,6 @@ function NodeClickManager(graphInstance, managerInstance) {
 	}
 
 	(function setUpDefaultClickActions(scope) {
-		scope.setClickFunction('feature', featureNodeAction, featureNodeUnclickAction);
+		scope.setClickFunction('feature', featureNodeAction);
 	})(this);
 }

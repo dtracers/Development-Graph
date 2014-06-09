@@ -98,10 +98,15 @@ function createNewNode(existingNode, dynamicNode, adjustX, adjustY, nodeLabel, a
 		actionType: actionLabel,
 		size: dynamicNode ? 2 : 1,
 		extraData: nodeExtraData,
+		dynamic: dynamicNode,
 	};
 
 	if (color) {
 		returnNode.color = color;
+	}
+	
+	if (dynamicNode && existingNode) {
+		returnNode.parentNode = existingNode.id;
 	}
 
 	return returnNode;
