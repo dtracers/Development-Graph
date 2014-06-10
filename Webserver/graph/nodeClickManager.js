@@ -1,9 +1,8 @@
-function NodeClickManager(graphInstance, managerInstance) {
-	var graphInstance;
-	var managerInstance;
+function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var nodeClickFunctionMap = {};
 	var undoNodeClickFunction;
 	var lastNodeClicked;
+	var fa2Runtime = 2000; // 2 seconds seems long enough for the nodes to settle.
 
 	/**
 	 * 
@@ -30,10 +29,16 @@ function NodeClickManager(graphInstance, managerInstance) {
 		var clickedNode = e.data.node;
 		console.log('node ' + clickedNode.label + 'has been clicked');
 
+		// in case the node was removed before another node was clicked.  (it should behave like the first node click in a graph)
+		if (lastNodeClicked && displayGraph.nodes(lastNodeClicked.id) == undefined) {
+			console.log('the previous node was removed from the graph and can no longer be accessed');
+			lastNodeClicked = undefined;
+		}
+
+		// calls the undo click function (may not be implemented for every node)
 		if ((lastNodeClicked != clickedNode || clickedNode.redoClick) && undoNodeClickFunction) {
-			var oldUndoClickFunction = undoNodeClickFunction;
+			undoNodeClickFunction(lastNodeClicked, e);
 			setUndoClickFunction(undefined); // remove the click function now
-			oldUndoClickFunction(lastNodeClicked, e);
 		}
 
 		if (lastNodeClicked == clickedNode && !clickedNode.redoClick) {
@@ -63,18 +68,13 @@ function NodeClickManager(graphInstance, managerInstance) {
 		if (clickFunc) {
 			clickFunc(e, oldNode);
 		}
+
 	};
 
 	this.startClickListener = function() {
 		managerInstance.bind('clickNode', clickFunction);
 	};
 
-	function twoSecondMove() {
-		managerInstance.startForceAtlas2();
-		setTimeout(function() {
-			managerInstance.stopForceAtlas2();
-		}, 2000);
-	}
 	/*********
 	 * There are 7 different types of default actions:<ul>
 	 * <li> a feature node is clicked (this will open up a list of dynamically created subnodes				: feature</li>
@@ -100,7 +100,7 @@ function NodeClickManager(graphInstance, managerInstance) {
 		for (var i = 0; i < actionList.length; i++) {
 			var id = 'dn' + actionList[i] + parentNode.id;
 			try {
-				graphInstance.dropNode(id);
+				displayGraph.dropNode(id);
 			} catch(exception) {
 				console.log(exception);
 			}
@@ -109,49 +109,69 @@ function NodeClickManager(graphInstance, managerInstance) {
 	}
 
 	/**
-	 * creates all of the other nodes dynamically for when the feature node is clicked
+	 * Creates all of the other nodes dynamically for when the feature node is clicked.
+	 *
+	 * Removes dynamic nodes from other nodes if they exist.
+	 * Adds the dynamic nodes for this specific feature.
 	 */
 	function featureNodeAction(e, oldNode) {
 		var clickedNode = e.data.node;
 
-		if (oldNode && oldNode.actionType == 'feature') {
-			removeAllDynamicNodes(oldNode);
+		if (oldNode) {
+			if (oldNode.actionType == 'feature') {
+				removeAllDynamicNodes(oldNode);
+			} else if (oldNode.isDynamic) {
+				if (oldNode.parentNode != clickedNode.id) {
+					removeAllDynamicNodes({id : oldNode.parentNode});
+				} else {
+					console.log("there will be no more new nodes made today!");
+					return;
+				}
+			 }
 		}
 
 		managerInstance.stopForceAtlas2();
-		
-		var viewChildNode = createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
-		var viewDocumentationNode = createNewNode(clickedNode, true, -1, 1, 'Documentation', 'viewDocumentation', clickedNode.id, '#0f0');
-		var viewCodeNode = createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, '#0f0');
-		var editNode = createNewNode(clickedNode, true, 1, 1, 'Edit this feature', 'edit', clickedNode.id, '#0f0');
-		var viewIssuesNode = createNewNode(clickedNode, true, 1, 0, 'Issues/Bugs', 'viewIssues', clickedNode.id, '#0f0');
-		var viewCommitsNode = createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, '#0f0');
+
+		var viewChildNode = displayGraph.createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
+		var viewDocumentationNode = displayGraph.createNewNode(clickedNode, true, -1, 1, 'Documentation',
+				'viewDocumentation', clickedNode.id, '#0f0');
+		var viewCodeNode = displayGraph.createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, '#0f0');
+		var editNode = displayGraph.createNewNode(clickedNode, true, 1, 1, 'Edit this feature', 'edit', clickedNode.id, '#0f0');
+		var viewIssuesNode = displayGraph.createNewNode(clickedNode, true, 1, 0, 'Issues/Bugs', 'viewIssues', clickedNode.id, '#0f0');
+		var viewCommitsNode = displayGraph.createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, '#0f0');
 
 		// add all nodes to the graph
-		graphInstance.addNode(viewChildNode).addNode(viewDocumentationNode).addNode(viewCodeNode)
+		displayGraph.addNode(viewChildNode).addNode(viewDocumentationNode).addNode(viewCodeNode)
 				.addNode(editNode).addNode(viewIssuesNode).addNode(viewCommitsNode);
 
 		// add all edges to the graph
-		graphInstance.addEdge(createNewEdge(clickedNode, viewChildNode, true))
-				.addEdge(createNewEdge(clickedNode, viewDocumentationNode, true))
-				.addEdge(createNewEdge(clickedNode, viewCodeNode, true))
-				.addEdge(createNewEdge(clickedNode, editNode, true))
-				.addEdge(createNewEdge(clickedNode, viewIssuesNode, true))
-				.addEdge(createNewEdge(clickedNode, viewCommitsNode, true));
+		displayGraph.addEdge(displayGraph.createNewEdge(clickedNode, viewChildNode, true))
+				.addEdge(displayGraph.createNewEdge(clickedNode, viewDocumentationNode, true))
+				.addEdge(displayGraph.createNewEdge(clickedNode, viewCodeNode, true))
+				.addEdge(displayGraph.createNewEdge(clickedNode, editNode, true))
+				.addEdge(displayGraph.createNewEdge(clickedNode, viewIssuesNode, true))
+				.addEdge(displayGraph.createNewEdge(clickedNode, viewCommitsNode, true));
 
 		managerInstance.refresh();
-		twoSecondMove();
+		managerInstance.timedForceAtlas2(fa2Runtime);
 	}
 
-	/**
-	 * All the code in here goes into creating a new feature (node)
-	 */
+	function viewChildrenAction(e, oldNode) {
+		console.log("clicked node!");
+		var clickedNode = e.data.node;
+		removeAllDynamicNodes(oldNode);
+		console.log(clickedNode.parentNode);
+		var graph = realGraph.getChildGraph(clickedNode.parentNode);
+		console.log(graph);
+		displayGraph.read(graph);
+		console.log(displayGraph.nodes());
+		managerInstance.refresh();
 
-	function newNodeAction() {
-
+		managerInstance.timedForceAtlas2(fa2Runtime);
 	}
 
 	(function setUpDefaultClickActions(scope) {
 		scope.setClickFunction('feature', featureNodeAction);
+		scope.setClickFunction('viewChildren', viewChildrenAction);
 	})(this);
 }
