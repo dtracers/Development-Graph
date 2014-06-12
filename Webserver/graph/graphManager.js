@@ -8,7 +8,12 @@ function GraphManager() {
 	var nodeClickManager;
 	var realGraphInstance;
 
-	this.load = function (dataLocation, placementId) {
+	/**
+	 * @param dataLocation {string} the loaction of the graph data
+	 * @param placementId {string} the id for where the graph goes
+	 * @param postSetupFunction {function} called after the graph is setup
+	 */
+	this.load = function (dataLocation, placementId, postSetupFunction) {
 		console.log(sigma.classes);
 		managerInstance = new sigma({
 			container: placementId,
@@ -31,6 +36,8 @@ function GraphManager() {
 		  	nodeClickManager.startClickListener();
 
 		  	managerInstance.timedForceAtlas2(2000);
+		  	
+		  	postSetupFunction();
 		});
 	}
 
