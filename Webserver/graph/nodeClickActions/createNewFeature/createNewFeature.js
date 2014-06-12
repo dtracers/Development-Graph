@@ -12,14 +12,17 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	 * Pops up an overlay
 	 */
 	function createNewFeature(e, oldNode) {
+		alert('new feature being made!');
 		if (!window.featureCreatorLoaded) {
 			// load window here 
-			var fileref = this.scope.createElement('link');
+			var fileref = document.createElement('link');
+			fileref.id = "createNewFeatureImport";
 			fileref.setAttribute("rel", "import");
 			fileref.setAttribute("href", 'nodeClickActions/createNewFeature/featureCreator.html');
 			document.querySelector("head").appendChild(fileref);
-			fileref.onload = function() {
-				produceOverlay(e, oldNode);
+			fileref.onload = function(event) {
+				alert('file loaded');
+				produceOverlay(e, oldNode, event);
 			}
 		} else {
 			produceOverlay(e, oldNode);
@@ -38,14 +41,17 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	 * Produces the grayed overlay where the node data is inserted
 	 */
 	function produceOverlay(e, oldNode) {
-		var content = document.querySelector('#createNewFeature').content;
+		var importedDocument = document.querySelector('#createNewFeatureImport').import;
+		var content = importedDocument.querySelector('#createNewFeature').content;
 		var saveButton = content.querySelector('.save');
 		saveButton.onclick = function() {
+			alert('saving!');
 			saveData(e, content);
 		}
+		console.log(saveButton);
 		document.querySelector('#' + overlayId).appendChild(
 		        document.importNode(content, true));
 	}
 
-	clickManager.setClickFunction('', createNewFeature);
+	clickManager.setClickFunction('newFeature', createNewFeature);
 }
