@@ -1,9 +1,11 @@
 <html>
 <head>
 <style type="text/css">
-  #container {
-    max-width: 700px;
-    height: 700px;
+  #graphContainer {
+  	min-width:700px;
+  	min-height:700px;
+    max-width: 90%;
+    hight:90%;
     margin: auto;
     border-style:solid;
 	border-width:thin;
@@ -18,10 +20,12 @@
 <script src="nodeClickManager.js"></script>
 </head>
 <body>
-<div id="container"></div>
+<div id="graphContainer"></div>
 <script>
 	var graphManager = new GraphManager();
-	graphManager.load('data.grp', 'container');
+	graphManager.load('data.grp', 'graphContainer');
+	FeatureCreator
 </script>
+<!-- <div id="overlay"></div> -->
 </body>
 </html>
