@@ -33,6 +33,10 @@ function GraphManager() {
 		  	managerInstance.timedForceAtlas2(2000);
 		});
 	}
+
+	this.getNodeClickManager = function() {
+		return nodeClickManager;
+	}
 }
 
 /**
@@ -42,6 +46,8 @@ function GraphManager() {
 
 /**
  * Runs ForceAtlas2 for a time designated by the number of milliseconds involved.
+ *
+ * @param millis {number}
  */
 sigma.prototype.timedForceAtlas2 = function(millis) {
 	if (this.graph.nodes().length <= 1) {
