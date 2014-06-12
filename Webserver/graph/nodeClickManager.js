@@ -179,6 +179,10 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		localScope.lastClickedNodeHasBeenRemoved(e); // we have to send it the event
 	}
 
+	this.addClickListener = function(listener, args) {
+		var listen = new listener(realGraph, displayGraph, managerInstance, this, args);
+	};
+
 	(function setUpDefaultClickActions(scope) {
 		scope.setClickFunction('feature', featureNodeAction);
 		scope.setClickFunction('viewChildren', viewChildrenAction);

@@ -35,6 +35,7 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	function saveData(e, formData) {
 		var nameElement = formData.querySelector('.featureName');
 		alert(nameElement.value);
+		document.getElementById(overlayId).style.display = 'none';
 	}
 
 	/**
@@ -43,14 +44,18 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	function produceOverlay(e, oldNode) {
 		var importedDocument = document.querySelector('#createNewFeatureImport').import;
 		var content = importedDocument.querySelector('#createNewFeature').content;
-		var saveButton = content.querySelector('.save');
+		var importedNode = document.importNode(content, true);
+		var shadowRoot = document.querySelector('#' + overlayId).createShadowRoot();
+		shadowRoot.appendChild(importedNode);
+		console.log(importedNode);
+		console.log(shadowRoot);
+		var saveButton = shadowRoot.querySelector('.save');
+		console.log(saveButton);
 		saveButton.onclick = function() {
 			alert('saving!');
-			saveData(e, content);
-		}
-		console.log(saveButton);
-		document.querySelector('#' + overlayId).appendChild(
-		        document.importNode(content, true));
+			saveData(e, shadowRoot);
+		};
+		document.getElementById(overlayId).style.display = 'block';
 	}
 
 	clickManager.setClickFunction('newFeature', createNewFeature);

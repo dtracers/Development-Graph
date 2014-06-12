@@ -10,6 +10,15 @@
     border-style:solid;
 	border-width:thin;
   }
+  #overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    display:none;
+}
 </style>
 <script src="sigma-v1.0.2/sigma.min.js"></script>
 <script src="sigma-v1.0.2/plugins/sigma.parsers.json.min.js"></script>
@@ -18,14 +27,17 @@
 <script src="sigma-v1.0.2/plugins/sigma.renderers.customShapes.min.js"></script>
 <script src="graphManager.js"></script>
 <script src="nodeClickManager.js"></script>
+<script src="nodeClickActions/createNewFeature/createNewFeature.js"></script>
 </head>
 <body>
 <div id="graphContainer"></div>
 <script>
 	var graphManager = new GraphManager();
-	graphManager.load('data.grp', 'graphContainer');
-	FeatureCreator
+	graphManager.load('data.grp', 'graphContainer', function() {
+		graphManager.getNodeClickManager().addClickListener(FeatureCreator, ['overlay']);
+	});
+
 </script>
-<!-- <div id="overlay"></div> -->
+ <div id="overlay"></div>
 </body>
 </html>
