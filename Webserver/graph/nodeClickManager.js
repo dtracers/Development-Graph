@@ -3,6 +3,8 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var undoNodeClickFunction;
 	var lastNodeClicked;
 	var fa2Runtime = 2000; // 2 seconds seems long enough for the nodes to settle.
+	var localScope = this;
+	var parentRedirect = false;
 
 	/**
 	 * 
@@ -41,8 +43,12 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 			setUndoClickFunction(undefined); // remove the click function now
 		}
 
-		if (lastNodeClicked == clickedNode && !clickedNode.redoClick) {
+		if (lastNodeClicked == clickedNode && !clickedNode.redoClick && !parentRedirect) {
 			return;
+		}
+		
+		if (parentRedirect) {
+			parentRedirect = false;
 		}
 
 		// replace old node with new node
@@ -75,6 +81,16 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		managerInstance.bind('clickNode', clickFunction);
 	};
 
+	this.lastClickedNodeHasBeenRemoved = function(event) {
+		var clickedNode = event.data.node;
+		if (clickedNode.isDynamic) {
+			var node = displayGraph.nodes(clickedNode.parentNode);
+			if (node) {
+				lastNodeClicked = node;
+				parentRedirect = true;
+			}
+		}
+	}
 	/*********
 	 * There are 7 different types of default actions:<ul>
 	 * <li> a feature node is clicked (this will open up a list of dynamically created subnodes				: feature</li>
@@ -91,38 +107,22 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var actionList = ['feature', 'viewChildren','edit', 'viewCode', 'viewIssues', 'viewDocumentation','viewCommits', 'newFeature'];
 
 	/**
-	 * Drops all of the dynamic nodes from its parent node.
-	 */
-	function removeAllDynamicNodes(parentNode) {
-		managerInstance.stopForceAtlas2();
-		// do some removing things
-		// dynamic nodes
-		for (var i = 0; i < actionList.length; i++) {
-			var id = 'dn' + actionList[i] + parentNode.id;
-			try {
-				displayGraph.dropNode(id);
-			} catch(exception) {
-				console.log(exception);
-			}
-		}
-		managerInstance.refresh();
-	}
-
-	/**
 	 * Creates all of the other nodes dynamically for when the feature node is clicked.
 	 *
 	 * Removes dynamic nodes from other nodes if they exist.
 	 * Adds the dynamic nodes for this specific feature.
 	 */
 	function featureNodeAction(e, oldNode) {
+		managerInstance.stopForceAtlas2();
+
 		var clickedNode = e.data.node;
 
 		if (oldNode) {
 			if (oldNode.actionType == 'feature') {
-				removeAllDynamicNodes(oldNode);
+				displayGraph.removeAllDynamicNodes(oldNode.id, actionList);
 			} else if (oldNode.isDynamic) {
 				if (oldNode.parentNode != clickedNode.id) {
-					removeAllDynamicNodes({id : oldNode.parentNode});
+					displayGraph.removeAllDynamicNodes(oldNode.parentNode, actionList);
 				} else {
 					console.log("there will be no more new nodes made today!");
 					return;
@@ -130,7 +130,8 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 			 }
 		}
 
-		managerInstance.stopForceAtlas2();
+		// drops all descendants of the node *if they exist*
+		displayGraph.removeDescendants(clickedNode.id);
 
 		var viewChildNode = displayGraph.createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
 		var viewDocumentationNode = displayGraph.createNewNode(clickedNode, true, -1, 1, 'Documentation',
@@ -159,15 +160,23 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	function viewChildrenAction(e, oldNode) {
 		console.log("clicked node!");
 		var clickedNode = e.data.node;
-		removeAllDynamicNodes(oldNode);
-		console.log(clickedNode.parentNode);
+		displayGraph.removeAllDynamicNodes(oldNode.id, actionList, true);
 		var graph = realGraph.getChildGraph(clickedNode.parentNode);
 		console.log(graph);
 		displayGraph.read(graph);
-		console.log(displayGraph.nodes());
+
+		var parentNode = displayGraph.nodes(clickedNode.parentNode);
+		var addNewFeatureNode = displayGraph.createNewNode(parentNode, true, -1, 0, 'Make a new Feature', 'newFeature', parentNode.id, '#00f');
+		displayGraph.addNode(addNewFeatureNode);
+
+		displayGraph.addEdge(displayGraph.createNewEdge(parentNode, addNewFeatureNode, true))
+
 		managerInstance.refresh();
 
 		managerInstance.timedForceAtlas2(fa2Runtime);
+
+		// tell the event to set the node to the parent
+		localScope.lastClickedNodeHasBeenRemoved(e); // we have to send it the event
 	}
 
 	(function setUpDefaultClickActions(scope) {
