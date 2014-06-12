@@ -13,7 +13,8 @@ function GraphManager() {
 		managerInstance = new sigma({
 			container: placementId,
 			settings: {
-				defaultNodeColor: '#ec5148'
+				defaultNodeColor: '#ec5148',
+				labelThreshold: 3
 			}
 		});
 
@@ -30,30 +31,6 @@ function GraphManager() {
 		  	nodeClickManager.startClickListener();
 
 		  	managerInstance.timedForceAtlas2(2000);
-
-		  	managerInstance.addNeighborhoodToDisplay = function(centerNode) {
-		  		displayGraphInstance.read(realGraphInstance.neighborhood(centerNode));
-		  	};
-
-		  	managerInstance.removeNeighborhoodFromDisplay = function(centerNode) {
-		  		var nodes = realGraphInstance.neighborhood(centerNode).nodes;
-		  		console.log(nodes);
-		  		for (var i = 0; i < nodes.length; i++) {
-
-		  		}
-		  	};
-
-		  	/*
-		  	// TEST CODE
-		  	var fakeGraph = realGraphInstance.neighborhood('n0');
-		  	console.log('fake test now');
-		  	console.log(fakeGraph);
-		  	var edges = realGraphInstance.edges(['n0']);
-		  	console.log('edges')
-		  	console.log(edges);
-		  	var outs = realGraphInstance.getChildGraph('n0');
-		  	console.log(outs);
-		  	*/
 		});
 	}
 }
@@ -114,7 +91,7 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
 		x: nodeX,
 		y: nodeY,
 		actionType: actionLabel,
-		size: dynamicNode ? 2 : 1,
+		size: dynamicNode ? 3 : 2,
 		extraData: nodeExtraData,
 		isDynamic: dynamicNode,
 	};
@@ -142,9 +119,9 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
 
 /**
  * Creates a new edge from the existing nodes.  
- * @param sourceNode
- * @param targetNode
- * @param dynamic This is ignored right now but that should be changed soon.
+ * @param sourceNode {node}
+ * @param targetNode {node}
+ * @param dynamic {boolean} This is ignored right now but that should be changed soon.
  * @returns {edge}
  */
 sigma.classes.graph.addMethod('createNewEdge', function createNewEdge(sourceNode, targetNode, dynamic) {
@@ -161,10 +138,10 @@ sigma.classes.graph.addMethod('createNewEdge', function createNewEdge(sourceNode
  * 
  * Children are defined by having edges that point away from the given node.
  * The graph contains the nodes and the edges
- * @param {string} sourceNodeId the id
+ * @param sourceNodeId {string} the id
  * @returns {graph} a graph that can be read in
  */
-sigma.classes.graph.addMethod('getChildGraph', function(sourceNodeId) {
+sigma.classes.graph.addMethod('getChildGraph', function getChildGraph(sourceNodeId) {
 	var nodes = this.outNeighborsIndex[sourceNodeId];
 	var resultantGraph = {
 		nodes : [],
@@ -178,6 +155,42 @@ sigma.classes.graph.addMethod('getChildGraph', function(sourceNodeId) {
 		}
 	}
 	return resultantGraph;
+});
+
+/**
+ * Removes all descendant of the given node from the graph.
+ *
+ * @param sourceNodeId {string} This is the node that we want to remove the descendants from.
+ * @param actionList {array}
+ */
+sigma.classes.graph.addMethod('removeDescendants', function removeDescendants(sourceNodeId, actionList) {
+	var childGraph = this.getChildGraph(sourceNodeId);
+	var nodes = childGraph.nodes;
+	for (var i = 0; i < nodes.length; i++) {
+		this.removeDescendants(nodes[i].id);
+		if (actionList) {
+			this.removeAllDynamicNodes(nodes[i].id, actionList);
+		}
+		this.dropNode(nodes[i].id);
+	}
+});
+
+/**
+ * Drops all of the dynamic nodes from its parent node.
+ */
+sigma.classes.graph.addMethod('removeAllDynamicNodes', function removeAllDynamicNodes(parentNodeId, actionList, printErrors) {
+	// do some removing things
+	// dynamic nodes
+	for (var i = 0; i < actionList.length; i++) {
+		var id = 'dn' + actionList[i] + parentNodeId;
+		try {
+			this.dropNode(id);
+		} catch(exception) {
+			if (printErrors) {
+				console.log(exception);
+			}
+		}
+	}
 });
 
 }).call(window);
