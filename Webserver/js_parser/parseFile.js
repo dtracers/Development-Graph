@@ -1,6 +1,9 @@
 /*
  * The documentation of the parser is as follows
  * @Class - tells the parser that the function is a class
+ * @ClassStart - used inside a doc this allows you to embed information about anonymous or abstracted classes
+ * @ClassEnd - used to signify the end of an embedded class
+ * @ClassName - used to set the name of the class when it may not exist otherwise
  * @Method - tells the parser it is a function
  * @Field - tells the parser the next item is a field
  * @StartFields
@@ -8,6 +11,7 @@
  *		Contains: A list of field objects (see the @Field tag)
  * @SeeClass:ClassName - tells the parser to try and link a certain class to another class
  * @SeeClass:ClassName#MethodName - tells the parser to try and link a certain method to another
+ *
  * 
  * All of these object contain similar fields:
  * lineNumber:		which is the line number the object starts at
@@ -211,7 +215,7 @@ function DocumentParser() {
 	/**
 	 * @Method
 	 *
-	 * @returns the documentation object to add to the end of the list
+	 * @returns The documentation object to add to the end of the list
 	 */
 	function createObject(specificString, leftIndex, rightIndex, totalFile) {
 		if (specificString.indexOf(TAG_CLASS) != -1) {
@@ -391,7 +395,7 @@ function DocumentParser() {
 	/**
 	 * Creates a documentation object without the needed items
 	 * @Method
-	 * @param objectType The type that the object is
+	 * @param ObjectType The type that the object is
 	 */
 	function createDocumentationObject(objectType) {
 		var object = new DocumentationObject();
