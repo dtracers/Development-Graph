@@ -19,7 +19,8 @@ function GraphManager() {
 			container: placementId,
 			settings: {
 				defaultNodeColor: '#ec5148',
-				labelThreshold: 3
+				labelThreshold: 3,
+				defaultLabelColor: '#ffffff'
 			}
 		});
 
