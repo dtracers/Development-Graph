@@ -60,7 +60,7 @@ function DocumentParser() {
 	var TAG_FILE = "@File";
 	var TAG_CLASS = /(@Class+)([\W\n\r]|$)/; // a tag to make @Class and not @ClassStart
 	var TAG_METHOD = "@Method";
-	var TAG_FIELD = /(@Field+)([\W\n\r]|$)/;;
+	var TAG_FIELD = /(@Field+)([\W\n\r]|$)/;
 	var TYPE_CLASS = "Class";
 	var TYPE_METHOD = "Method";
 	var TYPE_FIELD = "Field";
@@ -121,6 +121,15 @@ function DocumentParser() {
 		}
 	}
 
+	/**
+	 * @Method
+	 * Passes the contents of the file that was previously read.
+	 * 
+	 * @returns {string} returns the entrie file that was read.
+	 */
+	this.getFileContents = function() {
+		return fileContents
+	};
 	/**
 	 * @Method
 	 */
