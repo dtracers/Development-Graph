@@ -2,6 +2,7 @@
 	<link rel="stylesheet" href="testFile.css">
 	<script src = "parseFile.js"></script>
 	<script src = "DocumentRenderer.js"></script>
+	<script src = "CommentParser.js"></script>
 </head>
 <body>
 	<div id="drop_zone">
@@ -9,6 +10,7 @@
 	</div>
 	<script>
 		var docRend = new DocumentRenderer();
+		var commentParse = new CommentParser();
   		function handleFileSelect(evt) {
 			evt.stopPropagation();
 			evt.preventDefault();
@@ -23,6 +25,10 @@
 				parser.setParsingFinishedCallback(function(docObject) {
 					console.log("FINISHED PARSING!");
 					console.log(docObject);
+					console.log("\n------------------------------------------------------\n");
+					console.log("STARTING COMMENT PARSING!");
+					commentParse.startParsing(docObject);
+					console.log("FINISHED COMMENT PARSING!");
 					console.log("\n------------------------------------------------------\n");
 					console.log("STARTING RENDERING PARSING!");
 					docRend.createHtml(docObject, function(element) {
