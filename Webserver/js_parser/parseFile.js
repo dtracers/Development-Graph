@@ -1,5 +1,6 @@
 /*
  * The documentation of the parser is as follows
+ * @File - tells the parser that these comments are to describe the file itself
  * @Class - tells the parser that the function is a class
  * @ClassStart - used inside a doc this allows you to embed information about anonymous or abstracted classes
  * @ClassEnd - used to signify the end of an embedded class
@@ -19,7 +20,7 @@
  * endingIndex:		the ending index in the file that the object ends at
  * comment: the comment that is associated with this object
  * name: the name of the documentation object
- * type: the type of the documentation object
+ * documentationType: the type of the documentation object
  */
 
 /**
@@ -50,10 +51,13 @@ function DocumentParser() {
 	var TAG_OPEN_DOC = "/**"; // */
 	var TAG_CLOSE_DOC = "*/";
 	var SEMICOLON = ";";
+	var EQUAL_SIGN = "=";
+	var DOT = ".";
 
 	/**
 	 * @StartFields
 	 */
+	var TAG_FILE = "@File";
 	var TAG_CLASS = "@Class";
 	var TAG_METHOD = "@Method";
 	var TAG_FIELD = "@Field";
@@ -62,6 +66,10 @@ function DocumentParser() {
 	var TYPE_FIELD = "Field";
 	var TYPE_FILE = "File";
 	var TYPE_EMPTY = "EMPTY"
+	var TYPE_CALLBACK = "Callback";
+	var TYPE_EXCEPTION = "Exception";
+	var TYPE_RETURN_VALUE = "Return";
+	var TYPE_PARAMETER = "Parameter";
 
 	var VARIABLE = "var";
 	var FUNCTION = "function";
@@ -87,6 +95,18 @@ function DocumentParser() {
 
 	/**
 	 * @Method
+	 *
+	 * @Callback this callback is called when the entire parsing finishes
+	 * @CallbackParam {DocumentationObject} returns the entire document object for this file.
+	 */
+	this.setParsingFinishedCallback = function(finishedCallback) {
+		parsingFinishedCallback = finishedCallback;
+	};
+
+	/**
+	 * @Method
+	 *
+	 * Called to reset the parser to its starting state.
 	 */
 	this.reset = function() {
 		
@@ -135,10 +155,10 @@ function DocumentParser() {
 		if (parsingLayer == 0) {
 			parsing = false;
 			finishedParsing = true;
-			alert("Done parsing!");
-			console.log(returnObject);
+			parsingFinishedCallback(returnObject);
+		} else {
+			console.log("removing parsing layer" + parsingLayer);
 		}
-		console.log("removing parsing layer" + parsingLayer);
 	}
 
 	/**
@@ -155,7 +175,7 @@ function DocumentParser() {
 		}
 		returnObject = createDocumentationObject(TYPE_FILE);
 		returnObject.name = parseFile.name;
-		returnObject.location = parseFile.webkitRelativePath; // TODO correct this for other browsers! (or node.js)
+		returnObject.location = parseFile.webkitRelativePath; // TODO correct this for other browsers! (or node.js or chromeApp)
 		console.log(parseFile);
 		setTimeout(function() {
 			parseStringRecursively(str, leftIndex, rightIndex, returnObject);
@@ -188,7 +208,7 @@ function DocumentParser() {
 			resultingObject.addObject(result);
 			nextIndex = result.endingIndex;
 		} else {
-			alert("Invalid object created");
+			console.log("Invalid object created");
 			nextIndex = rightIndex + 1;
 		}
 
@@ -215,16 +235,34 @@ function DocumentParser() {
 	/**
 	 * @Method
 	 *
-	 * @returns The documentation object to add to the end of the list
+	 * @returns {DocumentationObject} The documentation object to add to the end of the list
 	 */
 	function createObject(specificString, leftIndex, rightIndex, totalFile) {
-		if (specificString.indexOf(TAG_CLASS) != -1) {
+		if (regexIndexOf(specificString, TAG_CLASS) != -1) {
 			return createClassObject(specificString, leftIndex, rightIndex, totalFile);
 		} else if (specificString.indexOf(TAG_METHOD) != -1){
 			return createMethodObject(specificString, leftIndex, rightIndex, totalFile);
+		} else if (specificString.indexOf(TAG_FILE) != -1) {
+			return createFileObject(specificString, leftIndex, rightIndex, totalFile);
+		}  else if (specificString.indexOf(TAG_FIELD) != -1) {
+			return createFieldObject(specificString, leftIndex, rightIndex, totalFile);
 		}
+
 		var object = createDocumentationObject(TYPE_EMPTY);
 		return object;
+	}
+
+	/**
+	 * @Method
+	 * Creates the comment for a file object
+	 */
+	function createFileObject(commentString, leftIndex, rightIndex, totalFile) {
+		console.log("CREATING FILE OBJECT");
+		var fileObject = createDocumentationObject(TYPE_FILE);
+		fileObject.comment = commentString;
+		fileObject.startingIndex = leftIndex;
+		fileObject.endingIndex = rightIndex;
+		return fileObject;
 	}
 
 	/**
@@ -268,25 +306,35 @@ function DocumentParser() {
 		var startingBracket = totalFile.indexOf(OPEN_BRACKET, rightIndex);
 		var endingBracket = bracketCounter(totalFile.substring(startingIndex , totalFile.length)) + startingIndex; // this should not travel far
 
-		var name = totalFile.substring(startingIndex, startingBracket).trim();
+		var headerString = totalFile.substring(startingIndex, startingBracket).trim();
+		var name = headerString;
 		name = name.substring(0, name.indexOf(OPEN_PARENTH)); // the name should only be the actual letters now
+		var visibility = "private";
 		if ( name.length == 0) {
+			visibility = "public";
 			var searchString = totalFile.substring(rightIndex, startingIndex);
-			alert("searching for a method name! " + searchString);
 			// we need to look for a . and an =
-			var smallerSearchString = searchString.substring(searchString.indexOf(".") + 1,searchString.indexOf("="));
-			alert("searching for a method name! " + smallerSearchString);
+			var smallerSearchString = searchString.substring(searchString.indexOf(DOT) + 1,searchString.indexOf(EQUAL_SIGN));
 			name = smallerSearchString.trim();
-			alert("Name found! " + name);
 		}
-		console.log("method name");
-		console.log(name);
+
+		var arguments = headerString.substring(headerString.indexOf(OPEN_PARENTH) + 1, headerString.indexOf(CLOSE_PARENTH)).trim();
 
 		var methodObject = createDocumentationObject(TYPE_METHOD);
+		methodObject.visibility = visibility;
 		methodObject.name = name;
 		methodObject.comment = commentString;
 		methodObject.startingIndex = startingIndex;
 		methodObject.endingIndex = endingBracket;
+
+		if (arguments.length > 0) {
+			var argumentList = arguments.split(',');
+			for (var i = 0; i < argumentList.length; i++) {
+				var param = createDocumentationObject(TYPE_PARAMETER);
+				param.name = argumentList[i].trim();
+				methodObject.addObject(param);
+			}
+		}
 		return methodObject;
 	}
 
@@ -296,31 +344,31 @@ function DocumentParser() {
 	 */
 	function createFieldObject(commentString, leftIndex, rightIndex, totalFile) {
 		var startingIndex = totalFile.indexOf(VARIABLE, rightIndex);
-		var endingIndex = totalFile.indexOf(SEMICOLON);
-		var fieldString = totalFile.substring
-		var assignIndex = totalFile.indexOf(EQUAL_SIGN);
-		
-		var name = totalFile.substring(startingIndex, startingBracket).trim();
-		
-		name = name.substring(0, name.indexOf(EQUAL_SIGN)); // the name should only be the actual letters now
-		if ( name.length == 0) {
-			var searchString = totalFile.substring(rightIndex, startingIndex);
-			alert("searching for a method name! " + searchString);
-			// we need to look for a . and an =
-			var smallerSearchString = searchString.substring(searchString.indexOf(".") + 1,searchString.indexOf("="));
-			alert("searching for a method name! " + smallerSearchString);
-			name = smallerSearchString.trim();
-			alert("Name found! " + name);
-		}
-		console.log("method name");
-		console.log(name);
+		var endingIndex = totalFile.indexOf(SEMICOLON, rightIndex);
+		var assignIndex = totalFile.indexOf(EQUAL_SIGN, rightIndex);
 
-		var methodObject = createDocumentationObject(TYPE_METHOD);
-		methodObject.name = name;
-		methodObject.comment = commentString;
-		methodObject.startingIndex = startingIndex;
-		methodObject.endingIndex = endingBracket;
-		return methodObject;
+		var name = "";
+		var visibility = "";
+		if (startingIndex != -1) {
+			// version 1
+			visibility = "private";
+			var name = totalFile.substring(startingIndex + VARIABLE.length, endingIndex).trim();
+			name = name.substring(0, name.indexOf(EQUAL_SIGN)).trim();
+		} else {
+			// version 2
+			visibility = "public";
+			startingIndex = totalFile.indexOf(DOT, rightIndex) + 1;
+			var name = totalFile.substring(startingIndex, endingIndex).trim();
+			name = name.substring(0, name.indexOf(EQUAL_SIGN)).trim();
+		}
+
+		var fieldObject = createDocumentationObject(TYPE_FIELD);
+		fieldObject.name = name;
+		fieldObject.comment = commentString;
+		fieldObject.startingIndex = startingIndex;
+		fieldObject.endingIndex = endingIndex;
+		fieldObject.visibility = visibility;
+		return fieldObject;
 	}
 
 	/**
@@ -339,12 +387,12 @@ function DocumentParser() {
 		name = name.substring(0, name.indexOf("(")); // the name should only be the actual letters now
 		if ( name.length == 0) {
 			var searchString = totalFile.substring(rightIndex, startingIndex);
-			alert("searching for a method name! " + searchString);
+			console.log("searching for a method name! " + searchString);
 			// we need to look for a . and an =
 			var smallerSearchString = searchString.substring(searchString.indexOf(".") + 1,searchString.indexOf("="));
-			alert("searching for a method name! " + smallerSearchString);
+			console.log("searching for a method name! " + smallerSearchString);
 			name = smallerSearchString.trim();
-			alert("Name found! " + name);
+			console.log("Name found! " + name);
 		}
 		console.log("method name");
 		console.log(name);
@@ -356,6 +404,7 @@ function DocumentParser() {
 		methodObject.endingIndex = endingBracket;
 		return methodObject;
 	}
+
 	/**
 	 * Finds the matching closing bracket assuming that the opening bracket occurs at zero.
 	 *
@@ -405,7 +454,7 @@ function DocumentParser() {
 		}
 
 		makeValueReadOnly(object,"isValidObject", true);
-		makeValueReadOnly(object,"type", "" + objectType);
+		makeValueReadOnly(object,"documentationType", "" + objectType);
 
 		if (objectType == TYPE_FILE) {
 			object.location = null;
@@ -414,17 +463,19 @@ function DocumentParser() {
 	}
 
 	/**
-	 * This nested class represents a documentation object
+	 * This nested class represents a documentation object.
 	 * @Class
 	 */
 	function DocumentationObject() {
-		var fieldList = {};
-		var classList = {};
-		var methodList = {};
-		this.name = null;
-		this.tempFieldList = fieldList;
-		this.classListList = classList;
-		this.methodListList = methodList;
+		var fieldList = [];
+		var classList = [];
+		var methodList = [];
+		var parameterList = [];
+		var exceptionList = [];
+		var callbackList = [];
+		var returnValue = undefined; // if a language if found with multiple return values then we should chane to a list
+		this.name = undefined;
+		this.visibility = undefined;
 
 		/**
 		 * @Method
@@ -433,39 +484,120 @@ function DocumentParser() {
 		 * The object is added to a different list depending on its type.
 		 */
 		this.addObject = function(object) {
-			if (object.type == TYPE_CLASS) {
+			if (object.documentationType == TYPE_CLASS) {
 				classList[object.name] = object;
-			} else if (object.type == TYPE_METHOD) {
+			} else if (object.documentationType == TYPE_METHOD) {
 				methodList[object.name] = object;
-			} if (object.type == TYPE_FIELD) {
+			} else if (object.documentationType == TYPE_FIELD) {
 				fieldList[object.name] = object;
-			} 
+			} else if (object.documentationType == TYPE_PARAMETER) {
+				parameterList[object.name] = object;
+			} else if (object.documentationType == TYPE_CALLBACK) {
+				callbackList[object.name] = object;
+			} else if (object.documentationType == TYPE_EXCEPTION) {
+				exceptionList[object.name] = object;
+			} else if (object.documentationType == TYPE_FILE) {
+				// this special case means that there is a comment to be added
+				this.comment = object.comment;
+			} else if (object.documentationType == TYPE_RETURN_VALUE) {
+				returnValue = object;
+			}
 		}
 
 		/**
 		 * @Method
 		 */
 		this.getAllClassObjects = function() {
-			return classList.clone();
+			return convertArray(classList);
 		};
 
 		/**
 		 * @Method
 		 */
 		this.getAllMethodObjects = function() {
-			return methodList.clone();
+			return convertArray(methodList);
 		};
 
 		/**
 		 * @Method
 		 */
 		this.getAllFieldObjects = function() {
-			return fieldList.clone();
+			return convertArray(fieldList);
 		};
+
+		/**
+		 * @Method
+		 * @return {List} returns the list the list of parameters (which are themselves document objects)
+		 */
+		this.getAllParameters = function() {
+			return convertArray(parameterList);
+		};
+
+		/**
+		 * @Method
+		 * @return {DocumentationObject} if a return value exist, if the method is void or does not return anything then undefined is returned.
+		 */
+		this.getReturnValue = function() {
+			return returnValue;
+		};
+
+		/**
+		 * @Method
+		 * @return {boolean} true of there are classes in this documentation object
+		 */
+		this.hasClasses = function() {
+			return Object.keys(classList).length;
+		};
+
+		/**
+		 * @Method
+		 * @return {boolean} true of there are methods in this documentation object
+		 */
+		this.hasMethods = function() {
+			return Object.keys(methodList).length;
+		};
+
+		/**
+		 * @Method
+		 * @return {boolean} true if there are methods in this documentation object
+		 */
+		this.hasFields = function() {
+			return Object.keys(fieldList).length;
+		};
+
+		/**
+		 * @Method
+		 * @return {boolean} true if there are methods in this documentation object
+		 */
+		this.hasParameters = function() {
+			return Object.keys(parameterList).length;
+		};
+
+		/**
+		 * @Method
+		 * @return {boolean} true if there are methods in this documentation object
+		 */
+		this.hasReturnValue = function() {
+			return typeof returnValue != "undefined" && typeof returnValue != "null";
+		};
+
+		/**
+		 * @Method
+		 */
+		function convertArray(aArray) {
+			var numericArray = [];
+			for (var items in aArray){
+				numericArray.push( aArray[items] );
+			}
+			return numericArray;
+		}
 	}
 
 	/**
 	 * @Method
+	 * @param obj {Object}
+	 * @param property {String}
+	 * @param value {Object}
 	 */
 	function makeValueReadOnly(obj, property, value) {
 		if (typeof property != "string") {
@@ -475,5 +607,36 @@ function DocumentParser() {
 		    value: value,
 		    writable: false
 		});
+	}
+
+	/**
+	 * @Method
+	 * @param str {String} The string to search in
+	 * @param regex {String} The regular expression to search for
+	 * @param startpos {Number} The starting index
+	 */
+	function regexIndexOf(str, regex, startpos) {
+		var indexOf = str.substring(startpos || 0).search(regex);
+	    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+	}
+
+	/**
+	 * @Method
+	 */
+	function regexLastIndexOf(str, regex, startpos) {
+	    regex = (regex.global) ? regex : new RegExp(regex.source, "g" + (regex.ignoreCase ? "i" : "") + (regex.multiLine ? "m" : ""));
+	    if (typeof (startpos) == "undefined") {
+	        startpos = this.length;
+	    } else if(startpos < 0) {
+	        startpos = 0;
+	    }
+	    var stringToWorkWith = str.substring(0, startpos + 1);
+	    var lastIndexOf = -1;
+	    var nextStop = 0;
+	    while((result = regex.exec(stringToWorkWith)) != null) {
+	        lastIndexOf = result.index;
+	        regex.lastIndex = ++nextStop;
+	    }
+	    return lastIndexOf;
 	}
 }
