@@ -38,6 +38,7 @@ function TestClass() {
 
 	/**
 	 * @Field
+	 * @FieldType String
 	 * class field version 2
 	 */
 	this.testField2 = "hi";
@@ -45,14 +46,16 @@ function TestClass() {
 	 /**
 	  * class method version 1
 	  * @Method
+	  * @returns {boolean} true for the sake of returning true
 	  */
 	 function testMethod() {
-
+		 return true;
 	 }
 
 	 /**
 	  * class method version 2
 	  * @Method
+	  * @param arg1 {string} takes in a string
 	  */
 	 this.testMethod2 = function(arg1, arg2) {
 
@@ -62,26 +65,38 @@ function TestClass() {
 	  * nested class version 1
 	  * @Class
 	  */
-	 function NestedClass {
+	 function NestedClass() {
 
 		 /**
-		  * nested class method
+		  * nested class method.
+		  *
+		  * This method will call other methods!
 		  * @Method
+		  * @param callback {function} gets calledback
+		  * @Callback callback Called right when this method is called.
+		  * @CallbackParam elem1 {undefined} always called as undefined.
+		  * @CallbackParam elem2 {string} it says "balh".
+		  * @Callback callback2 called after the first callback finishes.
+		  * @CallbackFullDescription A longer descripton of this callback purpose
+		  *
+		  * This description is multiple lines!
+		  * @CallbackParam elem1 {undefined} called as undefined! Useful!
 		  */
-		 function nestedMethod() {
-
+		 function nestedMethod(callback1, callback2) {
+			 callback(elem1, "balh");
+			 callback2(elem1);
 		 }
 	 }
 
 	 /**
 	  * @Method
 	  *
-	  * @TEMPClassStart
-	  * @TEMPClassName name
-	  * @TEMPClassEnd
+	  * @ClassStart
+	  * @ClassName empty class
+	  * @ClassEnd
 	  */
 	 this.getNestedClass = function() {
-		 return ;
+		 return {};
 	 };
 }
 
