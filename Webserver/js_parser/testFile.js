@@ -20,7 +20,9 @@ function globalMethod2(arg1, arg2) {
 }
 
 /**
- * global field
+ * global field short descriptions.
+ *
+ * A longer description about this project
  * @Field
  */
 var globalTestField = 0;
