@@ -191,6 +191,17 @@ function DocumentRenderer() {
 			});
 		}
 
+		if (docObject.hasClasses()) {
+			var classList = docObject.getAllClassObjects();
+			var div = document.createElement('div');
+			totalHtml.appendChild(div);
+			for (var i = 0; i <classList.length; i++) {
+				functionScope.renderClassDetailHtml(classList[i], function(element) {
+					div.appendChild(element);
+				});
+			}
+		}
+
 		resultFunction(totalHtml);
 	};
 
