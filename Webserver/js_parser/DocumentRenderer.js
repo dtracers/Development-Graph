@@ -134,7 +134,7 @@ function DocumentRenderer() {
 	 * @Method
 	 */
 	this.renderClassSummaryHtml = function(docObject, resultFunction) {
-		var abbreviatedDescript = docObject.comment; //TODO: actually check to see if the real abbreviated description works.
+		var abbreviatedDescript = docObject.summary ? docObject.summary : docObject.comment;
 		var row = document.createElement("tr");
 
 		// name
@@ -233,7 +233,7 @@ function DocumentRenderer() {
 	 * @CallbackParam {Element} The element that contains everything that is needed for an abbreviated method document.
 	 */
 	this.renderMethodSummaryHtml = function(docObject, resultFunction) {
-		var abbreviatedDescript = docObject.comment; //TODO: actually check to see if the real abbreviated description works.
+		var abbreviatedDescript = docObject.summary ? docObject.summary : docObject.comment;
 		var row = document.createElement("tr");
 
 		// name
@@ -415,7 +415,7 @@ function DocumentRenderer() {
 	 */
 	this.renderFieldSummaryHtml = function(docObject, resultFunction) {
 		console.log(docObject);
-		var abbreviatedDescript = docObject.comment; //TODO: actually check to see if the real abbreviated description works.
+		var abbreviatedDescript = docObject.summary ? docObject.summary : docObject.comment;
 		var row = document.createElement("tr");
 
 		// name
