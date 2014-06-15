@@ -1,12 +1,14 @@
 <head>
-	<link rel="stylesheet" href="/testFile.css">
-	<script src = "/parseFile.js"></script>
+	<link rel="stylesheet" href="testFile.css">
+	<script src = "parseFile.js"></script>
+	<script src = "DocumentRenderer.js"></script>
 </head>
 <body>
 	<div id="drop_zone">
 		<input type="file" id="files" name="files[]" multiple />
 	</div>
 	<script>
+		var docRend = new DocumentRenderer();
   		function handleFileSelect(evt) {
 			evt.stopPropagation();
 			evt.preventDefault();
@@ -18,6 +20,15 @@
 			for (var i = 0, f; f = files[i]; i++) {
 				var parser = new DocumentParser();
 				parser.setFileToParse(f);
+				parser.setParsingFinishedCallback(function(docObject) {
+					console.log("FINISHED PARSING!");
+					console.log(docObject);
+					console.log("\n------------------------------------------------------\n");
+					console.log("STARTING RENDERING PARSING!");
+					docRend.createHtml(docObject, function(element) {
+						document.getElementById("result").appendChild(element);
+					});
+				});
 				parser.start();
 			}
 		}
@@ -34,5 +45,5 @@
 		dropZone.addEventListener('drop', handleFileSelect, false);
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 	</script>
-	<div id="list"></div>
+	<div id="result"></div>
 </body>
