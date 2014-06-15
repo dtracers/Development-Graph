@@ -58,9 +58,9 @@ function DocumentParser() {
 	 * @StartFields
 	 */
 	var TAG_FILE = "@File";
-	var TAG_CLASS = "@Class";
+	var TAG_CLASS = /(@Class+)([\W\n\r]|$)/; // a tag to make @Class and not @ClassStart
 	var TAG_METHOD = "@Method";
-	var TAG_FIELD = "@Field";
+	var TAG_FIELD = /(@Field+)([\W\n\r]|$)/;;
 	var TYPE_CLASS = "Class";
 	var TYPE_METHOD = "Method";
 	var TYPE_FIELD = "Field";
@@ -244,7 +244,7 @@ function DocumentParser() {
 			return createMethodObject(specificString, leftIndex, rightIndex, totalFile);
 		} else if (specificString.indexOf(TAG_FILE) != -1) {
 			return createFileObject(specificString, leftIndex, rightIndex, totalFile);
-		}  else if (specificString.indexOf(TAG_FIELD) != -1) {
+		}  else if (regexIndexOf(specificString, TAG_FIELD) != -1) {
 			return createFieldObject(specificString, leftIndex, rightIndex, totalFile);
 		}
 
