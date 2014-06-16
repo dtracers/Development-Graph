@@ -57,6 +57,7 @@ function TestClass() {
 	 /**
 	  * class method version 2
 	  * @Method
+	  * @param arg2 has no type actually
 	  * @param arg1 {string} takes in a string
 	  */
 	 this.testMethod2 = function(arg1, arg2) {
@@ -74,8 +75,8 @@ function TestClass() {
 		  *
 		  * This method will call other methods!
 		  * @Method
-		  * @param callback {function} gets calledback
-		  * @Callback callback Called right when this method is called.
+		  * @param callback1 {function} gets calledback
+		  * @Callback callback1 Called right when this method is called.
 		  * @CallbackParam elem1 {undefined} always called as undefined.
 		  * @CallbackParam elem2 {string} it says "balh".
 		  * @Callback callback2 called after the first callback finishes.
