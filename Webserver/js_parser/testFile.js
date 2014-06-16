@@ -46,7 +46,7 @@ function TestClass() {
 	this.testField2 = "hi";
 
 	 /**
-	  * class method version 1
+	  * @SummaryDescription class method version 1
 	  * @Method
 	  * @returns {boolean} true for the sake of returning true
 	  */
