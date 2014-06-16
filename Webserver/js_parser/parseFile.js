@@ -196,7 +196,7 @@ function DocumentParser() {
 	/**
 	 * @Method
 	 * @param leftIndex the index of the starting comment (starts after /**)
-	 * @param rightIndex
+	 * @param rightIndex the index of the end of the comment.
 	 */
 	function parseStringRecursively(str, leftIndex, rightIndex, resultingObject) {
 		addParsingLayer();
@@ -453,7 +453,7 @@ function DocumentParser() {
 	/**
 	 * Creates a documentation object without the needed items
 	 * @Method
-	 * @param ObjectType The type that the object is
+	 * @param objectType {string} The type that the object is
 	 */
 	function createDocumentationObject(objectType) {
 		var object = new DocumentationObject();
@@ -517,7 +517,7 @@ function DocumentParser() {
 		 * @Method
 		 * Grabs a {@link DocumentationObject} given a type and an objectName.
 		 * @param type {string} looks for the correct array.
-		 * @param object {string} the specific object to return.
+		 * @param objectName {string} the specific object to return.
 		 */
 		this.getObject = function(type, objectName) {
 			if (type == TYPE_CLASS) {
