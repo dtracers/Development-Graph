@@ -2,8 +2,7 @@
 * @Callback - describes what the callback should do, its possible conditions
 * @CallbackParam - a parameter given to the callback (these should be in the order that they are listed in the callback function)
 * @CallbackFullDescription - a longer multi line description of the callback
-* @AbbreviatedDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description)
-* @FullDescription - the full description of the method
+* @SummaryDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description)
 * @FieldType - specifies the type that this field should be
 *
 *
@@ -24,14 +23,23 @@ function CommentParser() {
 	 */
 	var documentationObject;
 
-	var commentRemoverRegex = /\n[\s]*[*]/g; // removes all * following a new line character
-	var commentRemoverRegexFirstLine = /^[\s]*[*]/g; // removes all * following a new line character
-	var shortDescriptionPattern = /([\w]|[^\w\s]|_)(\n|<br>)\s*(\n|<br>)\s*\w/; /* looks for the instance of a word followed by one or
-		more lines followed by another word.
-		example is here http://jsfiddle.net/dtracers/XTnCS/2/
-		*/
-	var specialWord = /@\w+/g; //looks for an @ followed by a word
+	/**
+	 * @Field
+	 * 
+	 */
+	var maxSummaryLineLength = 132; // randomly chosen
 
+	var commentRemoverRegex = /\n\s*[*]/g; // removes all * following a new line character
+	var commentRemoverRegexFirstLine = /(^|\A)\s*[*]/g; // removes all * following a new line character
+	var shortDescriptionPattern = /([\w]|[^\w\s]|_)((\n|<br>)\s*){2,}(\w|@)/; /* looks for the instance of a word followed by one or
+		more lines followed by another word.
+		example is here http://jsfiddle.net/dtracers/XTnCS/5/
+		*/
+	var SUMMARY_DESCRIPTION = /@SummaryDescription/;
+
+	/**
+	 * @Method
+	 */
 	function searchAllObject(docObject) {
 		if (docObject.hasFields()) {
 			var fields = docObject.getAllFieldObjects();
@@ -75,29 +83,100 @@ function CommentParser() {
 	 */
 	this.parseComment = function(docObject, finishedParsing) {
 		console.log("Parsing new comment!");
+		if (!docObject.comment) {
+			finishedParsing();
+			return;
+		}
 		var comment = docObject.comment.trim();
-		comment = comment.replace(commentRemoverRegex, "<br>");
 		comment = comment.replace(commentRemoverRegexFirstLine, "");
+		comment = comment.replace(commentRemoverRegex, "<br>");
 		docObject.comment = comment;
+		this.removeTags(docObject);
+
 		this.shortDescriptionFinder(docObject);
+
+		// has to be the final thing done.
+		this.replaceSpecialCharacters(docObject);
 		finishedParsing();
 	};
 
 	/**
+	 * @Method
+	 * Removes the tags that are only used in for the specific parser.
+	 *
+	 * TODO: make it so that the parser themselves can add these tags with 2 different rules.
+	 * The ones that are the whole word and the ones that are not the whole word.
+	 */
+	this.removeTags = function(docObject) {
+		var comment = docObject.comment;
+		comment = comment.replace(/(@File)|(@Method)/g, ""); // simple tag replacer
+		comment = comment.replace(/((@Class)|(@Field))</g, "<"); // complex tag replacer (with running into <br>)
+		comment = comment.replace(/((@Class)|(@Field))(\s|$)/g, ""); // complex tag replacer
+		comment = comment.replace(/^\s*(<br>\s*)+/g, ""); // new line remover
+		docObject.comment = comment;
+	};
+
+	/**
+	 * Tries to find the short description of a method.
+	 *
+	 * This method uses 3 ways to create a short summary.<ol>
+	 * <li>Looks for an {AT}SummaryDescription tag to try and find
 	 * 
+	 * @Method 
 	 */
 	this.shortDescriptionFinder = function(docObject) {
 		var comment = docObject.comment;
 		var shortCommentIndex = comment.search(shortDescriptionPattern);
-		if (shortCommentIndex != -1) {
-			var shortComment = comment.substring(0, shortCommentIndex);
+		var summaryCommentItem = comment.search(/@SummaryDescription/);
+		if (summaryCommentItem != -1) {
+			var startIndex = SUMMARY_DESCRIPTION.source.length + summaryCommentItem + 1;
+			comment = comment.replace(SUMMARY_DESCRIPTION, "");
+			docObject.summary = comment.substring(startIndex, Math.min(startIndex + maxSummaryLineLength, 
+					Math.max(startIndex, regexIndexOf(comment,/[.!?]|\n|\r|<br>/, startIndex))));
+			docObject.comment = comment;
+		} else if (shortCommentIndex != -1) {
+			var shortComment = comment.substring(0, shortCommentIndex + 1);
 			var longComment = comment.substring(shortCommentIndex + 1);
-			console.log("shortComment");
-			console.log(shortComment);
-			console.log("longComment");
-			console.log(longComment);
 			docObject.summary = shortComment;
 			docObject.details = longComment;
+		} else  {
+			var index = comment.search(/[.!?]|\n|\r|<br>/);
+			if (index < maxSummaryLineLength) {
+				docObject.incompleteSummary = true;
+				docObject.summary = comment.substring(0, index) + "";
+				docObject.details = comment;
+			} else {
+				docObject.incompleteSummary = true;
+				docObject.summary = comment.substring(0, maxSummaryLineLength) + "...";
+				docObject.details = comment;
+			}
 		}
+		if ((docObject.summary && docObject.summary.search(/\w/) == -1) || docObject.comment.search(/\w/) == -1 ) {
+			docObject.emptyComment = true;
+		}
+	};
+
+	/**
+	 * @Method
+	 * Removes special characters to make it easier to comment about the comment parser
+	 *
+	 * Changes \{AT\} to @
+	 * removes any \ before { or }
+	 */
+	this.replaceSpecialCharacters = function(docObject) {
+		docObject.comment = docObject.comment.replace(/[{]AT[}]/g,"@");
+		docObject.comment = docObject.comment.replace(/\\[}]/g,"}");
+		docObject.comment = docObject.comment.replace(/\\[{]/g,"{");
+	};
+
+	/**
+	 * @Method
+	 * @param str {String} The string to search in
+	 * @param regex {String} The regular expression to search for
+	 * @param startpos {Number} The starting index
+	 */
+	function regexIndexOf(str, regex, startpos) {
+		var indexOf = str.substring(startpos || 0).search(regex);
+	    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
 	}
 }
