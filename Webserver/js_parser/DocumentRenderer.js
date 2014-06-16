@@ -151,6 +151,9 @@ function DocumentRenderer() {
 		// description
 		var td = document.createElement("td");
 		td.innerHTML = "" + abbreviatedDescript;
+		if (docObject.emptyComment) {
+			td.className = "warning";
+		}
 		row.appendChild(td);
 
 		resultFunction(row);
@@ -274,6 +277,9 @@ function DocumentRenderer() {
 		// description
 		var td = document.createElement("td");
 		td.innerHTML = "" + abbreviatedDescript;
+		if (docObject.emptyComment) {
+			td.className = "warning";
+		}
 		row.appendChild(td);
 
 		resultFunction(row);
@@ -441,6 +447,9 @@ function DocumentRenderer() {
 		// description
 		var td = document.createElement("td");
 		td.innerHTML = "" + abbreviatedDescript;
+		if (docObject.emptyComment) {
+			td.className = "warning";
+		}
 		row.appendChild(td);
 
 		resultFunction(row);

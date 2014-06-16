@@ -151,3 +151,7 @@ tr:first-child 			{ background-color:#ccc; }
 	border-bottom: 2px solid #777;
 	background-color:#E0E0E9;
 }
+
+.warning {
+	background-color:#FFFF00;
+}
