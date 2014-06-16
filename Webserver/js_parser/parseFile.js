@@ -511,7 +511,33 @@ function DocumentParser() {
 			} else if (object.documentationType == TYPE_RETURN_VALUE) {
 				returnValue = object;
 			}
-		}
+		};
+
+		/**
+		 * @Method
+		 * Grabs a {@link DocumentationObject} given a type and an objectName.
+		 * @param type {string} looks for the correct array.
+		 * @param object {string} the specific object to return.
+		 */
+		this.getObject = function(type, objectName) {
+			if (type == TYPE_CLASS) {
+				return classList[objectName];
+			} else if (type == TYPE_METHOD) {
+				return methodList[objectName];
+			} else if (type == TYPE_FIELD) {
+				return fieldList[objectName];
+			} else if (type == TYPE_PARAMETER) {
+				console.log(parameterList);
+				console.log(objectName);
+				return parameterList[objectName];
+			} else if (type == TYPE_CALLBACK) {
+				return callbackList[objectName];
+			} else if (type == TYPE_EXCEPTION) {
+				return exceptionList[objectName];
+			} else if (type == TYPE_RETURN_VALUE) {
+				return returnValue;
+			}
+		};
 
 		/**
 		 * @Method
