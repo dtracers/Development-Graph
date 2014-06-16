@@ -1,4 +1,6 @@
 /*
+* @param - a parameter for a method.
+* @returns - the return value for a method
 * @Callback - describes what the callback should do, its possible conditions
 * @CallbackParam - a parameter given to the callback (these should be in the order that they are listed in the callback function)
 * @CallbackFullDescription - a longer multi line description of the callback
@@ -25,7 +27,8 @@ function CommentParser() {
 
 	/**
 	 * @Field
-	 * 
+	 * @FieldType {Number}
+	 * The max lenght a summary line can take up
 	 */
 	var maxSummaryLineLength = 132; // randomly chosen
 
@@ -36,6 +39,7 @@ function CommentParser() {
 		example is here http://jsfiddle.net/dtracers/XTnCS/5/
 		*/
 	var SUMMARY_DESCRIPTION = /@SummaryDescription/;
+	var PARAM = /@param/;
 
 	/**
 	 * @Method
@@ -93,6 +97,11 @@ function CommentParser() {
 		docObject.comment = comment;
 		this.removeTags(docObject);
 
+		// special tag finder
+		this.fillOutParameters(docObject);
+
+
+		// short description finder
 		this.shortDescriptionFinder(docObject);
 
 		// has to be the final thing done.
@@ -117,6 +126,40 @@ function CommentParser() {
 	};
 
 	/**
+	 * @Method
+	 *
+	 * @param docObject {DocumentationObject}
+	 */
+	this.fillOutParameters = function(docObject) {
+		var indexValue = 0;
+		while ((indexValue = regexIndexOf(docObject.comment, PARAM, indexValue)) != -1) {
+			console.log(indexValue);
+			var nextSearchValue = indexValue + PARAM.source.length;
+			var wordEndIndex = regexIndexOf(docObject.comment, /\w\s/, nextSearchValue) + 1;
+			var firstWord = docObject.comment.substring(nextSearchValue, wordEndIndex).trim();
+			var endOfLine = regexIndexOf(docObject.comment, /$|<br>|\n|\r/, nextSearchValue);
+			var wholeLine = docObject.comment.substring(wordEndIndex, endOfLine).trim();
+			var paramType = wholeLine.match(/^[{]\w+[}]/);
+			
+			var parameter = docObject.getObject("Parameter", firstWord);
+			if (typeof parameter == "undefined") {
+				// TODO: log this as a comment does not match actual parameter error
+				return;
+			}
+
+			if (paramType != null) {
+				paramType = paramType[0];
+				wholeLine = wholeLine.substring(paramType.length + 1).trim();
+				paramType = paramType.replace(/[{}]/g,"");
+				parameter.objectType = paramType;
+			}
+
+			parameter.comment = wholeLine;
+			docObject.comment = docObject.comment.replace(docObject.comment.substring(nextSearchValue, endOfLine),'');
+		};
+	};
+
+	/**
 	 * Tries to find the short description of a method.
 	 *
 	 * This method uses 3 ways to create a short summary.<ol>
@@ -127,7 +170,7 @@ function CommentParser() {
 	this.shortDescriptionFinder = function(docObject) {
 		var comment = docObject.comment;
 		var shortCommentIndex = comment.search(shortDescriptionPattern);
-		var summaryCommentItem = comment.search(/@SummaryDescription/);
+		var summaryCommentItem = comment.search(SUMMARY_DESCRIPTION);
 		if (summaryCommentItem != -1) {
 			var startIndex = SUMMARY_DESCRIPTION.source.length + summaryCommentItem + 1;
 			comment = comment.replace(SUMMARY_DESCRIPTION, "");
