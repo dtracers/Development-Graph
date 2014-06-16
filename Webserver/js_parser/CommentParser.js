@@ -156,7 +156,9 @@ function CommentParser() {
 
 			parameter.comment = wholeLine;
 			docObject.comment = docObject.comment.replace(docObject.comment.substring(nextSearchValue, endOfLine),'');
+			indexValue += 1;
 		};
+		docObject.comment = docObject.comment.replace(/@param/g,"");
 	};
 
 	/**
