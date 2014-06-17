@@ -40,6 +40,8 @@ function CommentParser() {
 		*/
 	var SUMMARY_DESCRIPTION = /@SummaryDescription/;
 	var PARAM = /@param/;
+	var RETURN_VALUE = /@returns/;
+	var EMPTY_COMMENT = /(^(\s|<br>)*(\W|<br>)(\s|<br>)*$)|(^$)/; // if this evaluates to true then the comment is empty;
 
 	/**
 	 * @Method
@@ -100,12 +102,15 @@ function CommentParser() {
 		// special tag finder
 		this.fillOutParameters(docObject);
 
+		docObject.comment = trim(docObject.comment); // saves space
 
 		// short description finder
 		this.shortDescriptionFinder(docObject);
 
 		// has to be the final thing done.
 		this.replaceSpecialCharacters(docObject);
+
+		this.emptyCommentWarning(docObject);
 		finishedParsing();
 	};
 
@@ -121,7 +126,7 @@ function CommentParser() {
 		comment = comment.replace(/(@File)|(@Method)/g, ""); // simple tag replacer
 		comment = comment.replace(/((@Class)|(@Field))</g, "<"); // complex tag replacer (with running into <br>)
 		comment = comment.replace(/((@Class)|(@Field))(\s|$)/g, ""); // complex tag replacer
-		comment = comment.replace(/^\s*(<br>\s*)+/g, ""); // new line remover
+		comment = trim(comment);
 		docObject.comment = comment;
 	};
 
@@ -135,7 +140,7 @@ function CommentParser() {
 		while ((indexValue = regexIndexOf(docObject.comment, PARAM, indexValue)) != -1) {
 			console.log(indexValue);
 			var nextSearchValue = indexValue + PARAM.source.length;
-			var wordEndIndex = regexIndexOf(docObject.comment, /\w\s/, nextSearchValue) + 1;
+			var wordEndIndex = regexIndexOf(docObject.comment, /\w(\s|$|<)/, nextSearchValue) + 1;
 			var firstWord = docObject.comment.substring(nextSearchValue, wordEndIndex).trim();
 			var endOfLine = regexIndexOf(docObject.comment, /$|<br>|\n|\r/, nextSearchValue);
 			var wholeLine = docObject.comment.substring(wordEndIndex, endOfLine).trim();
@@ -143,8 +148,11 @@ function CommentParser() {
 			
 			var parameter = docObject.getObject("Parameter", firstWord);
 			if (typeof parameter == "undefined") {
+				alert(firstWord);
+				alert("EMPTY ERROR THINGY");
 				// TODO: log this as a comment does not match actual parameter error
-				return;
+				indexValue += 1;
+				continue;
 			}
 
 			if (paramType != null) {
@@ -155,6 +163,8 @@ function CommentParser() {
 			}
 
 			parameter.comment = wholeLine;
+			this.emptyCommentWarning(parameter); // checks to see if the comment is empty
+
 			docObject.comment = docObject.comment.replace(docObject.comment.substring(nextSearchValue, endOfLine),'');
 			indexValue += 1;
 		};
@@ -165,8 +175,10 @@ function CommentParser() {
 	 * Tries to find the short description of a method.
 	 *
 	 * This method uses 3 ways to create a short summary.<ol>
-	 * <li>Looks for an {AT}SummaryDescription tag to try and find
-	 * 
+	 * <li>Looks for an {AT}SummaryDescription tag to try and find a short description.</li>
+	 * <li>Then it looks to see if there is a line that is then followed by an empty line.</li>
+	 * <li>Finally it just looks for the first sentence or caps the summary at a fixed number of characters.</li>
+	 *
 	 * @Method 
 	 */
 	this.shortDescriptionFinder = function(docObject) {
@@ -174,10 +186,10 @@ function CommentParser() {
 		var shortCommentIndex = comment.search(shortDescriptionPattern);
 		var summaryCommentItem = comment.search(SUMMARY_DESCRIPTION);
 		if (summaryCommentItem != -1) {
-			var startIndex = SUMMARY_DESCRIPTION.source.length + summaryCommentItem + 1;
+			var startIndex = summaryCommentItem + 1;
 			comment = comment.replace(SUMMARY_DESCRIPTION, "");
 			docObject.summary = comment.substring(startIndex, Math.min(startIndex + maxSummaryLineLength, 
-					Math.max(startIndex, regexIndexOf(comment,/[.!?]|\n|\r|<br>/, startIndex))));
+					Math.max(startIndex, regexIndexOf(comment, /[.!?]|\n|\r|<br>/, startIndex))));
 			docObject.comment = comment;
 		} else if (shortCommentIndex != -1) {
 			var shortComment = comment.substring(0, shortCommentIndex + 1);
@@ -196,7 +208,14 @@ function CommentParser() {
 				docObject.details = comment;
 			}
 		}
-		if ((docObject.summary && docObject.summary.search(/\w/) == -1) || docObject.comment.search(/\w/) == -1 ) {
+	};
+
+	/**
+	 * @Method
+	 * Adds a warning to an empty comment.
+	 */
+	this.emptyCommentWarning = function(docObject) {
+		if ((docObject.summary && docObject.summary.search(EMPTY_COMMENT) != -1) || docObject.comment.search(EMPTY_COMMENT) != -1) {
 			docObject.emptyComment = true;
 		}
 	};
@@ -207,11 +226,14 @@ function CommentParser() {
 	 *
 	 * Changes \{AT\} to @
 	 * removes any \ before { or }
+	 * <script>This also removes any script tags.</script>
 	 */
 	this.replaceSpecialCharacters = function(docObject) {
 		docObject.comment = docObject.comment.replace(/[{]AT[}]/g,"@");
 		docObject.comment = docObject.comment.replace(/\\[}]/g,"}");
 		docObject.comment = docObject.comment.replace(/\\[{]/g,"{");
+		docObject.comment = docObject.comment.replace(/<script>/g,"");
+		docObject.comment = docObject.comment.replace(/<\/script>/g,"");
 	};
 
 	/**
@@ -223,5 +245,15 @@ function CommentParser() {
 	function regexIndexOf(str, regex, startpos) {
 		var indexOf = str.substring(startpos || 0).search(regex);
 	    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
+	}
+
+	/**
+	 * @Method
+	 * @param trim {string} trims all characters surrounding the text
+	 */
+	function trim(str) {
+		var str = str.replace(/^\s*(<br>\s*)+/g, ""); // start line remover
+		str = str.replace(/\s*(<br>\s*)+$/g, ""); // end line remover
+		return str.trim();
 	}
 }
