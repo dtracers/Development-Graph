@@ -482,6 +482,9 @@ function DocumentRenderer() {
 				var cont = document.createElement("li");
 				var p = document.createElement("p");
 				p.innerHTML = parameterList[i].name + (parameterList[i].comment ? " - " + parameterList[i].comment : '');
+				if (parameterList[i].emptyComment || !parameterList[i].comment) {
+					p.className = "warning";
+				}
 				cont.appendChild(p);
 				ul.appendChild(p);
 			}
