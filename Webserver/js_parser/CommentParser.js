@@ -150,6 +150,7 @@ function CommentParser() {
 			if (typeof parameter == "undefined") {
 				alert(firstWord);
 				alert("EMPTY ERROR THINGY");
+				docObject.addError("commentParsingError", firstWord + " is not a valid parameter");
 				// TODO: log this as a comment does not match actual parameter error
 				indexValue += 1;
 				continue;
@@ -235,25 +236,4 @@ function CommentParser() {
 		docObject.comment = docObject.comment.replace(/<script>/g,"");
 		docObject.comment = docObject.comment.replace(/<\/script>/g,"");
 	};
-
-	/**
-	 * @Method
-	 * @param str {String} The string to search in
-	 * @param regex {String} The regular expression to search for
-	 * @param startpos {Number} The starting index
-	 */
-	function regexIndexOf(str, regex, startpos) {
-		var indexOf = str.substring(startpos || 0).search(regex);
-	    return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
-	}
-
-	/**
-	 * @Method
-	 * @param trim {string} trims all characters surrounding the text
-	 */
-	function trim(str) {
-		var str = str.replace(/^\s*(<br>\s*)+/g, ""); // start line remover
-		str = str.replace(/\s*(<br>\s*)+$/g, ""); // end line remover
-		return str.trim();
-	}
 }
