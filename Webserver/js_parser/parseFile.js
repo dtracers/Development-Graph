@@ -186,8 +186,10 @@ function DocumentParser() {
 
 	/**
 	 * @Method
-	 * @param leftIndex the index of the starting comment (starts after /**)
-	 * @param rightIndex the index of the end of the comment.
+	 * @param str {String} The string that is being parsed.
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param resultingObject {DocumentationObject} The object that sub objects will be added to.
 	 */
 	function parseStringRecursively(str, leftIndex, rightIndex, resultingObject) {
 		addParsingLayer();
@@ -234,7 +236,10 @@ function DocumentParser() {
 
 	/**
 	 * @Method
-	 *
+	 * @param specificString {String}
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param totalFile {String} A string representing the entire file that is being parsed.
 	 * @returns {DocumentationObject} The documentation object to add to the end of the list
 	 */
 	function createObject(specificString, leftIndex, rightIndex, totalFile) {
@@ -254,7 +259,12 @@ function DocumentParser() {
 
 	/**
 	 * @Method
-	 * Creates the comment for a file object
+	 * Creates the comment for a file object.
+	 * @param commentString {String}
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param totalFile {String} A string representing the entire file that is being parsed.
+	 * @returns {DocumentationObject} The object representing a file type.
 	 */
 	function createFileObject(commentString, leftIndex, rightIndex, totalFile) {
 		console.log("CREATING FILE OBJECT");
@@ -267,6 +277,11 @@ function DocumentParser() {
 
 	/**
 	 * @Method
+	 * @param commentString {String}
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param totalFile {String} A string representing the entire file that is being parsed.
+	 * @returns {DocumentationObject} The object representing a class type.
 	 */
 	function createClassObject(commentString, leftIndex, rightIndex, totalFile) {
 		console.log("CREATING CLASS OBJECT");
@@ -300,6 +315,11 @@ function DocumentParser() {
 
 	/**
 	 * @Method
+	 * @param commentString {String}
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param totalFile {String} A string representing the entire file that is being parsed.
+	 * @returns {DocumentationObject} The object representing a method type.
 	 */
 	function createMethodObject(commentString, leftIndex, rightIndex, totalFile) {
 		var startingIndex = totalFile.indexOf(FUNCTION, rightIndex) + FUNCTION.length;
@@ -340,7 +360,12 @@ function DocumentParser() {
 
 	/**
 	 * @Method
-	 * Creates a field object
+	 * Creates a field object.
+	 * @param commentString {String}
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param totalFile {String} A string representing the entire file that is being parsed.
+	 * @returns {DocumentationObject} The object representing a field type.
 	 */
 	function createFieldObject(commentString, leftIndex, rightIndex, totalFile) {
 		var startingIndex = totalFile.indexOf(VARIABLE, rightIndex);
@@ -377,6 +402,13 @@ function DocumentParser() {
 	 * Example:
 	 * var fieldOne = 0;
 	 * var fieldTwo = "hello" // comment about fieldTwo
+	 * 
+	 * TODO: finish this!
+	 * @param commentString {String}
+	 * @param leftIndex {Number} The index of the starting comment (starts after /**)
+	 * @param rightIndex {Number} The index of the end of the comment.
+	 * @param totalFile {String} A string representing the entire file that is being parsed.
+	 * @returns {Array} a list represting multiple field types.
 	 */
 	function createMultiFieldObject(commentString, leftIndex, rightIndex, totalFile) {
 		var startingIndex = totalFile.indexOf(FUNCTION, rightIndex) + FUNCTION.length;
@@ -410,7 +442,8 @@ function DocumentParser() {
 	 *
 	 * (this method has been tested and it works)
 	 * @Method
-	 * @returns the index that the matching close bracket would occur at.
+	 * @param searchString
+	 * @returns {Number} The index that the matching close bracket would occur at.
 	 */
 	function bracketCounter(searchString) {
 		var currentIndex = 0;
@@ -439,42 +472,5 @@ function DocumentParser() {
 			}
 		}
 		return currentIndex;
-	}
-
-	/**
-	 * Creates a documentation object without the needed items
-	 * @Method
-	 * @param objectType {string} The type that the object is
-	 */
-	function createDocumentationObject(objectType) {
-		var object = new DocumentationObject();
-		if (objectType == undefined || objectType == TYPE_EMPTY) {
-			makeValueReadOnly(object,"isValidObject", false);
-			return object; // bail early
-		}
-
-		makeValueReadOnly(object,"isValidObject", true);
-		makeValueReadOnly(object,"documentationType", "" + objectType);
-
-		if (objectType == TYPE_FILE) {
-			object.location = null;
-		}
-		return object;
-	}
-
-	/**
-	 * @Method
-	 * @param obj {Object}
-	 * @param property {String}
-	 * @param value {Object}
-	 */
-	function makeValueReadOnly(obj, property, value) {
-		if (typeof property != "string") {
-			throw new Error("property argument must be a string");
-		}
-		Object.defineProperty(obj, property, {
-		    value: value,
-		    writable: false
-		});
 	}
 }

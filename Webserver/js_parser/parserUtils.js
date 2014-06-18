@@ -3,6 +3,9 @@
  * This file will contain utility classes and methods used by all parts of the parsing process.
  */
 
+/**
+ * @StartFields
+ */
 var TYPE_CLASS = "Class";
 var TYPE_METHOD = "Method";
 var TYPE_FIELD = "Field";
@@ -12,6 +15,9 @@ var TYPE_CALLBACK = "Callback";
 var TYPE_EXCEPTION = "Exception";
 var TYPE_RETURN_VALUE = "Return";
 var TYPE_PARAMETER = "Parameter";
+/**
+ * @EndFields
+ */
 
 /**
  * This class represents a documentation object.
@@ -70,8 +76,6 @@ function DocumentationObject() {
 		} else if (type == TYPE_FIELD) {
 			return fieldList[objectName];
 		} else if (type == TYPE_PARAMETER) {
-			console.log(parameterList);
-			console.log(objectName);
 			return parameterList[objectName];
 		} else if (type == TYPE_CALLBACK) {
 			return callbackList[objectName];
@@ -80,6 +84,20 @@ function DocumentationObject() {
 		} else if (type == TYPE_RETURN_VALUE) {
 			return returnValue;
 		}
+	};
+
+	/**
+	 * @Method
+	 */
+	this.addError = function(creationStage, errorType, errorMessage) {
+		errors.push({type : errorType, message: errorMessage, stage: creationStage});
+	};
+
+	/**
+	 * @return {array} the all of the errors in this document.
+	 */
+	this.getAllErrors = function() {
+		return errors;
 	};
 
 	/**
@@ -161,9 +179,10 @@ function DocumentationObject() {
 
 	/**
 	 * @Method
+	 * @return {boolean} true if there are errors in this documentation object
 	 */
-	this.addError = function(errorType, errorMessage) {
-		errors.push({type : errorType, message: errorMessage});
+	this.hasErrors = function() {
+		return errors.length > 0;
 	};
 
 	/**
@@ -176,6 +195,44 @@ function DocumentationObject() {
 		}
 		return numericArray;
 	}
+}
+
+/**
+ * Adds value to obj in a way that it is only readable and can not be changed.
+ * @Method
+ * @param obj {Object} The object that is being modified.
+ * @param property {String} The name of the what is being changed (the key).
+ * @param value {Object} What is being added. (the value)
+ */
+function makeValueReadOnly(obj, property, value) {
+	if (typeof property != "string") {
+		throw new Error("property argument must be a string");
+	}
+	Object.defineProperty(obj, property, {
+	    value: value,
+	    writable: false
+	});
+}
+
+/**
+ * Creates a documentation object without the needed items.
+ * @Method
+ * @param objectType {string} The type that the object is
+ */
+function createDocumentationObject(objectType) {
+	var object = new DocumentationObject();
+	if (objectType == undefined || objectType == TYPE_EMPTY) {
+		makeValueReadOnly(object,"isValidObject", false);
+		return object; // bail early
+	}
+
+	makeValueReadOnly(object,"isValidObject", true);
+	makeValueReadOnly(object,"documentationType", "" + objectType);
+
+	if (objectType == TYPE_FILE) {
+		object.location = null;
+	}
+	return object;
 }
 
 /**
@@ -212,6 +269,13 @@ function regexLastIndexOf(str, regex, startpos) {
     return lastIndexOf;
 }
 
+/**
+ * @returns {boolean} true if the string is empty (filled with invisible characters) or if str evaluates to false.
+ * @param str {string}
+ */
+function emptyString(str) {
+	return !(str && str.search(/(^(\s|<br>)*(\W|<br>)(\s|<br>)*$)|(^$)/) == -1);
+}
 /**
  * @Method
  * @param str {string} trims all characters surrounding the text.
