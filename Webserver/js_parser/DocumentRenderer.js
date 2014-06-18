@@ -7,6 +7,8 @@
 function DocumentRenderer() {
 	var functionScope = this;
 	/**
+	 * @param docObject {DocumentationObject}
+	 * @param resultFunction {function}
 	 * @Method
 	 */
 	this.createHtml = function(docObject, resultFunction) {
@@ -19,6 +21,11 @@ function DocumentRenderer() {
 				functionScope.renderSummaries(docObject, function(summary) {
 					summaryLocation.appendChild(summary);
 				}, true);
+
+				// render the errors first because all further rendering errors are attributed to the methods themselves
+				functionScope.renderErrors(docObject, function(errors) {
+					element.appendChild(errors);
+				});
 
 				if (docObject.hasMethods()) {
 					functionScope.renderMethodDetailListHtml(docObject.getAllMethodObjects(), function(element2) {
@@ -43,8 +50,10 @@ function DocumentRenderer() {
 			// idk why you are sending me an object that is not a file
 		}
 	};
-
+	
 	/**
+	 * @param docObject {DocumentationObject}
+	 * @param resultFunction {function}
 	 * @Method
 	 */
 	this.renderSummaries = function(docObject, resultFunction, isGlobal) {
@@ -95,6 +104,8 @@ function DocumentRenderer() {
 	/**
 	 * @Method
 	 * Creates html to describe the file in it.
+	 * @param docObject {DocumentationObject}
+	 * @param resultFunction {function}
 	 * @Callback called with the html element that further elements should go in.
 	 * @CallbackParam {Element} The element that contains everything that all child code should go in.
 	 */
@@ -115,6 +126,7 @@ function DocumentRenderer() {
 	};
 
 	/**
+	 * @param resultFunction {function}
 	 * @Method
 	 */
 	this.renderClassSummaryListHtml = function(classList, resultFunction) {
@@ -131,6 +143,8 @@ function DocumentRenderer() {
 	};
 
 	/**
+	 * @param docObject {DocumentationObject}
+	 * @param resultFunction {function}
 	 * @Method
 	 */
 	this.renderClassSummaryHtml = function(docObject, resultFunction) {
@@ -151,7 +165,7 @@ function DocumentRenderer() {
 		// description
 		var td = document.createElement("td");
 		td.innerHTML = "" + abbreviatedDescript;
-		if (docObject.emptyComment) {
+		if (docObject.emptySummary || docObject.emptyComment) {
 			td.className = "warning";
 		}
 		row.appendChild(td);
@@ -160,6 +174,8 @@ function DocumentRenderer() {
 	};
 
 	/**
+	 * @param docObject {DocumentationObject}
+	 * @param resultFunction {function}
 	 * @Method
 	 */
 	this.renderClassDetailHtml = function (docObject, resultFunction) {
@@ -188,6 +204,11 @@ function DocumentRenderer() {
 			summaryDiv.appendChild(element);
 		});
 
+		// render the errors first because all further rendering errors are attributed to the methods themselves
+		functionScope.renderErrors(docObject, function(element) {
+			totalHtml.appendChild(element);
+		});
+
 		if (docObject.hasMethods()) {
 			functionScope.renderMethodDetailListHtml(docObject.getAllMethodObjects(), function(element) {
 				totalHtml.appendChild(element);
@@ -211,6 +232,7 @@ function DocumentRenderer() {
 	/**
 	 * @Method
 	 * Called with a list of document method objects this can be used to help render your methods.
+	 * @param resultFunction {function}
 	 * @Callback
 	 * @CallbackParam
 	 */
@@ -231,7 +253,8 @@ function DocumentRenderer() {
 	 * @Method
 	 *
 	 * Summary method means that it can appear in a quick list for glancing and not contain all of the possible information.
-	 *
+	 * @param docObject {DocumentationObject}
+	 * @param resultFunction {function}
 	 * @Callback called with the html element that contains an abbreviated method doc
 	 * @CallbackParam {Element} The element that contains everything that is needed for an abbreviated method document.
 	 */
@@ -266,7 +289,9 @@ function DocumentRenderer() {
 		// return
 		if (docObject.hasReturnValue()) {
 			var returnData = document.createElement("td");
-			returnData.innerHTML = "" + docObject.getReturnValue(); // todo render a return value creator
+			functionScope.renderReturnValueSummaryHtml(docObject.getReturnValue(), function(element) {
+				returnData.appendChild(element);
+			});
 			row.appendChild(returnData);
 		} else {
 			var td = document.createElement("td");
@@ -277,7 +302,7 @@ function DocumentRenderer() {
 		// description
 		var td = document.createElement("td");
 		td.innerHTML = "" + abbreviatedDescript;
-		if (docObject.emptyComment) {
+		if (docObject.emptySummary || docObject.emptyComment) {
 			td.className = "warning";
 		}
 		row.appendChild(td);
@@ -288,7 +313,7 @@ function DocumentRenderer() {
 	/**
 	 * @Method
 	 * Called with a list of document method objects this can be used to help render your methods.
-	 *
+	 * @param resultFunction {function}
 	 * @Callback
 	 * @CallbackParam
 	 */
@@ -309,6 +334,8 @@ function DocumentRenderer() {
 	/**
 	 * @Method
 	 *
+	 * @param resultFunction {function}
+	 * @param docObject {DocumentationObject}
 	 * @Callback called with the html element that contains an abbreviated method doc
 	 * @CallbackParam {Element} The element that contains everything that is needed for an abbreviated method document.
 	 */
@@ -362,9 +389,11 @@ function DocumentRenderer() {
 			returnTitle.textContent = "Return Value";
 			container.appendChild(returnTitle);
 
-			var returnData = document.createElement("p");
+			var returnData = document.createElement("div");
 			container.appendChild(returnData);
-			parameterData.innerHTML = "" + docObject.getReturnValue(); // todo create a return value creator
+			functionScope.renderReturnValueDetailHtml(docObject.getReturnValue(), function(element) {
+				returnData.appendChild(element);
+			});
 		}
 
 		// callback
@@ -389,12 +418,17 @@ function DocumentRenderer() {
 			exceptionData.innerHTML = "" + docObject.exceptions; // todo create an exception renderer
 		}
 
+		functionScope.renderErrors(docObject, function(element) {
+			container.appendChild(element);
+		});
+		
 		resultFunction(container);
 	};
 	
 	/**
 	 * @Method
 	 * Called with a list of document field objects this can be used to help render your fields.
+	 * @param resultFunction {function}
 	 * @Callback
 	 * @CallbackParam
 	 */
@@ -416,6 +450,8 @@ function DocumentRenderer() {
 	 *
 	 * Summary means that it can appear in a quick list for glancing and not contain all of the possible information.
 	 *
+	 * @param resultFunction {function}
+	 * @param docObject {DocumentationObject}
 	 * @Callback called with the html element that contains an abbreviated method doc
 	 * @CallbackParam {Element} The element that contains everything that is needed for an abbreviated method document.
 	 */
@@ -447,7 +483,7 @@ function DocumentRenderer() {
 		// description
 		var td = document.createElement("td");
 		td.innerHTML = "" + abbreviatedDescript;
-		if (docObject.emptyComment) {
+		if (docObject.emptySummary || docObject.emptyComment) {
 			td.className = "warning";
 		}
 		row.appendChild(td);
@@ -457,14 +493,17 @@ function DocumentRenderer() {
 
 	/**
 	 * @Method
+	 * @param resultFunction {function}
 	 */
 	this.renderParameterSummaryHtml = function(parameterList, resultFunction) {
 		var p = document.createElement("p");
 		if (parameterList && parameterList.length > 0) {
 			for (var i = 0; i < parameterList.length -1; i ++) {
-				p.textContent += parameterList[i].name + ", ";
+				var type = parameterList[i].objectType ? parameterList[i].objectType : "any";
+				p.innerHTML += "<a>" + type + "</a> " + parameterList[i].name +  ", ";
 			}
-			p.textContent += parameterList[parameterList.length -1].name;
+			var type = parameterList[parameterList.length -1].objectType ? parameterList[parameterList.length -1].objectType : "any";
+			p.innerHTML += "<a>" + type + "</a> " + parameterList[parameterList.length -1].name;
 			resultFunction(p);
 		} else {
 			p.textContent = "void";
@@ -474,19 +513,37 @@ function DocumentRenderer() {
 
 	/**
 	 * @Method
+	 * @param resultFunction {function}
 	 */
 	this.renderParameterDetailHtml = function(parameterList, resultFunction) {
 		var ul = document.createElement("ul");
+		var invisiTable = document.createElement("table");
+		ul.appendChild(invisiTable);
+		invisiTable.className = "invisibleTable";
 		if (parameterList && parameterList.length > 0) {
 			for (var i = 0; i < parameterList.length; i ++) {
-				var cont = document.createElement("li");
-				var p = document.createElement("p");
-				p.innerHTML = parameterList[i].name + (parameterList[i].comment ? " - " + parameterList[i].comment : '');
-				if (parameterList[i].emptyComment || !parameterList[i].comment) {
-					p.className = "warning";
+				var cont = document.createElement("tr");
+				invisiTable.appendChild(cont);
+
+				var tdType = document.createElement("td");
+				var type = parameterList[i].objectType ? parameterList[i].objectType : "any";
+				// do something about it being indexable?
+				tdType.innerHTML = "<a>" + type + "</a> ";
+				cont.appendChild(tdType);
+
+				var tdName = document.createElement("td");
+				tdName.innerHTML = "<b>" +  parameterList[i].name + "</b>";
+				cont.appendChild(tdName);
+
+				if (!parameterList[i].emptyComment) {
+					var tdComment = document.createElement("td");
+					tdComment.innerHTML = "- " + parameterList[i].comment;
+					cont.appendChild(tdComment);
 				}
-				cont.appendChild(p);
-				ul.appendChild(p);
+
+				if (parameterList[i].emptyComment) {
+					tdName.className = "warning";
+				}
 			}
 			resultFunction(ul);
 		} else {
@@ -501,7 +558,87 @@ function DocumentRenderer() {
 
 	/**
 	 * @Method
-	 * @param docObject
+	 * @param returnValue {DocumentationObject}
+	 * @param resultFunction {function}
+	 */
+	this.renderReturnValueSummaryHtml = function(returnValue, resultFunction) {
+		var p = document.createElement("p");
+		if (returnValue) {
+			p.innerHTML = "<a>" + returnValue.objectType + "</a>";
+			resultFunction(p);
+		} else {
+			p.textContent = "void";
+			resultFunction(p);
+		}
+	};
+
+	/**
+	 * @Method
+	 * @param returnValue {DocumentationObject}
+	 * @param resultFunction {function}
+	 */
+	this.renderReturnValueDetailHtml = function(returnValue, resultFunction) {
+		// todo finish this
+		var p = document.createElement("p");
+		if (returnValue) {
+			var ul = document.createElement("ul");
+			ul.appendChild(p);
+
+			p.innerHTML = "<a>" + returnValue.objectType + "</a>";
+			p.innerHTML += " - " + returnValue.comment;
+			resultFunction(ul);
+		} else {
+			p.textContent = "void";
+			resultFunction(p);
+		}
+	};
+
+	/**
+	 * Renders any errors that have occured during any of the stages of documentation creation.
+	 *
+	 * Any erroor that occured during file parsing, comment parsing, index building, or document rendering will show up in this list.
+	 * @param resultFunction {function}
+	 * @param docObject {DocumentationObject}
+	 * @Callback resultFunction
+	 * @Method
+	 */
+	this.renderErrors = function(docObject, resultFunction) {
+		if (!docObject.hasErrors()) {
+			return;
+		}
+
+		var table = document.createElement("table");
+		table.className = "errorTable";
+		resultFunction(table);
+
+
+		var header = document.createElement("tr");
+		header.innerHTML = "<th>Stage</th><th>Error Type</th><th>Error Message</th>";
+		header.style.background = "#FF1111";
+		table.appendChild(header);
+
+		var errorList = docObject.getAllErrors();
+		for (var i = 0; i < errorList.length; i++) {
+			var row = document.createElement("tr");
+			table.appendChild(row);
+			var error = errorList[i];
+			var tdStage = document.createElement("td");
+			tdStage.textContent = error.stage;
+			row.appendChild(tdStage);
+			
+			var tdType = document.createElement("td");
+			tdType.textContent = error.type;
+			row.appendChild(tdType);
+			
+			var tdMessage = document.createElement("td");
+			tdMessage.innerHTML = error.message;
+			row.appendChild(tdMessage);
+		}
+	};
+
+	/**
+	 * @Method
+	 * @param docObject {DocumentationObject}
 	 * @return {Element} returns an anchor element that can be referenced later
 	 */
 	this.anchorCreator = function(docObject) {
@@ -514,6 +651,9 @@ function DocumentRenderer() {
 		
 	};
 
+	/**
+	 * @param docObject {DocumentationObject}
+	 */
 	this.anchorReferenceCreator = function(docObject) {
 		
 	};
