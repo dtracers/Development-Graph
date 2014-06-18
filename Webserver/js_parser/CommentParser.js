@@ -18,14 +18,15 @@
 */
 
 /**
+ *
  * @Class
  * Goes through the comment section and performs comment parsing.
- *
  * This is where linking can happen and where other parts of a comment are added to the documentation object.
  */
 function CommentParser() {
 
 	var functionScope = this;
+	var THIS_STAGE = "CommentParser";
 	/**
 	 * @Field
 	 */
@@ -45,9 +46,8 @@ function CommentParser() {
 		example is here http://jsfiddle.net/dtracers/XTnCS/5/
 		*/
 	var SUMMARY_DESCRIPTION = /@SummaryDescription/;
-	var PARAM = /@param/;
-	var RETURN_VALUE = /@returns/;
-	var EMPTY_COMMENT = /(^(\s|<br>)*(\W|<br>)(\s|<br>)*$)|(^$)/; // if this evaluates to true then the comment is empty;
+	var PARAM = /@param/g;
+	var RETURN_VALUE = /@returns/g;
 
 	/**
 	 * @Method
@@ -107,13 +107,16 @@ function CommentParser() {
 
 		// special tag finder
 		this.fillOutParameters(docObject);
+		this.fillOutReturnValue(docObject);
+		// end special tag finder
 
 		docObject.comment = trim(docObject.comment); // saves space
 
 		// short description finder
 		this.shortDescriptionFinder(docObject);
 
-		// has to be the final thing done.
+		// has to be the final set of things done.
+		this.todoHighlighter(docObject);
 		this.replaceSpecialCharacters(docObject);
 
 		this.emptyCommentWarning(docObject);
@@ -141,22 +144,68 @@ function CommentParser() {
 	 *
 	 * @param docObject {DocumentationObject}
 	 */
+	this.fillOutReturnValue = function(docObject) {
+		var indexValue = 0;
+		while ((indexValue = regexIndexOf(docObject.comment, RETURN_VALUE, indexValue)) != -1) {
+			var nextSearchValue = indexValue + RETURN_VALUE.source.length;
+			var endOfLine = regexIndexOf(docObject.comment, /$|<br>|\n|\r/, nextSearchValue);
+			var wholeLine = docObject.comment.substring(nextSearchValue, endOfLine).trim();
+			var returnType = wholeLine.match(/^[{]\w+[}]/);
+
+			var returnDoc = createDocumentationObject(TYPE_RETURN_VALUE);
+			if (returnType != null) {
+				returnType = returnType[0];
+				wholeLine = wholeLine.substring(returnType.length + 1).trim();
+				returnType = returnType.replace(/[{}]/g,"");
+				returnDoc.objectType = returnType;
+				if (emptyString(returnType)) {
+					docObject.addError(THIS_STAGE, "EmptyTypeError", "specified a type with {} but it was empty");
+				}
+			} else {
+				docObject.addError(THIS_STAGE, "NoReturnType", "A Return type was not specificed");
+			}
+
+			returnDoc.comment = wholeLine;
+			returnDoc.emptyComment = false;
+			this.emptyCommentWarning(TYPE_RETURN_VALUE, returnDoc); // checks to see if the comment is empty
+
+			docObject.comment = docObject.comment.replace(docObject.comment.substring(nextSearchValue, endOfLine),'');
+			docObject.addObject(returnDoc);
+			indexValue += 1;
+		};
+		docObject.comment = docObject.comment.replace(RETURN_VALUE,"");
+	};
+
+	/**
+	 * looks for {AT}param and fills out the parameters appropriately.
+	 * @Method
+	 * All parameters are set to automatically have empty comments.
+	 * All comments with an {AT}param is then set to not have an empty comment unless the {AT}param is not followed by anything.
+	 *
+	 * @param docObject {DocumentationObject}
+	 */
 	this.fillOutParameters = function(docObject) {
 		var indexValue = 0;
+
+		// presets all parameters to have empty comments
+		if (docObject.hasParameters()) {
+			var parameters = docObject.getAllParameters();
+			for (var i = 0; i < parameters.length; i++) {
+				parameters[i].emptyComment = true;
+			}
+		}
+
 		while ((indexValue = regexIndexOf(docObject.comment, PARAM, indexValue)) != -1) {
-			console.log(indexValue);
 			var nextSearchValue = indexValue + PARAM.source.length;
 			var wordEndIndex = regexIndexOf(docObject.comment, /\w(\s|$|<)/, nextSearchValue) + 1;
 			var firstWord = docObject.comment.substring(nextSearchValue, wordEndIndex).trim();
 			var endOfLine = regexIndexOf(docObject.comment, /$|<br>|\n|\r/, nextSearchValue);
 			var wholeLine = docObject.comment.substring(wordEndIndex, endOfLine).trim();
 			var paramType = wholeLine.match(/^[{]\w+[}]/);
-			
+
 			var parameter = docObject.getObject("Parameter", firstWord);
 			if (typeof parameter == "undefined") {
-				alert(firstWord);
-				alert("EMPTY ERROR THINGY");
-				docObject.addError("commentParsingError", firstWord + " is not a valid parameter");
+				docObject.addError(THIS_STAGE, "parameterNotFoundError", firstWord + " is not a valid parameter");
 				// TODO: log this as a comment does not match actual parameter error
 				indexValue += 1;
 				continue;
@@ -166,16 +215,23 @@ function CommentParser() {
 				paramType = paramType[0];
 				wholeLine = wholeLine.substring(paramType.length + 1).trim();
 				paramType = paramType.replace(/[{}]/g,"");
+				if (emptyString(paramType)) {
+					docObject.addError(THIS_STAGE, "EmptyTypeError", "specified a type with {} but it was empty");
+				}
 				parameter.objectType = paramType;
+			} else {
+				docObject.addError(THIS_STAGE, "NoReturnType", "A Return type was not specificed");
 			}
 
 			parameter.comment = wholeLine;
+			parameter.emptyComment = false;
 			this.emptyCommentWarning(parameter); // checks to see if the comment is empty
 
 			docObject.comment = docObject.comment.replace(docObject.comment.substring(nextSearchValue, endOfLine),'');
 			indexValue += 1;
 		};
-		docObject.comment = docObject.comment.replace(/@param/g,"");
+
+		docObject.comment = docObject.comment.replace(PARAM,"");
 	};
 
 	/**
@@ -222,10 +278,22 @@ function CommentParser() {
 	 * Adds a warning to an empty comment.
 	 */
 	this.emptyCommentWarning = function(docObject) {
-		if ((docObject.summary && docObject.summary.search(EMPTY_COMMENT) != -1) || docObject.comment.search(EMPTY_COMMENT) != -1) {
+		if (docObject.summary && emptyString(docObject.summary)) {
+			docObject.emptySummary = true;
+		}
+
+		if (emptyString(docObject.comment)) {
 			docObject.emptyComment = true;
 		}
 	};
+
+	/**
+	 * @Method
+	 * Puts a span around all TODO items.
+	 */
+	this.todoHighlighter = function(docObject) {
+		docObject.comment = docObject.comment.replace(/TODO/g,'<span class = "todo">TODO</span>');
+	}
 
 	/**
 	 * @Method
