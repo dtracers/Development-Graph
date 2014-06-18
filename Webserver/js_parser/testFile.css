@@ -10,8 +10,6 @@
 
 
 
-
-
 table {
     border-collapse: collapse;
 }
@@ -25,9 +23,21 @@ th, td {
 	padding-right:5px;
 }
 
-tr:nth-child(odd)		{ background-color:#eee; }
+table.invisibleTable {
+	border:none;
+}
+
+table.invisibleTable td {
+	border:none;
+}
+
+tr:nth-child(odd)		{ background-color:#f6f4f4; }
 tr:nth-child(even)		{ background-color:#fff; }
 tr:first-child 			{ background-color:#ccc; }
+
+table.invisibleTable tr {
+	background:none;
+}
 
 .summary {
 	position: relative;
@@ -152,6 +162,22 @@ tr:first-child 			{ background-color:#ccc; }
 	background-color:#E0E0E9;
 }
 
+.todo {
+	font-weight:bold;
+}
+
+.errorTable {
+	margin-top: 20px;
+}
+
 .warning {
 	background-color:#FFFF00;
+}
+
+.error {
+	background-color:#FF1111;
+}
+
+a {
+	color:#0000FF;
 }
