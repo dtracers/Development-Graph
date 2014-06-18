@@ -13,6 +13,8 @@ function globalMethod1() {
 
 /**
  * global method2
+ *
+ * The parameters do not have comments.
  * @Method
  */
 function globalMethod2(arg1, arg2) {
