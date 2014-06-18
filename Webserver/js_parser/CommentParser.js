@@ -1,12 +1,16 @@
 /*
 * @param - a parameter for a method.
 * @returns - the return value for a method
-* @Callback - describes what the callback should do, its possible conditions
-* @CallbackParam - a parameter given to the callback (these should be in the order that they are listed in the callback function)
-* @CallbackFullDescription - a longer multi line description of the callback
-* @SummaryDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description)
-* @FieldType - specifies the type that this field should be
-*
+* @Callback - describes what the callback should do, its possible conditions. TODO
+* @CallbackParam - a parameter given to the callback (these should be in the order that they are listed in the callback function) TODO
+* @CallbackFullDescription - a longer multi line description of the callback TODO
+* @SummaryDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description) TODO
+* @FieldType - specifies the type that this field should be TODO
+* @deprecated - used to indicate that this method/field/class should not be used anymore TODO
+* @author - used to indicate who made this method/field/class TODO
+* @throws - used to indicate exceptions that are being thrown TODO
+* @see - used to point to another file (or url) TODO
+* {@link} - used to point to a specific object found in the index TODO
 *
 * this will a couple of items to the document object
 */
