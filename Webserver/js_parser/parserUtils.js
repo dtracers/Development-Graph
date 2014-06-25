@@ -94,7 +94,7 @@ function DocumentationObject() {
 	};
 
 	/**
-	 * @return {array} the all of the errors in this document.
+	 * @returns {array} the all of the errors in this document.
 	 */
 	this.getAllErrors = function() {
 		return errors;
