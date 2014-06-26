@@ -118,6 +118,32 @@ function AbstractedFile(file) {
 
 	};
 
+	this.getName = function() {
+		return name;
+	};
+
+	this.getFullName = function() {
+		return name + extenstion;
+	};
+
+	this.getExtension = function() {
+		return extenstion;
+	};
+
+	/**
+	 * @Method
+	 */
+	this.isDirectory = function() {
+		return isDirectory;
+	};
+
+	/**
+	 * @Method
+	 */
+	this.toString = function() {
+		return name + fileExtension + " - is a Directory: " + isDirectory;
+	};
+
 	/**
 	 * @Method
 	 */

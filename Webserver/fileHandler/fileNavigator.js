@@ -17,18 +17,10 @@ function FileNavigator() {
 
 	/**
 	 * @Method
-	 * An internal function to load the files from a given directory.
-	 */
-	function loadFileInCurrentDirectory() {
-		
-	}
-
-	/**
-	 * @Method
 	 * @returns {Array<AbstractedFile>}
 	 */
 	this.getFilesWithName = function(name) {
-		return GetItemsWithName(name, false, true);
+		return getItemsWithName(name, false, true);
 	};
 
 	/**
@@ -36,7 +28,7 @@ function FileNavigator() {
 	 * @returns {Array<AbstractedFile>}
 	 */
 	this.getDirectoriesWithName = function(name) {
-		return GetItemsWithName(name, true, false);
+		return getItemsWithName(name, true, false);
 	};
 
 	/**
@@ -46,8 +38,20 @@ function FileNavigator() {
 	 * @param files {Boolean}
 	 * @returns {Array<AbstractedFile>}
 	 */
-	function GetItemsWithName(name, directories, files) {
-
+	function getItemsWithName(name, directories, files) {
+		console.log("looking for " + files + " " + directories + " with name: " + name);
+		var resultList = [];
+		for (var i = 0; i < projectFiles.length; i++) {
+			var file = projectFiles[i];
+			console.log("Looking at file " + file.getName());
+			// if the name matches AND it is a directory and directories are valid OR it is a file and files are valid
+			if (file.getFullName().match(name) && (file.isDirectory() && directories) || (!file.isDirectory() && files)) {
+				console.log("adding file " + file.getName());
+				resultList.push(file);
+			}
+		}
+		console.log(resultList);
+		return resultList;
 	}
 
 	/**
@@ -55,7 +59,7 @@ function FileNavigator() {
 	 * @param finishedFunction {function}
 	 * @Callback finishedFunction a callback that is called when all of the files have been loaded.
 	 */
-	function loadFilesInDirectory(finishedFunction) {
+	function loadFilesInCurrentDirectory(finishedFunction) {
 		projectFiles = [];
 		if (usingChromeApp) {
 			var entry = currentDirectory.getFileObject();
@@ -102,7 +106,7 @@ function FileNavigator() {
 		}
 
 		// if no exceptiosn were thrown then the file was set succesffuly
-		loadFilesInDirectory(finishedFunction);
+		loadFilesInCurrentDirectory(finishedFunction);
 	};
 
 	/**

@@ -25,10 +25,11 @@ function ProjectLoader() {
 	 */
 	this.loadMainDirectory = function(readyFunction) {
 		if (usingChromeApp) {
+			console.log("Loading as a chrome app");
 			chrome.fileSystem.chooseEntry( { type: 'openDirectory' }, function(entry) {
+				console.log(entry);
 				var directory = new AbstractedFile(entry);
 				console.log(directory);
-				console.log(entry);
 				fileNavigator.setCurrentDirectory(directory, function() {
 					readyFunction();
 				});
@@ -40,7 +41,7 @@ function ProjectLoader() {
 	 * @Method
 	 * There are no gaurentees about how this class will function if this is called before loadmainDirectory has finished executing.
 	 */
-	this.getProjectNavigator() = function() {
+	this.getProjectNavigator = function() {
 		return fileNavigator;
 	};
 }
