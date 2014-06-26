@@ -1,27 +1,29 @@
 <html>
 <head>
 <style type="text/css">
-  #graphContainer {
-  	min-width:700px;
-  	min-height:700px;
-    max-width: 95%;
-    hight:95%;
-    margin: auto;
-    border-style:solid;
-	border-width:thin;
-	background: #000000;
-  }
-  #overlay {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 10;
-    display:none;
-    background: rgba(136,136,136,.4);
-    text-align: center;
-}
+	body {
+		margin:0px;
+	}
+	#graphContainer {
+	  	min-width:700px;
+	  	min-height:700px;
+	    max-width: 95%;
+	    hight:95%;
+	    margin: auto;
+	    margin-top:0px;
+		background: #000000;
+  	}
+	#overlay {
+	    width: 100%;
+	    height: 100%;
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    z-index: 10;
+	    display:none;
+	    background: rgba(136,136,136,.35);
+	    text-align: center;
+	}
 </style>
 <script src="sigma-v1.0.2/sigma.min.js"></script>
 <script src="sigma-v1.0.2/plugins/sigma.parsers.json.min.js"></script>
@@ -31,6 +33,7 @@
 <script src="graphManager.js"></script>
 <script src="nodeClickManager.js"></script>
 <script src="nodeClickActions/createNewFeature/createNewFeature.js"></script>
+<script src="nodeClickActions/viewCode/viewCode.js"></script>
 </head>
 <body>
 <div id="graphContainer"></div>
@@ -38,6 +41,7 @@
 	var graphManager = new GraphManager();
 	graphManager.load('data.grp', 'graphContainer', function() {
 		graphManager.getNodeClickManager().addClickListener(FeatureCreator, ['overlay']);
+		graphManager.getNodeClickManager().addClickListener(CodeViewCreator, ['overlay']);
 	});
 
 </script>
