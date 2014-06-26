@@ -66,7 +66,7 @@ function FileNavigator() {
 					projectFiles.push(new AbstractedFile(file));
 					i--;
 					if (i <= 0) {
-						alert("finished!");
+						console.log("finished");
 						finishedFunction();
 					}
 				});
@@ -83,7 +83,7 @@ function FileNavigator() {
 	 * @throws FileNotFoundException, InvalidFileType
 	 */
 	this.setCurrentDirectory = function(item, finishedFunction) {
-		if (item typeof === "string") {
+		if (typeof item == "string") {
 			var fileFound = false;
 			for (var i = 0; i < projectFiles.length; i++) {
 				if (projectFiles[i].getName().match(name) && projectFiles[i].isDirectory()) {
