@@ -1,5 +1,5 @@
 /**
- * 
+ *
  * @param realGraph
  * @param displayGraph
  * @param managerInstance
@@ -12,7 +12,6 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	 * Pops up an overlay
 	 */
 	function createNewFeature(e, oldNode) {
-		alert('new feature being made!');
 		if (!window.featureCreatorLoaded) {
 			// load window here 
 			var fileref = document.createElement('link');
@@ -21,7 +20,6 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 			fileref.setAttribute("href", 'nodeClickActions/createNewFeature/featureCreator.html');
 			document.querySelector("head").appendChild(fileref);
 			fileref.onload = function(event) {
-				alert('file loaded');
 				produceOverlay(e, oldNode, event);
 			}
 		} else {
@@ -34,7 +32,6 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	 */
 	function saveData(e, formData) {
 		var nameElement = formData.querySelector('.featureName');
-		alert(nameElement.value);
 		document.getElementById(overlayId).style.display = 'none';
 	}
 
@@ -52,7 +49,6 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 		var saveButton = shadowRoot.querySelector('.save');
 		console.log(saveButton);
 		saveButton.onclick = function() {
-			alert('saving!');
 			saveData(e, shadowRoot);
 		};
 		document.getElementById(overlayId).style.display = 'block';
