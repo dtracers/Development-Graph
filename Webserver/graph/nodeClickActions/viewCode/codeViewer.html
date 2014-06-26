@@ -1,0 +1,79 @@
+<script>
+window.codeViewerLoaded = true;
+</script>
+<template id="viewCode">
+	<style>
+		.table {
+		display : table;
+		    border-collapse: collapse;
+		    width: 100%;
+		    table-layout: fixed;
+		}
+		.table > div {
+			display: table-cell;
+			width: 100%;
+		}
+		td {
+   			text-align: center;
+		}
+		h1 {
+			font-style:italic;
+			font-weight:bold;
+			font-family: Georgia,serif;
+			text-shadow:2px 2px #000000;
+		}
+
+		.closeButton {
+			margin:0px;
+			color:white;
+			cursor:pointer;
+		}
+		.closeButton:hover {
+			color:yellow;
+		}
+
+		.code > h1 {
+			color:red;
+		}
+		
+		.docs > h1 {
+			color:#1111FF;
+		}
+		
+		.test > h1 {
+			color:green;
+		}
+	</style>
+	<div class = "darken">
+		<h1 class = "closeButton">Close</h1>
+		<div class = "table">
+			<div class="code">
+				<h1>Code</h1>
+			</div>
+			<div class="docs">
+				<h1>Documentation</h1>
+			</div>
+			<div class="test">
+				<h1>Test</h1>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="fileBox">
+	<style>
+		.mediumFile {
+		/*4 lines*/
+		}
+		.smallFile {
+		/*two lines*/
+		}
+		.largeFile {
+		/*6 lines*/
+		}
+	</style>
+	<div class="block">
+		<h3>File Name</h3>
+		<span>Css Lines</span>
+	</div>
+</template>
