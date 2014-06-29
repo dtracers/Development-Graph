@@ -77,7 +77,7 @@ function AbstractedFile(file) {
 			reader.onload = function(e) {
 				var contents = e.target.result;
 				fileContents = contents;
-				callback(fileObject);
+				callback(fileContents);
 			};
 			reader.readAsText(fileObject);
 		} else if (usingChromeApp) {
@@ -87,8 +87,9 @@ function AbstractedFile(file) {
 				reader.onload = function(e) {
 					var contents = e.target.result;
 					fileContents = contents;
-					callback(fileObject);
+					callback(fileContents);
 				};
+				reader.readAsText(file);
 			});
 		}
 	};
@@ -123,7 +124,7 @@ function AbstractedFile(file) {
 	};
 
 	this.getFullName = function() {
-		return name + extenstion;
+		return name + fileExtension;
 	};
 
 	this.getExtension = function() {
@@ -155,7 +156,7 @@ function AbstractedFile(file) {
 				name = file.name;
 			} else {
 				name = file.name.substring(0, splitIndex);
-				fileExtenstionn = file.name.substring(splitIndex);
+				fileExtension = file.name.substring(splitIndex);
 			}
 		} else if (usingBrowser) {
 			var splitIndex = file.name.indexOf(".");
@@ -165,7 +166,7 @@ function AbstractedFile(file) {
 			} else {
 				isDirectory = false; // i guess we assume that
 				name = file.name.substring(0, splitIndex);
-				fileExtenstionn = file.name.substring(splitIndex);
+				fileExtension = file.name.substring(splitIndex);
 			}
 		}
 	})();

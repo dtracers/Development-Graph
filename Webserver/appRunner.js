@@ -10,6 +10,9 @@ chrome.app.runtime.onLaunched.addListener(function() {
   var screenHeight = screen.availHeight;
   var width = screen.availWidth;
   var height = screen.availHeight;
+  
+  width = 400;
+  height = 400;
 
   chrome.app.window.create('index.html', {
     id: "Developer-Graph",

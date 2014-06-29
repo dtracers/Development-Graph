@@ -39,17 +39,18 @@ function FileNavigator() {
 	 * @returns {Array<AbstractedFile>}
 	 */
 	function getItemsWithName(name, directories, files) {
-		console.log("looking for " + files + " " + directories + " with name: " + name);
 		var resultList = [];
 		for (var i = 0; i < projectFiles.length; i++) {
 			var file = projectFiles[i];
-			console.log("Looking at file " + file.getName());
+			//console.log("Looking at file " + file.getFullName());
+			var result = file.getFullName().match(name);
 			// if the name matches AND it is a directory and directories are valid OR it is a file and files are valid
-			if (file.getFullName().match(name) && (file.isDirectory() && directories) || (!file.isDirectory() && files)) {
-				console.log("adding file " + file.getName());
+			if (result && ((file.isDirectory() && directories) || (!file.isDirectory() && files))) {
+				//console.log("adding file " + file.getFullName());
 				resultList.push(file);
 			}
 		}
+		console.log("Finished loading files");
 		console.log(resultList);
 		return resultList;
 	}
