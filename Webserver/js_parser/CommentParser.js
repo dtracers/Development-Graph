@@ -4,7 +4,7 @@
 * {AT}Callback - describes what the callback should do, its possible conditions. TODO
 * {AT}CallbackParam - a parameter given to the callback (these should be in the order that they are listed in the callback function) TODO
 * {AT}CallbackFullDescription - a longer multi line description of the callback TODO
-* {AT}SummaryDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description) TODO
+* {AT}SummaryDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description)
 * {AT}FieldType - specifies the type that this field should be TODO
 * {AT}deprecated - used to indicate that this method/field/class should not be used anymore.
 * {AT}author - used to indicate who made this method/field/class TODO
@@ -14,6 +14,7 @@
 * {{AT}link} - used to point to a specific object found in the index TODO
 *
 * this will a couple of items to the document object
+* TODO: add all tags shown here: http://www.tutorialspoint.com/java/java_documentation.htm
 *
 * @File
 */
@@ -224,7 +225,7 @@ function CommentParser() {
 				}
 				parameter.objectType = paramType;
 			} else {
-				docObject.addError(THIS_STAGE, "NoParamType", "A Parameter type was not specificed");
+				docObject.addError(THIS_STAGE, "NoParamType", "A Parameter type was not specificed for " + parameter.name);
 			}
 
 			parameter.comment = wholeLine;
