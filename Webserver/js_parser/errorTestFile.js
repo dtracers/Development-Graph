@@ -29,6 +29,15 @@ function TestClass() {
 	 };
 
 	 /**
+	  * no type given.
+	  * @Method
+	  * @param arg2 This is an argument without a type
+	  */
+	 this.testMethod3 = function(arg1, arg2) {
+
+	 };
+
+	 /**
 	  * nested class version 1
 	  * @Method (wrong name?)
 	  */
