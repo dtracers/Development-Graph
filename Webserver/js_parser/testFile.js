@@ -59,11 +59,13 @@ function TestClass() {
 	 /**
 	  * class method version 2
 	  * @Method
-	  * @param arg2 has no type actually
-	  * @param arg1 {string} takes in a string
+	  * @param arg2 has no type actually.
+	  * @param arg1 {string} takes in a string.
+	  * @throws {NoExceptionError} if there is no exception an error is thrown.
+	  * @exception {NoErrorException} if there is no error so an exception is thrown.
 	  */
 	 this.testMethod2 = function(arg1, arg2) {
-
+		 throw "NoExceptionError";
 	 };
 
 	 /**
@@ -94,8 +96,9 @@ function TestClass() {
 	 }
 
 	 /**
+	  * @deprecated
 	  * @Method
-	  *
+	  * This method returns a class but we no longer use this method.
 	  * @ClassStart
 	  * @ClassName empty class
 	  * @ClassEnd
@@ -109,7 +112,7 @@ function TestClass() {
  * @Class
  * A second global class for classing.
  */
-function SecondGlobalClass {
+function SecondGlobalClass() {
 
 	/**
 	 * @StartFields

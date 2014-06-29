@@ -50,7 +50,7 @@ function DocumentRenderer() {
 			// idk why you are sending me an object that is not a file
 		}
 	};
-	
+
 	/**
 	 * @param docObject {DocumentationObject}
 	 * @param resultFunction {function}
@@ -113,7 +113,7 @@ function DocumentRenderer() {
 		var totalHtml = document.createElement('div');
 		if (docObject.name) {
 			var title = document.createElement('h1');
-			title.textContent = "File Name: " + docObject.name;
+			title.textContent = "File Name: " + this.renderName(docObject);
 			totalHtml.appendChild(title);
 		}
 
@@ -154,7 +154,7 @@ function DocumentRenderer() {
 		// name
 		if (docObject.name) {
 			var nameData = document.createElement("td");
-			nameData.innerHTML = "" + docObject.name;
+			nameData.innerHTML = "" + this.renderName(docObject);
 			row.appendChild(nameData);
 		} else {
 			var td = document.createElement("td");
@@ -179,18 +179,16 @@ function DocumentRenderer() {
 	 * @Method
 	 */
 	this.renderClassDetailHtml = function (docObject, resultFunction) {
-		console.log("CLASS DETAIL");
-		console.log(docObject);
 		var totalHtml = document.createElement('div');
 		totalHtml.className = "classDetail";
 
 		if (docObject.name) {
 			var nameData = document.createElement("h2");
-			nameData.innerHTML = "Class " + docObject.name;
+			nameData.innerHTML = this.renderName("Class ", docObject);
 			totalHtml.appendChild(nameData);
 		} else {
 			var title = document.createElement("h2");
-			title.innerHTML = "Class " + "anonymous";
+			title.innerHTML = this.renderName("Class ", docObject, "anonymous");
 			totalHtml.appendChild(title);
 		}
 
@@ -265,7 +263,7 @@ function DocumentRenderer() {
 		// name
 		if (docObject.name) {
 			var nameData = document.createElement("td");
-			nameData.innerHTML = "" + docObject.name;
+			nameData.innerHTML = "" + this.renderName(docObject);
 			row.appendChild(nameData);
 		} else {
 			row.appendChild(document.createElement("td"));
@@ -348,7 +346,7 @@ function DocumentRenderer() {
 		// name
 		if (docObject.name) {
 			var nameData = document.createElement("h3");
-			nameData.innerHTML = "" + docObject.name;
+			nameData.innerHTML = "" + this.renderName(docObject);
 			container.appendChild(nameData);
 		} else {
 			container.appendChild(document.createElement("h3"));
@@ -408,14 +406,16 @@ function DocumentRenderer() {
 		}
 
 		// exception
-		if (docObject.exceptions) {
+		if (docObject.hasExceptions()) {
 			var exceptionTitle = document.createElement("h4");
 			exceptionTitle.textContent = "Exceptions";
 			container.appendChild(exceptionTitle);
 
-			var exceptionData = document.createElement("p");
+			var exceptionData = document.createElement("div");
 			container.appendChild(exceptionData);
-			exceptionData.innerHTML = "" + docObject.exceptions; // todo create an exception renderer
+			functionScope.renderExceptionsDetailHtml(docObject.getAllExceptions(), function(element) {
+				exceptionData.appendChild(element);
+			});
 		}
 
 		functionScope.renderErrors(docObject, function(element) {
@@ -456,14 +456,13 @@ function DocumentRenderer() {
 	 * @CallbackParam {Element} The element that contains everything that is needed for an abbreviated method document.
 	 */
 	this.renderFieldSummaryHtml = function(docObject, resultFunction) {
-		console.log(docObject);
 		var abbreviatedDescript = docObject.summary ? docObject.summary : docObject.comment;
 		var row = document.createElement("tr");
 
 		// name
 		if (docObject.name) {
 			var nameData = document.createElement("td");
-			nameData.innerHTML = "" + docObject.name;
+			nameData.innerHTML = "" + this.renderName(docObject);
 			row.appendChild(nameData);
 		} else {
 			row.appendChild(document.createElement("td"));
@@ -500,10 +499,10 @@ function DocumentRenderer() {
 		if (parameterList && parameterList.length > 0) {
 			for (var i = 0; i < parameterList.length -1; i ++) {
 				var type = parameterList[i].objectType ? parameterList[i].objectType : "any";
-				p.innerHTML += "<a>" + type + "</a> " + parameterList[i].name +  ", ";
+				p.innerHTML += "<a>" + type + "</a> " + this.renderName(parameterList[i]) +  ", ";
 			}
 			var type = parameterList[parameterList.length -1].objectType ? parameterList[parameterList.length -1].objectType : "any";
-			p.innerHTML += "<a>" + type + "</a> " + parameterList[parameterList.length -1].name;
+			p.innerHTML += "<a>" + type + "</a> " + this.renderName(parameterList[parameterList.length -1]);
 			resultFunction(p);
 		} else {
 			p.textContent = "void";
@@ -532,7 +531,7 @@ function DocumentRenderer() {
 				cont.appendChild(tdType);
 
 				var tdName = document.createElement("td");
-				tdName.innerHTML = "<b>" +  parameterList[i].name + "</b>";
+				tdName.innerHTML = "<b>" +  this.renderName(parameterList[i]) + "</b>";
 				cont.appendChild(tdName);
 
 				if (!parameterList[i].emptyComment) {
@@ -594,6 +593,49 @@ function DocumentRenderer() {
 	};
 
 	/**
+	 * @Method
+	 * Renders the exceptions using the {AT}throws or {AT}exception tag.
+	 * @param exceptionList {Array<DocumentationObject>}
+	 * @param resultFunction {function}
+	 */
+	this.renderExceptionsDetailHtml = function(exceptionList, resultFunction) {
+		var ul = document.createElement("ul");
+		var invisiTable = document.createElement("table");
+		ul.appendChild(invisiTable);
+		invisiTable.className = "invisibleTable";
+		if (exceptionList && exceptionList.length > 0) {
+			for (var i = 0; i < exceptionList.length; i ++) {
+				var cont = document.createElement("tr");
+				invisiTable.appendChild(cont);
+
+				var tdType = document.createElement("td");
+				var type = exceptionList[i].objectType ? exceptionList[i].objectType : "any";
+				// do something about it being indexable?
+				tdType.innerHTML = "<a>" + type + "</a> ";
+				cont.appendChild(tdType);
+
+				if (!exceptionList[i].emptyComment) {
+					var tdComment = document.createElement("td");
+					tdComment.innerHTML = "- " + exceptionList[i].comment;
+					cont.appendChild(tdComment);
+				}
+
+				if (exceptionList[i].emptyComment) {
+					tdName.className = "warning";
+				}
+			}
+			resultFunction(ul);
+		} else {
+			var cont = document.createElement("li");
+			var p = document.createElement("p");
+			p.textContent = "void";
+			cont.appendChild(p);
+			ul.appendChild(p);
+			resultFunction(ul);
+		}
+	};
+
+	/**
 	 * Renders any errors that have occured during any of the stages of documentation creation.
 	 *
 	 * Any erroor that occured during file parsing, comment parsing, index building, or document rendering will show up in this list.
@@ -634,6 +676,38 @@ function DocumentRenderer() {
 			tdMessage.innerHTML = error.message;
 			row.appendChild(tdMessage);
 		}
+	};
+
+	/**
+	 * @Method
+	 * returns a name that is rendered with any special items.
+	 * @returns {String} an HTML valid string.
+	 * @param previousStr {String} any string you want to possibly styled like the name. Appears before the name.
+	 * @param docObject {DocumentationObject} if there is no name then an empty string is put inbetween the other two strings.
+	 * @param afterStr {String} any string you want to possibly styled like the name. Appears after the name.
+	 */
+	this.renderName = function(previousStr, docObject, afterStr) {
+
+		if (previousStr instanceof DocumentationObject && typeof docObject == "undefined") {
+			docObject = previousStr;
+			previousStr = "";
+		}
+
+		if (typeof afterStr == "undefined") {
+			afterStr = "";
+		}
+
+		var nameString = "";
+		if (docObject.name) {
+			nameString = previousStr + docObject.name + afterStr;
+		} else {
+			nameString = previousStr + afterStr;
+		}
+
+		if (docObject.isDeprecated) {
+			return '<span class="deprecated">' + nameString + '</span>';
+		}
+		return nameString;
 	};
 
 	/**

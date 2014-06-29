@@ -35,6 +35,9 @@ function DocumentationObject() {
 	this.name = undefined;
 	this.visibility = undefined;
 
+	// simple fields.
+	this.isDeprecated = false;
+
 	/**
 	 * @Method
 	 * Adds an {@link DocumentationObject} to itself.
@@ -123,10 +126,18 @@ function DocumentationObject() {
 
 	/**
 	 * @Method
-	 * @return {List} returns the list the list of parameters (which are themselves document objects)
+	 * @return {List} returns the list of parameters (which are themselves document objects)
 	 */
 	this.getAllParameters = function() {
 		return convertArray(parameterList);
+	};
+
+	/**
+	 * @Method
+	 * @return {List} the list of exceptions (which are themselves document objects)
+	 */
+	this.getAllExceptions = function() {
+		return convertArray(exceptionList);
 	};
 
 	/**
@@ -142,7 +153,7 @@ function DocumentationObject() {
 	 * @return {boolean} true of there are classes in this documentation object
 	 */
 	this.hasClasses = function() {
-		return Object.keys(classList).length;
+		return Object.keys(classList).length > 0;
 	};
 
 	/**
@@ -150,7 +161,7 @@ function DocumentationObject() {
 	 * @return {boolean} true of there are methods in this documentation object
 	 */
 	this.hasMethods = function() {
-		return Object.keys(methodList).length;
+		return Object.keys(methodList).length > 0;
 	};
 
 	/**
@@ -158,7 +169,7 @@ function DocumentationObject() {
 	 * @return {boolean} true if there are methods in this documentation object
 	 */
 	this.hasFields = function() {
-		return Object.keys(fieldList).length;
+		return Object.keys(fieldList).length > 0;
 	};
 
 	/**
@@ -166,7 +177,15 @@ function DocumentationObject() {
 	 * @return {boolean} true if there are methods in this documentation object
 	 */
 	this.hasParameters = function() {
-		return Object.keys(parameterList).length;
+		return Object.keys(parameterList).length > 0;
+	};
+
+	/**
+	 * @Method
+	 * @return {boolean} true if there are exceptions in this documentation object
+	 */
+	this.hasExceptions = function() {
+		return Object.keys(exceptionList).length > 0;
 	};
 
 	/**

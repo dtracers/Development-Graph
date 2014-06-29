@@ -162,6 +162,10 @@ table.invisibleTable tr {
 	background-color:#E0E0E9;
 }
 
+.deprecated {
+	text-decoration:line-through;
+}
+
 .todo {
 	font-weight:bold;
 }

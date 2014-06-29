@@ -6,9 +6,10 @@
 * {AT}CallbackFullDescription - a longer multi line description of the callback TODO
 * {AT}SummaryDescription - a short one line description of the method.  (this is also inferred by the first sentence in the description) TODO
 * {AT}FieldType - specifies the type that this field should be TODO
-* {AT}deprecated - used to indicate that this method/field/class should not be used anymore TODO
+* {AT}deprecated - used to indicate that this method/field/class should not be used anymore.
 * {AT}author - used to indicate who made this method/field/class TODO
-* {AT}throws - used to indicate exceptions that are being thrown TODO
+* {AT}throws - used to indicate exceptions that are being thrown
+* {AT}exception - same as {AT}throws
 * {AT}see - used to point to another file (or url) TODO
 * {{AT}link} - used to point to a specific object found in the index TODO
 *
@@ -18,7 +19,6 @@
 */
 
 /**
- *
  * @Class
  * Goes through the comment section and performs comment parsing.
  * This is where linking can happen and where other parts of a comment are added to the documentation object.
@@ -48,6 +48,8 @@ function CommentParser() {
 	var SUMMARY_DESCRIPTION = /@SummaryDescription/;
 	var PARAM = /@param/g;
 	var RETURN_VALUE = /@returns/g;
+	var DEPRECATED = /@deprecated/;
+	var EXCEPTION = /(@throws)|(@exception)/g;
 
 	/**
 	 * @Method
@@ -108,6 +110,8 @@ function CommentParser() {
 		// special tag finder
 		this.fillOutParameters(docObject);
 		this.fillOutReturnValue(docObject);
+		this.fillOutExceptions(docObject);
+		this.findDeprecated(docObject);
 		// end special tag finder
 
 		docObject.comment = trim(docObject.comment); // saves space
@@ -205,7 +209,7 @@ function CommentParser() {
 
 			var parameter = docObject.getObject("Parameter", firstWord);
 			if (typeof parameter == "undefined") {
-				docObject.addError(THIS_STAGE, "parameterNotFoundError", firstWord + " is not a valid parameter");
+				docObject.addError(THIS_STAGE, "ParameterNotFoundError", firstWord + " is not a valid parameter");
 				// TODO: log this as a comment does not match actual parameter error
 				indexValue += 1;
 				continue;
@@ -220,7 +224,7 @@ function CommentParser() {
 				}
 				parameter.objectType = paramType;
 			} else {
-				docObject.addError(THIS_STAGE, "NoReturnType", "A Return type was not specificed");
+				docObject.addError(THIS_STAGE, "NoParamType", "A Parameter type was not specificed");
 			}
 
 			parameter.comment = wholeLine;
@@ -232,6 +236,48 @@ function CommentParser() {
 		};
 
 		docObject.comment = docObject.comment.replace(PARAM,"");
+	};
+
+	/**
+	 * looks for {AT}throws and {AT}exception and fills out the data appropriately.
+	 * @Method
+	 * All parameters are set to automatically have empty comments.
+	 * All comments with an {AT}throws/{AT}exception is then set to not have an empty comment unless the {AT}throws/{AT}exception is not followed by anything.
+	 *
+	 * @param docObject {DocumentationObject}
+	 */
+	this.fillOutExceptions = function(docObject) {
+		var indexValue = 0;
+		while ((indexValue = regexIndexOf(docObject.comment, EXCEPTION, indexValue)) != -1) {
+			var nextSearchValue = regexIndexOf(docObject.comment, /\s/, indexValue + 1); //should find the next space
+			var endOfLine = regexIndexOf(docObject.comment, /$|<br>|\n|\r/, nextSearchValue);
+			var wholeLine = docObject.comment.substring(nextSearchValue, endOfLine).trim();
+			var exceptionType = wholeLine.match(/^[{]\w+[}]/);
+
+			var exceptionDoc = createDocumentationObject(TYPE_EXCEPTION);
+			if (exceptionType != null) {
+				exceptionType = exceptionType[0];
+				wholeLine = wholeLine.substring(exceptionType.length + 1).trim();
+				exceptionType = exceptionType.replace(/[{}]/g,"");
+				exceptionDoc.objectType = exceptionType;
+				exceptionDoc.name = exceptionType; // we set the name so that they are unique! exceptions don't actually have a name though.
+				if (emptyString(exceptionType)) {
+					docObject.addError(THIS_STAGE, "EmptyTypeError", "specified a type with {} but it was empty");
+				}
+			} else {
+				docObject.addError(THIS_STAGE, "NoExceptionType", "An Exception type was not specificed");
+			}
+
+			exceptionDoc.comment = wholeLine;
+			exceptionDoc.emptyComment = false;
+			this.emptyCommentWarning(TYPE_EXCEPTION, exceptionDoc); // checks to see if the comment is empty
+
+			docObject.comment = docObject.comment.replace(docObject.comment.substring(nextSearchValue, endOfLine),'');
+			console.log(exceptionDoc);
+			docObject.addObject(exceptionDoc);
+			indexValue += 1;
+		};
+		docObject.comment = docObject.comment.replace(EXCEPTION, "");
 	};
 
 	/**
@@ -289,11 +335,22 @@ function CommentParser() {
 
 	/**
 	 * @Method
+	 * looks for {AT}deprecated
+	 */
+	this.findDeprecated = function(docObject) {
+		if (docObject.comment.search(DEPRECATED) != -1) {
+			docObject.isDeprecated = true;
+			docObject.comment = docObject.comment.replace(DEPRECATED,"");
+		}
+	}
+
+	/**
+	 * @Method
 	 * Puts a span around all TODO items.
 	 */
 	this.todoHighlighter = function(docObject) {
 		docObject.comment = docObject.comment.replace(/TODO/g,'<span class = "todo">TODO</span>');
-	}
+	};
 
 	/**
 	 * @Method
