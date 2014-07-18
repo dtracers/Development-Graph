@@ -1,0 +1,8 @@
+This server contains 3 parts
+1: A git client that allows simple git commands to be made
+2: A file loader that allows choice files to be loaded (within the initial selected directory)
+3: A communication tool to communicate with the client
+
+http://www.tornadoweb.org/en/stable/
+
+easy_install tornado
