@@ -6,3 +6,4 @@ This server contains 3 parts
 http://www.tornadoweb.org/en/stable/
 
 easy_install tornado
+easy_install GitPython
