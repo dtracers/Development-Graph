@@ -5,9 +5,10 @@ Created on Jul 17, 2014
 '''
 
 from git import Repo, Commit
+from gitManagment.diffManagment import EnhancedDiff
 
 
-class GitManager:
+class GitManager(object):
     def __init__(self, fileLocation):
         self.repo = Repo(fileLocation)
         print 'Loading git directory ' + self.repo.git_dir
@@ -27,16 +28,22 @@ class GitManager:
     def grabUserEmail(self):
         """ grabs the user email (this "should" be the local owner)"""
         try:
-            if self.userEmail is None:
+            if self.userEmail is None: 
                 self.userEmail = self.config_parser.get('user', 'email')
         except AttributeError:
             self.userEmail = self.config_parser.get('user', 'email')
         return self.userEmail
-    
+
     def grabAllFilesToBeCommited(self):
         totalList = self.grabUntrackedFiles()
-        for diff in x.repo.commit().diff(None, None):
-            totalList.append(diff.b_blob.path)
+        for diff in self.repo.commit().diff(None, None, True):
+            if not diff is None:
+                diff = EnhancedDiff.convert(diff)
+                if not diff.b_blob is None:
+                    totalList.append(diff.b_blob.path)
+                else:
+                    totalList.append(diff.a_blob.path)
+        return totalList
 
     def grabUntrackedFiles(self):
         """Returns the file names as a list"""
@@ -49,7 +56,7 @@ class GitManager:
         proc = self.repo.git.status(porcelain=True,
                                untracked_files=True,
                                as_process=True)
-          # Untracked files preffix in porcelain mode
+        # Untracked files preffix in porcelain mode
         prefix = "?? "
         untracked_files = list()
         for line in proc.stdout:
@@ -65,21 +72,41 @@ class GitManager:
     def getUntrackedFilesInList(self, fileList):
         """ @param fileList it is assumed that the will be in the same format as the given untracked files"""
         untrackedFiles = self.grabUntrackedFiles()
-        return list(set(fileList) & set(fileList))
+        return list(set(fileList) & set(untrackedFiles))
 
-    def createCommitForPartialFiles(self, ):
-        listOfDiffFiles = x.repo.commit().diff(None, None, None, '--name-only')
+    def createCommitForPartialFiles(self, commitFileList = None):
+        """Given a list of files which denote which lines are to be commited this method should create a commit"""
+        listOfDiffFiles = self.repo.commit().diff(None, None, True)
         for diff in listOfDiffFiles:
-            print diff
+            print dir(diff)
 
-        
+    def commit(self, commit, message):
+        """Commits files given a commit message and a given commit"""
+        self.repo.git.commit()
+
+class CommitFile(object):
+    """Holds some information about a file in addition to its diff"""
+    def __init__(self):
+        self.isUntracked = None
+        self.isRenamed = None
+        self.diff = None
+        self.lineNumbers = None
+        #self.
+
+    def setDiff(self, diff):
+        """"""
+        self.diff = diff
 
 if __name__ == "__main__":
     x = GitManager('')
     print x.grabUntrackedFiles()
+    print x.grabAllFilesToBeCommited()
     commit = Commit.new(x.repo, x.repo.head.ref)
     print commit
     print commit.author
     print commit.committer
-    print commit.stats
-    print x.repo.commit().diff(None, None)[1].a_blob.path
+    print dir(commit.stats)
+    print commit.stats.files
+    #print x.createCommitForPartialFiles()
+    #print commit.diff(None, None)
+    #print x.repo.commit().diff(None, None)[1].a_blob.path
