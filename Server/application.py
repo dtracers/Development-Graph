@@ -19,12 +19,15 @@ CONST_REMOTE = False
 CONST_DEFAULT_PAGE = "/web/graph/graph.html"
 
 class DevelopmentGraph():
-    
+
     def __init__(self):
         t = threading.Thread(target = self.openWebpage)
         t.daemon = True
         t.start()
-        self.createServer()
+        try :
+            self.createServer()
+        except:
+            time.sleep(5)
 
     def createServer(self):
         server_class = BaseHTTPServer.HTTPServer
@@ -37,8 +40,9 @@ class DevelopmentGraph():
             pass
         httpd.server_close()
         print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
-    
+
     def openWebpage(self):
+        print "Waiting for server to start"
         time.sleep(3)
         controller = None
         try:
@@ -49,14 +53,14 @@ class DevelopmentGraph():
             elif system.isWindows():
                 controller = webbrowser.get('chrome')
         except :
-            controller = webbrowser.get('firefox')
+            controller = webbrowser.get() # grabs the default (hoping that it is chrome
         print 'opening browser'
         try:
             controller.open('http:' + HOST_NAME+ ":" + str(PORT_NUMBER) + CONST_DEFAULT_PAGE, 2)
         except Exception:
             print 'EXCEPTION'
         print 'window opened'
-        
+
 
 if __name__ == '__main__':
     DevelopmentGraph()
