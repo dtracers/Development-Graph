@@ -7,8 +7,10 @@ Created on Jul 24, 2014
 import time
 import connection.server
 import BaseHTTPServer
+from utilities import system
 
 import webbrowser
+
 import threading
 
 HOST_NAME = 'localhost' # !!!REMEMBER TO CHANGE THIS FOR REMOTE CONNECTION!!!
@@ -17,7 +19,7 @@ CONST_REMOTE = False
 CONST_DEFAULT_PAGE = "/web/graph/graph.html"
 
 class DevelopmentGraph():
-
+    
     def __init__(self):
         t = threading.Thread(target = self.openWebpage)
         t.daemon = True
@@ -38,9 +40,19 @@ class DevelopmentGraph():
     
     def openWebpage(self):
         time.sleep(3)
+        controller = None
+        try:
+            if system.isMac() :
+                controller = webbrowser.get("open -a /Applications/Google\ Chrome.app %s")
+            elif system.isLinux():
+                controller = webbrowser.get('/usr/bin/google-chrome %s')
+            elif system.isWindows():
+                controller = webbrowser.get('chrome')
+        except :
+            controller = webbrowser.get('firefox')
         print 'opening browser'
         try:
-            webbrowser.open(HOST_NAME+ ":" + str(PORT_NUMBER) + CONST_DEFAULT_PAGE, 1)
+            controller.open('http:' + HOST_NAME+ ":" + str(PORT_NUMBER) + CONST_DEFAULT_PAGE, 2)
         except Exception:
             print 'EXCEPTION'
         print 'window opened'
