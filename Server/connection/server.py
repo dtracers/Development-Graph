@@ -4,9 +4,10 @@ Created on Jul 24, 2014
 @author: gigemjt
 '''
 
-import time
+__all__ = ["RequestHandler"]
+
 import SimpleHTTPServer
-import BaseHTTPServer
+
 import posixpath
 import urllib
 import os
@@ -16,7 +17,7 @@ HOST_NAME = 'localhost' # !!!REMEMBER TO CHANGE THIS!!!
 PORT_NUMBER = 9000 # Maybe set this to 9000.
 
 
-class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
     currentProjectPath = None # we might need to export this value to somewhere else
     currentWebPath = None
@@ -87,15 +88,3 @@ class MyHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             path = os.path.join(path, word)
         print "After converison: " + path
         return path
-
-
-if __name__ == '__main__':
-    server_class = BaseHTTPServer.HTTPServer
-    httpd = server_class((HOST_NAME, PORT_NUMBER), MyHandler)
-    print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-    httpd.server_close()
-    print time.asctime(), "Server Stops - %s:%s" % (HOST_NAME, PORT_NUMBER)
