@@ -13,7 +13,7 @@ handlers:
   script: main.app
 
 - url: /*
-  static_dir: Webserver
+  static_dir: website
   application_readable: true
 
 - url: /html
