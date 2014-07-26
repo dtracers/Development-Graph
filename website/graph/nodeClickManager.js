@@ -134,7 +134,7 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		displayGraph.removeDescendants(clickedNode.id);
 
 		var viewChildNode = displayGraph.createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
-		var viewDocumentationNode = displayGraph.createNewNode(clickedNode, true, -1, 1, 'Documentation',
+		var viewDocumentationNode = displayGraph.createNewNode(clickedNode, true, -1, 1, 'Feature Docs',
 				'viewDocumentation', clickedNode.id, '#0f0');
 		var viewCodeNode = displayGraph.createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, '#0f0');
 		var editNode = displayGraph.createNewNode(clickedNode, true, 1, 1, 'Edit this feature', 'edit', clickedNode.id, '#0f0');
