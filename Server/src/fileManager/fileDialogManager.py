@@ -11,8 +11,10 @@ class FileDialog():
 
     def __init__(self):
         self.root = tk.Tk()
-        self.root.pack_propagate()
+        self.root.overrideredirect(True)
+        self.root.geometry("0x0+%d+%d" % (0, 0))
         self.root.withdraw()
+        
 
     def showDirectoryDialog(self):
         """A blocking method that returns the directory path to a selected directory"""
