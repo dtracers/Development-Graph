@@ -7,6 +7,7 @@ import Tkinter as tk
 from tkFileDialog import askdirectory
 import os
 from src.utilities import system
+
 class FileDialog():
 
     def __init__(self):
@@ -14,7 +15,6 @@ class FileDialog():
         self.root.overrideredirect(True)
         self.root.geometry("0x0+%d+%d" % (0, 0))
         self.root.withdraw()
-        
 
     def showDirectoryDialog(self):
         """A blocking method that returns the directory path to a selected directory"""
@@ -33,7 +33,7 @@ def hide(root):
     root.withdraw()
 
 def isDirectoryReadOnly(directory):
-    return os.access(directory, os.W_OK | os.X_OK)
+    return not os.access(directory, os.W_OK | os.X_OK)
 
 if __name__ == '__main__':
     dialog = FileDialog()

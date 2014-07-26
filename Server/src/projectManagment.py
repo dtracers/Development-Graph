@@ -3,6 +3,7 @@ Created on Jul 25, 2014
 
 @author: gigemjt
 '''
+from src.utilities import fileManager
 
 class ProjectManagment(object):
     _projectMap = None
@@ -34,3 +35,6 @@ class Project(object):
 
     def getProjectName(self):
         return self._projectName
+
+    def isProjectReadOnly(self):
+        return fileManager.isDirectoryReadOnly(self.getProjectDirectory())
