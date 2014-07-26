@@ -11,7 +11,7 @@ import SimpleHTTPServer
 import posixpath
 import urllib
 import os
-
+from src.projectManagment import ProjectManagment
 
 HOST_NAME = 'localhost' # !!!REMEMBER TO CHANGE THIS!!!
 PORT_NUMBER = 9000 # Maybe set this to 9000.
@@ -19,7 +19,6 @@ PORT_NUMBER = 9000 # Maybe set this to 9000.
 
 class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
-    currentProjectPath = None # we might need to export this value to somewhere else
     currentWebPath = None
     CONST_PROJECT_START_PATH = "/project"
     CONST_WEB_START_PATH = "/web"
@@ -31,6 +30,8 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_header("Content-type", "text/html")
         self.end_headers()
         
+    def doGet(self):
+        pass
     #def do_GET(self):
         """Respond to a GET request."""
         """
@@ -59,17 +60,12 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         This looks at two extra constants to move where it searches for files, one is dynamic and the other is hard coded
         """
         if path.startswith(self.CONST_PROJECT_START_PATH) :
-            if self.currentProjectPath is None:
-                self.currentProjectPath = self.translate_path("/")
-            path = self.currentProjectPath + path[len(self.CONST_PROJECT_START_PATH):]
-            print 'printing custom: ' + path
+            path = self.parserProjectPath(path)
             return path
 
         if path.startswith(self.CONST_WEB_START_PATH) :
             if self.currentWebPath is None:
-                self.currentWebPath = self.translate_path("/")
-                self.currentWebPath = self.currentWebPath[:self.currentWebPath.index(self.CONST_SERVER_FOLDER)]
-                self.currentWebPath += self.CONST_WEB_FOLDER
+                self.SetWebLocation()
             path = self.currentWebPath + path[len(self.CONST_WEB_START_PATH):]
             print 'printing custom: ' + path
             return path
@@ -86,5 +82,31 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             head, word = os.path.split(word)
             if word in (os.curdir, os.pardir): continue
             path = os.path.join(path, word)
-        print "After converison: " + path
         return path
+
+    def parserProjectPath(self, path):
+        path = path[len(self.CONST_PROJECT_START_PATH):]
+        if path.startswith('/'): # this means that there is no project so we go to default project
+            path = path[1:] # cut off the slash
+            projectPath = self.translate_path('/')
+            totalPath = projectPath[:projectPath.find(self.CONST_SERVER_FOLDER)] + path
+            return totalPath
+
+        if not path.startswith('-'): # all others must be a project path
+            raise Exception('Invalid project')
+        project = path[1:path.find("/")]
+        print project
+        projectPath = None
+
+        projectP = ProjectManagment.getInstance().getProject(project)
+        print projectP
+        projectPath = projectP.getProjectDirectory()
+        # do proejct look up
+        path = projectPath + path[len(project) + 1:]
+        print 'printing custom: ' + path
+        return path
+
+    def SetWebLocation(self):
+        self.currentWebPath = self.translate_path("/")
+        self.currentWebPath = self.currentWebPath[:self.currentWebPath.find(self.CONST_SERVER_FOLDER)]
+        self.currentWebPath += self.CONST_WEB_FOLDER
