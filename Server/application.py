@@ -16,7 +16,7 @@ import threading
 HOST_NAME = 'localhost' # !!!REMEMBER TO CHANGE THIS FOR REMOTE CONNECTION!!!
 PORT_NUMBER = 9000 # Maybe set this to 9000.
 CONST_REMOTE = False
-CONST_DEFAULT_PAGE = "/web/graph/graph.html"
+CONST_DEFAULT_PAGE = "/web/index.html"
 
 class DevelopmentGraph():
 
