@@ -5,9 +5,9 @@ Created on Jul 24, 2014
 '''
 
 import time
-import connection.server
+from src.connection import server
 import BaseHTTPServer
-from utilities import system
+from src.utilities import system
 
 import webbrowser
 
@@ -31,7 +31,7 @@ class DevelopmentGraph():
 
     def createServer(self):
         server_class = BaseHTTPServer.HTTPServer
-        httpd = server_class((HOST_NAME, PORT_NUMBER), connection.server.RequestHandler)
+        httpd = server_class((HOST_NAME, PORT_NUMBER), server.RequestHandler)
         print time.asctime(), "Server Starts - %s:%s" % (HOST_NAME, PORT_NUMBER)
         print 'starting server!'
         try:
