@@ -32,6 +32,9 @@ class FileDialog():
 def hide(root):
     root.withdraw()
 
+def isDirectoryReadOnly(directory):
+    return os.access(directory, os.W_OK | os.X_OK)
+
 if __name__ == '__main__':
     dialog = FileDialog()
     name = dialog.showDirectoryDialog()
