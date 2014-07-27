@@ -34,18 +34,6 @@ public class Server extends SimpleWebServer {
 		return !(uri.startsWith("src/main") || uri.contains("../"));
 	}
 
-	@Override
-	public File translatePath(File homeDir, String uri) throws Exception {
-		if (uri.startsWith(PROJECT_START_PATH)) {
-			return projectPathTranslater(homeDir, uri);
-		}
-
-		if (uri.startsWith(WEB_START_PATH)) {
-			return webPathTranslater(homeDir, uri);
-		}
-		return super.translatePath(homeDir, uri);
-	}
-
 	/**
 	 * 
 	 */
@@ -82,7 +70,8 @@ public class Server extends SimpleWebServer {
 			}
             return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
 		} else if (uri.contains(LOAD_PROJECT_REQUEST)) {
-			String projectName = ProjectManager.getInstance().loadProject(null);
+			System.out.println("LOADING OLD PROJECT");
+			String projectName = ProjectManager.getInstance().loadProject(form);
 			return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
 		}
 		return createNoDataResponse();
@@ -109,7 +98,19 @@ public class Server extends SimpleWebServer {
 	public Response get(IHTTPSession session) {
 		return super.serve(session);
 	}
-	
+
+	@Override
+	public File translatePath(File homeDir, String uri) throws Exception {
+		if (uri.startsWith(PROJECT_START_PATH)) {
+			return projectPathTranslater(homeDir, uri);
+		}
+
+		if (uri.startsWith(WEB_START_PATH)) {
+			return webPathTranslater(homeDir, uri);
+		}
+		return super.translatePath(homeDir, uri);
+	}
+
 	private File webPathTranslater(File homeDir, String uri) {
 		String path = homeDir.getAbsolutePath();
 		uri = uri.substring(WEB_START_PATH.length()); // we have cut it down
@@ -132,8 +133,10 @@ public class Server extends SimpleWebServer {
 		if (proj == null) {
 			throw new Exception("Project does not exist");
 		}
-		
-		String newPath = proj.getDirectory() + uri;
-		return null;
+
+		File f = new File(proj.getDirectory(), uri);
+		System.out.println("New project path! " + f.getAbsolutePath());
+		System.out.println("Eists " + f.exists());
+		return f;
 	}
 }

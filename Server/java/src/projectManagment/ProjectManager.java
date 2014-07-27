@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import utilities.FileManager;
 import connection.FormParser;
@@ -12,6 +14,7 @@ public class ProjectManager {
 	
 	public static final String PROJECT_FILE = ".dgrproj";
 	public static final String PROJECT_DIRECTORY = ".dgd";
+	private Map<String, Project> projectMap = new HashMap<String,Project>();
 
 	private ProjectManager() {
 	}
@@ -25,8 +28,13 @@ public class ProjectManager {
 		return instance;
 	}
 
+	public void addProject(Project proj) {
+		System.out.println("Adding project " + proj.getName());
+		projectMap.put(proj.getName(), proj);
+	}
+
 	public Project getProject(String projectName) {
-		return null;
+		return projectMap.get(projectName);
 	}
 
 	/**
@@ -41,11 +49,17 @@ public class ProjectManager {
 
 		Project p = new Project(projectName, f);
 		createNewProjectData(p);
+		this.addProject(p);
 		return projectName;
 	}
 
 	public String loadProject(FormParser form) {
-		return null;
+
+		String directory = form.getPostValue("directory");
+		Project p = new Project(form.getPostValue("name"), new File(directory.replaceAll("%2F", "/")));
+		this.addProject(p);
+		System.out.println("DIRECTORY " + p.getDirectoryPath());
+		return p.getName();
 	}
 
 	private void createNewProjectData(Project p) throws IOException {
