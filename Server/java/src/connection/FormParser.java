@@ -30,14 +30,18 @@ public class FormParser {
 	    this.postBody = session.getQueryParameterString();
 	}
 
-	public String getValue(String key) {
+	public String getPostValue(String key) {
 		if (!parsed) {
 			parseBody();
 		}
-		return "";
+		return postData.get(key);
 	}
 
 	private void parseBody() {
 		String[] values = postBody.split("&");
+		for (String str : values) {
+			String[] keyValue = str.split("=");
+			postData.put(keyValue[0], keyValue[1]);
+		}
 	}
 }
