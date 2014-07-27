@@ -74,7 +74,12 @@ public class Server extends SimpleWebServer {
 
 		String uri = session.getUri();
 		if (uri.contains(NEW_PROJECT_REQUEST)) {
-            String projectName = ProjectManager.getInstance().createNewProject(form);
+            String projectName = null;
+			try {
+				projectName = ProjectManager.getInstance().createNewProject(form);
+			} catch (IOException ioe) {
+				return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
+			}
             return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
 		} else if (uri.contains(LOAD_PROJECT_REQUEST)) {
 			String projectName = ProjectManager.getInstance().loadProject(null);
