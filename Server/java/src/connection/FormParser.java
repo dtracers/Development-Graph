@@ -10,10 +10,9 @@ import fi.iki.elonen.NanoHTTPD.ResponseException;
 public class FormParser {
 
 	private Map<String, String> files = new HashMap<String, String>();
-	private Map<String, String> postData = new HashMap<String, String>();
+	private Map<String, String> postData;
 	private String postBody;
 	private IHTTPSession session;
-	private boolean parsed = false;
 
 	public FormParser(IHTTPSession session) {
 		this.session = session;
@@ -23,21 +22,21 @@ public class FormParser {
 	public void parse() throws IOException, ResponseException {
         session.parseBody(files);
 
-        System.out.println("POST PARSING!");
-		System.out.println(files);
 
 	    // get the POST body
 	    this.postBody = session.getQueryParameterString();
 	}
 
 	public String getPostValue(String key) {
-		if (!parsed) {
+		if (postData == null) {
 			parseBody();
 		}
 		return postData.get(key);
 	}
 
 	private void parseBody() {
+		postData = new HashMap<String, String>();
+		System.out.println(postBody);
 		String[] values = postBody.split("&");
 		for (String str : values) {
 			String[] keyValue = str.split("=");
