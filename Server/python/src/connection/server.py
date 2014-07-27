@@ -11,13 +11,15 @@ import SimpleHTTPServer
 import posixpath
 import urllib
 import os
+import cgi
 from src.projectManagment import ProjectManagment
+
 
 HOST_NAME = 'localhost' # !!!REMEMBER TO CHANGE THIS!!!
 PORT_NUMBER = 9000 # Maybe set this to 9000.
 
 
-class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler, object):
 
     currentWebPath = None
     CONST_PROJECT_START_PATH = "/project"
@@ -29,9 +31,7 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        
-    def doGet(self):
-        pass
+
     #def do_GET(self):
         """Respond to a GET request."""
         """
@@ -48,6 +48,31 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         self.wfile.write("</body></html>")
         """
 
+    def do_POST(self):
+        """Serve a POST request."""
+
+        form = cgi.FieldStorage(
+            fp=self.rfile, 
+            headers=self.headers,
+            environ={'REQUEST_METHOD':'POST',
+                     'CONTENT_TYPE':self.headers['Content-Type'],
+                     })
+
+        if 'newProject' in self.path:
+            projectName = ProjectManagment.getInstance().createNewProject(form)
+            self.send_response(301)
+            self.path = RequestHandler.CONST_WEB_START_PATH +'-' + projectName + '/graph/graph.html'
+            self.send_header("Location", self.path)
+            self.end_headers()
+        elif 'loadProject' in self.path:
+            ProjectManagment.getInstance().loadProject(form)
+            self.send_response(301)
+            self.path = RequestHandler.CONST_WEB_START_PATH +'-' + projectName + '/graph/graph.html'
+            self.send_header("Location", self.path)
+            self.end_headers()
+        else:
+            self.send_error(400, "Post url is not valid")
+
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax.
 
@@ -57,17 +82,14 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 
         ABOVE FROM PARENT
 
-        This looks at two extra constants to move where it searches for files, one is dynamic and the other is hard coded
+        Does extra parsing if the path starts with special parts
         """
         if path.startswith(self.CONST_PROJECT_START_PATH) :
-            path = self.parserProjectPath(path)
+            path = self.parseProjectPath(path)
             return path
 
         if path.startswith(self.CONST_WEB_START_PATH) :
-            if self.currentWebPath is None:
-                self.SetWebLocation()
-            path = self.currentWebPath + path[len(self.CONST_WEB_START_PATH):]
-            print 'printing custom: ' + path
+            path = self.parseWebPath(path)
             return path
             
         # abandon query parameters
@@ -84,7 +106,8 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
             path = os.path.join(path, word)
         return path
 
-    def parserProjectPath(self, path):
+    def parseProjectPath(self, path):
+        """Given a path that looks like project-projectName/* This will redirect all files to the correct system directory"""
         path = path[len(self.CONST_PROJECT_START_PATH):]
         if path.startswith('/'): # this means that there is no project so we go to default project
             path = path[1:] # cut off the slash
@@ -99,11 +122,18 @@ class RequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
         projectPath = None
 
         projectP = ProjectManagment.getInstance().getProject(project)
-        print projectP
         projectPath = projectP.getProjectDirectory()
         # do proejct look up
-        path = projectPath + path[len(project) + 1:]
-        print 'printing custom: ' + path
+        path = projectPath + path[len(project) + 2:]
+        return path
+
+    def parseWebPath(self, path):
+        if self.currentWebPath is None:
+                self.SetWebLocation()
+        shortenedPath = path[len(self.CONST_WEB_START_PATH):]
+        if shortenedPath.startswith('-') :
+            shortenedPath = shortenedPath[shortenedPath.find('/'):] # removes everything up to the slash
+        path = self.currentWebPath + shortenedPath
         return path
 
     def SetWebLocation(self):

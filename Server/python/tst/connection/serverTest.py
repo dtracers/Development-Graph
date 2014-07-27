@@ -61,6 +61,16 @@ class Test(unittest.TestCase):
         except IOError:
             self.fail("Exception was thrown while opening file")
 
+    def testWebTranslatorWithDash(self):
+        """Passes if adding /web-project/index.html to the url redirects the computer to find website folder"""
+        print 'starting test testWebTranslator with project'
+        handler = handlerInstance2
+        try:
+            path = handler.translate_path('/web-project/index.html')
+            open(path, 'r')
+        except IOError:
+            self.fail("Exception was thrown while opening file")
+
     def testEmptyProjectTranslator(self):
         """Passes if the default project is correctly found and the correct file is opened"""
 
