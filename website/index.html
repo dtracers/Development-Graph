@@ -18,10 +18,18 @@
 			var output = [];
 			for (var i = 0, f; f = files[i]; i++) {
 				if (f.name == '.dgrproj') {
-					
+					file = new AbstractedFile(f);
+					file.readFileAsLines(function(fileReader) {
+						firstLine = fileReader.readLine();
+						secondLine = fileReader.readLine();
+						alert(firstLine);
+						alert(secondLine);
+						document.getElementById('existingName').value = firstLine;
+						document.getElementById('directory').value = secondLine;
+					});
+					console.log(f);
 					break;
 				}
-				console.log(f);
 			}
 		}
 
@@ -38,15 +46,13 @@
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 	</script>
 <form action ="loadProject" method="post" >
-	<input id = "Directory" type ="text" value = "" name = "directory" hidden>
+	<input id = "directory" type ="text" value = "" name = "directory" hidden>
 	<input id = "existingName" type ="text" value = "" name = "name" hidden>
 	<input type="submit" value="Submit">
 </form>
 <form action = "newProject" method="post">
 	<h1>Or make a new project</h1>
 	<input id = "newName" type ="text" name = "name" placeholder = "Project Name">
-	<input id = "Directory" type ="text" value = "TEST" name = "directory" hidden>
-	<input id = "existingName" type ="text" value = "TEST" name = "name" hidden>
 	<input type="submit" value="Submit">
 </form>
 </body>

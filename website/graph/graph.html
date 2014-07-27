@@ -36,7 +36,7 @@
 <div id="graphContainer"></div>
 <script>
 	var graphManager = new GraphManager();
-	graphManager.load('data.grp', 'graphContainer', function() {
+	graphManager.load('/project-'+ getProjectFromUrl() +'/.dgd/data.grp', 'graphContainer', function() {
 		graphManager.getNodeClickManager().addClickListener(FeatureCreator, ['overlay']);
 		graphManager.getNodeClickManager().addClickListener(CodeViewCreator, ['overlay']);
 	});

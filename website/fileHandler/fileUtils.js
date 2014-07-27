@@ -100,8 +100,22 @@ function AbstractedFile(file) {
 	 * @returns {custom object that will be described soon}
 	 */
 	this.readFileAsLines = function(callback) {
-		
-	};
+		func = function(text) {
+			console.log("Splitting up!");
+			console.log(text);
+			lines = (""+text).split(/[\r\n]+/g)	
+			callback(new (function(lines) {
+				var currentLineNumber = 0;// tolerate both Windows and Unix linebreaks
+				this.readLine = function() {
+					if (currentLineNumber >= lines.length) {
+						return null;
+					}
+					return lines[currentLineNumber++];
+				}
+			})(lines));
+		};
+		this.readFileAsOneString(func);
+	}
 
 	/**
 	 * @Method
