@@ -1,19 +1,14 @@
 package connection;
 
-import java.io.IOException;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 import projectManagment.Project;
 import projectManagment.ProjectManager;
-import fi.iki.elonen.NanoHTTPD.Response.IStatus;
-import fi.iki.elonen.NanoHTTPD.Response.Status;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.SimpleWebServer;
-import fi.iki.elonen.NanoHTTPD.IHTTPSession;
-import fi.iki.elonen.NanoHTTPD.Response;
 
+@SuppressWarnings("static-method")
 public class Server extends SimpleWebServer {
 
 	private static final String WORKING_DIR = System.getProperty("user.dir");
@@ -99,10 +94,13 @@ public class Server extends SimpleWebServer {
 		return super.serve(session);
 	}
 
+	/**
+	 * Translates the path from the given uri to the physical location in the local computer.
+	 */
 	@Override
 	public File translatePath(File homeDir, String uri) throws Exception {
 		if (uri.startsWith(PROJECT_START_PATH)) {
-			return projectPathTranslater(homeDir, uri);
+			return projectPathTranslater(uri);
 		}
 
 		if (uri.startsWith(WEB_START_PATH)) {
@@ -122,7 +120,14 @@ public class Server extends SimpleWebServer {
 		return new File(f, uri);
 	}
 
-	private File projectPathTranslater(File homeDir, String uri) throws Exception {
+	/**
+	 * Given a path that looks like <b>project-projectName/*</b> this method will redirect all files to the correct system directory.
+	 * @param homeDir
+	 * @param uri
+	 * @return
+	 * @throws Exception
+	 */
+	private File projectPathTranslater(String uri) throws Exception {
 		uri = uri.substring(PROJECT_START_PATH.length()); // we have cut it down
 		if (!uri.startsWith("-")) {
 			throw new Exception("Invalid Project path");
