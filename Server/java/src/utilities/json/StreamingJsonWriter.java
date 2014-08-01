@@ -1,17 +1,10 @@
 package utilities.json;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ContentHandler;
 import org.json.simple.parser.ParseException;
@@ -22,13 +15,14 @@ import org.json.simple.parser.ParseException;
  * added or replaced it will write that out and then continue on.
  *
  * This works on the specific principle that the item we are finding is either the first item in an object or not in the object at all
+ *
+ * TODO: add components for inserting an object into an array and inserting an object into an object.
  */
 
-public class StreamingJsonWriter extends BufferedReader implements ContentHandler {
+public class StreamingJsonWriter implements ContentHandler {
 
 	Writer output; 
-	public StreamingJsonWriter(Reader in, Writer out) {
-		super(in);
+	public StreamingJsonWriter(Writer out) {
 		this.output = out;
 	}
 

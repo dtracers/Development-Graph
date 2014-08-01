@@ -178,8 +178,8 @@ public class JsonWriterTest {
 		JSONParser parser = new JSONParser();
 		BufferedReader read = new BufferedReader(source);
 		StringWriter str = new StringWriter();
-		StreamingJsonWriter finder = new StreamingJsonWriter(read, str);
-		parser.parse(finder, finder, true);
+		StreamingJsonWriter finder = new StreamingJsonWriter(str);
+		parser.parse(read, finder, true);
 		return str.toString();
 	}
 
@@ -383,10 +383,10 @@ public class JsonWriterTest {
 		JSONParser parser = new JSONParser();
 		BufferedReader read = new BufferedReader(source);
 		StringWriter str = new StringWriter();
-		StreamingJsonWriter finder = new StreamingJsonWriter(read, str);
+		StreamingJsonWriter finder = new StreamingJsonWriter(str);
 		finder.setMatchKey(key);
 		finder.setReplacementMap(replacement);
-		parser.parse(finder, finder, true);
+		parser.parse(read, finder, true);
 		return str.toString();
 	}
 
