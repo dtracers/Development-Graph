@@ -3,6 +3,7 @@ package utilities.json;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
@@ -17,6 +18,7 @@ import org.json.simple.parser.ParseException;
  * This works on the specific principle that the item we are finding is either the first item in an object or not in the object at all
  *
  * TODO: add components for inserting an object into an array and inserting an object into an object.
+ * TODO: add optimization for not putting an object more than once into the stream.
  */
 
 public class StreamingJsonWriter implements ContentHandler {
@@ -27,6 +29,7 @@ public class StreamingJsonWriter implements ContentHandler {
 	}
 
 	private int counter = 0;
+	private List<String> keys;
 	private Map<String, JSONObject> objectList = new HashMap<String, JSONObject>();
 	private JSONObject currentObject = null;
 	private String key;

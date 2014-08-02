@@ -22,12 +22,11 @@ import org.json.simple.parser.ParseException;
  *
  * This works on the specific principle that the item we are finding is either the first item in an object or not in the object at all
  *
- * TODO: add components for inserting an object into an array and inserting an object into an object.
+ * TODO: add an option to send data straight to a writer.
  */
 
 public class StreamingJsonReader extends BufferedReader implements ContentHandler {
 
-	Writer output;
 	JSONParser parser;
 	private StringBuffer stringHolder;
 	private int counter = 0;
@@ -44,16 +43,29 @@ public class StreamingJsonReader extends BufferedReader implements ContentHandle
 	private int offset = 0; // the previous length of the string
 	private int positionOfObjectStart = -1;
 	private String objectValue;
+	private int maxLength = 0;
 
-	public StreamingJsonReader(Reader reader, Writer out, JSONParser parser) {
+	public StreamingJsonReader(Reader reader, JSONParser parser) {
 		super(reader);
-		this.output = out;
 		this.parser = parser;
+	}
+
+	/**
+	 * Used for testing allows a shorter max length than normal.
+	 * @param reader
+	 * @param parser
+	 * @param maxLength
+	 */
+	public StreamingJsonReader(Reader reader, JSONParser parser, int maxLength) {
+		this(reader, parser);
+		this.maxLength = maxLength;
 	}
 
 	@Override
 	public int read(char[] cbuf, int off, int len) throws IOException {
-		//len = 10;
+		if (maxLength != 0) {
+			len = Math.min(len, maxLength);
+		}
 		int result = super.read(cbuf, off, len);
 		lengthOfBuffer = result;
 		if (!inObject && !tracking && result > 0) {

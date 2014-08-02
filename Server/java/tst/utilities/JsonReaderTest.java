@@ -59,7 +59,7 @@ public class JsonReaderTest extends JsonTest {
 	 * Passes if the input string is the same as the output string.
 	 * Only the outer object should pass this test.
 	 */
-	@Test
+	@Test(expected = NullPointerException.class)
 	public void test3() throws IOException, ParseException { // level 3
 		String jsonText = "{\"id\":123, \"second\": " + SIMPLE_REPLACEMENT + "}";
 		Reader source = new StringReader(jsonText);
@@ -71,7 +71,7 @@ public class JsonReaderTest extends JsonTest {
 		List<String> keys = createList(map);
 		Map<String, String> result = createResult(source, keys, "id");
 		
-		map.remove("56"); // this object should never
+		//map.remove("56"); // this object should never exist
 		jsonEquals(map, result);
 	}
 
@@ -118,12 +118,10 @@ public class JsonReaderTest extends JsonTest {
 	}
 
 	/**
-	 * Passes if the input string is the same as the output string.
-	 * This should grab 2 objects.
-	 * The objects are now in an array
+	 * Should throw a null pointer exception as the entire object is grabbed so the inner object is not grabbed
 	 */
-	@Test
-	public void test6() throws IOException, ParseException { // level 5
+	@Test(expected = NullPointerException.class)
+	public void test6() throws IOException, ParseException { // level 6
 		String jsonText = COMPLEX_REPLACEMENT2;
 		System.out.println(jsonText);
 		System.out.println(jsonText.length());
@@ -139,12 +137,32 @@ public class JsonReaderTest extends JsonTest {
 		jsonEquals(map, result);
 	}
 
+	/**
+	 * Should grab 2 objects
+	 */
+	@Test
+	public void test7() throws IOException, ParseException { // level 7
+		String jsonText = COMPLEX_REPLACEMENT2;
+		System.out.println(jsonText);
+		System.out.println(jsonText.length());
+		Reader source = new StringReader(jsonText);
+
+		Map<String, String> map = createMap();
+		map.put("id1", "{\"id\": \"id1\"}");
+		map.put("124", "{ \"id\": 124 }");
+
+		List<String> keys = createList(map);
+		Map<String, String> result = createResult(source, keys, "id");
+
+		jsonEquals(map, result);
+	}
+
 	@SuppressWarnings("resource")
 	public static Map<String, String> createResult(Reader source, List<String> valuesToMatch, String key) throws IOException, ParseException {
 		JSONParser parser = new JSONParser();
 		
 		StringWriter str = new StringWriter();
-		StreamingJsonReader finder = new StreamingJsonReader(source, str, parser);
+		StreamingJsonReader finder = new StreamingJsonReader(source, parser, 10);
 		BufferedReader read = finder; // for code readability
 		finder.setMatchKey(key);
 		finder.setMatchValues(valuesToMatch);
