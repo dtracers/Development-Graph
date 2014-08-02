@@ -1,3 +1,4 @@
+package utilities;
 import static org.junit.Assert.*;
 
 import java.io.BufferedReader;
@@ -17,11 +18,7 @@ import org.junit.Test;
 import utilities.json.StreamingJsonWriter;
 
 @SuppressWarnings("static-method")
-public class JsonWriterTest {
-	public static final String SIMPLE_REPLACEMENT = "{\"replace value!\":56}";
-	public static final String SIMPLE_REPLACEMENT2 = "{\"other replace value\":57}";
-	public static final String COMPLEX_REPLACEMENT = "{\"first\": 123, \"second\": [{\"k1\":{\"id\":\"id1\"}}, 4, {\"id\": 123}], \"third\": 789, \"id\": null}";
-	public static final String COMPLEX_REPLACEMENT2 = "{\"id\": 123, \"id\": [{\"k1\":{\"id\":\"id1\"}}, 4, {\"id\": 123}], \"id\": 789, \"id\": null}";
+public class JsonWriterTest extends JsonTest {
 
 	/**
 	 * Passes if the input string is the same as the output string.
@@ -388,24 +385,5 @@ public class JsonWriterTest {
 		finder.setReplacementMap(replacement);
 		parser.parse(read, finder, true);
 		return str.toString();
-	}
-
-	private void jsonEquals(String expected, String result) {
-		JSONParser parser = new JSONParser();
-		JSONAware  expectedObj = null;
-		JSONAware  resultObj = null;
-		try {
-			expectedObj = (JSONAware) parser.parse(expected);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			resultObj = (JSONAware) parser.parse(result);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		assertEquals(expectedObj, resultObj);
 	}
 }
