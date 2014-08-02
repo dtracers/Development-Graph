@@ -199,11 +199,8 @@ public class StreamingJsonWriter implements ContentHandler {
 	}
 
 	private void writeReplacementObject(JSONObject currentObject) {
-		try {
-			new IdFirstJsonObject(currentObject).writeJSONString(output);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String result = currentObject.toJSONString();
+		write(result.substring(1));
 	}
 
 	private void writeKey(String key) {
