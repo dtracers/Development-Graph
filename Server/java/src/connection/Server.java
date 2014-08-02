@@ -57,6 +57,8 @@ public class Server extends SimpleWebServer {
 
 		String uri = session.getUri();
 		if (uri.contains(NEW_PROJECT_REQUEST)) {
+			System.out.println("NEW PROJECT");
+			System.out.println(uri);
             String projectName = null;
 			try {
 				projectName = ProjectManager.getInstance().createNewProject(form);
@@ -65,6 +67,7 @@ public class Server extends SimpleWebServer {
 			}
             return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
 		} else if (uri.contains(LOAD_PROJECT_REQUEST)) {
+			System.out.println(uri);
 			System.out.println("LOADING OLD PROJECT");
 			String projectName = ProjectManager.getInstance().loadProject(form);
 			return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
