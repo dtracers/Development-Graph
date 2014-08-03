@@ -35,7 +35,6 @@ public class IdFirstJsonObject extends JSONObject {
 
 		boolean first = true;
 		Iterator iter = map.entrySet().iterator();
-		
 
 		out.write('{');
 		if (map.containsKey(ID_TAG)) {
