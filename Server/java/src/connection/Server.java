@@ -19,13 +19,13 @@ import fi.iki.elonen.SimpleWebServer;
 public class Server extends SimpleWebServer {
 
 	public static final String WORKING_DIR = System.getProperty("user.dir");
-	private static final String PROJECT_START_PATH = "/project";
-	private static final String WEB_START_PATH = "/web";
-	private static final String WEB_FOLDER = "website/src";
-	private static final String SERVER_FOLDER = "Server";
-	private static final String NEW_PROJECT_REQUEST = "newProject";
-	private static final String LOAD_PROJECT_REQUEST = "loadProject";
-	private static final String MAIN_PROJECT_PAGE = "/graph/graph.html";
+	protected static final String PROJECT_START_PATH = "/project";
+	protected static final String WEB_START_PATH = "/web";
+	protected static final String WEB_FOLDER = "website/src";
+	protected static final String SERVER_FOLDER = "Server";
+	protected static final String NEW_PROJECT_REQUEST = "newProject";
+	protected static final String LOAD_PROJECT_REQUEST = "loadProject";
+	protected static final String MAIN_PROJECT_PAGE = "/graph/graph.html";
 
 	private ProjectManager projectManagerInstance;
 
@@ -95,7 +95,7 @@ public class Server extends SimpleWebServer {
 	 * @return
 	 */
 	public Response get(IHTTPSession session) {
-		if (session.getParms().size() > 0) {
+		if (session.getParms().size() > 0 && session.getUri().contains(".dgd")) {
 			System.out.println(session.getParms());
 			System.out.println(session.getUri());
 			File f  = null;

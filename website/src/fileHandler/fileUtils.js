@@ -30,8 +30,9 @@ function InvalidFileTypeException() {
 */
 function AbstractedFile(file, url) {
 	var usingChromeApp = chrome ? (chrome.fileSystem ? true : false) : false;
-	var usingServer = (typeof url != "undefined") && (url != ""); // until some way to detirmine if node is being used.
+	var usingServer = (typeof url != "undefined") && (url != "");
 	var usingBrowser = !usingChromeApp && !usingServer;
+	var timeoutTime = 1000;
 	/**
 	 * @Field
 	 * Holds the name of the file.
@@ -90,22 +91,26 @@ function AbstractedFile(file, url) {
 				reader.readAsText(file);
 			});
 		} else if (usingServer) {
-			alert("Grabbing file as server!");
 			var xmlhttp;
-			if (window.XMLHttpRequest)
-			{// code for IE7+, Firefox, Chrome, Opera, Safari
+			if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 				xmlhttp=new XMLHttpRequest();
 			}
-			else
-			{// code for IE6, IE5
+			else {// code for IE6, IE5
 				xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 			}
-			xmlhttp.onreadystatechange=function() {
-				if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
-				{
+
+			var timedOut = false;
+			var timeout = setTimeout(function() {
+				timedOut = true;
+				callback(undefined);
+			}, timeoutTime); // one second timeout (may need to be made longer)
+
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+					clearTimeout(timeout);
+					if (!timedOut) {
 					callback(xmlhttp.responseText);
-				} else {
-					callback(undefined);
+					}
 				}
 			};
 			xmlhttp.open("GET", url, true);
@@ -116,10 +121,10 @@ function AbstractedFile(file, url) {
 	/**
 	 * @Method
 	 * Creates a file navigator that will allow you to read one line at a time without blocking any threads
-	 * @returns {custom object that will be described soon}
+	 * @return {@link FileLineReader}
 	 */
 	this.readFileAsLines = function(callback) {
-		func = function(text) {
+		var func = function(text) {
 			if (typeof text == "undefined") {
 				console.log("no text was found returning undefined");
 				callback(undefined);
@@ -129,6 +134,25 @@ function AbstractedFile(file, url) {
 			console.log(text);
 			var reader = new FileLineReader(text);
 			callback(reader);
+		};
+		this.readFileAsOneString(func);
+	}
+
+	/**
+	 * @Method
+	 * Creates a json object from the file,
+	 * if the file is a not a json object then the error is logged and the callback is called with undefined.
+	 * @return Json object or undefined if there is a problem.
+	 */
+	this.readFileAsJson = function(callback) {
+		var func = function(text) {
+			if (typeof text == "undefined") {
+				console.log("no text was found returning undefined");
+				callback(undefined);
+				return;
+			}
+			var object = JSON.parse(text);
+			callback(object);
 		};
 		this.readFileAsOneString(func);
 	}
@@ -206,7 +230,7 @@ function AbstractedFile(file, url) {
 	 * @Class
 	 */
 	function FileLineReader(text) {
-		lines = (""+text).split(/[\r\n]+/g);// tolerate both Windows and Unix linebreaks
+		var lines = (""+text).split(/[\r\n]+/g);// tolerate both Windows and Unix linebreaks
 		var currentLineNumber = 0;
 
 		/**
