@@ -1,11 +1,9 @@
 package connection;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
@@ -20,7 +18,7 @@ import fi.iki.elonen.SimpleWebServer;
 @SuppressWarnings("static-method")
 public class Server extends SimpleWebServer {
 
-	private static final String WORKING_DIR = System.getProperty("user.dir");
+	public static final String WORKING_DIR = System.getProperty("user.dir");
 	private static final String PROJECT_START_PATH = "/project";
 	private static final String WEB_START_PATH = "/web";
 	private static final String WEB_FOLDER = "website";
@@ -29,8 +27,15 @@ public class Server extends SimpleWebServer {
 	private static final String LOAD_PROJECT_REQUEST = "loadProject";
 	private static final String MAIN_PROJECT_PAGE = "/graph/graph.html";
 
-	public Server(String hostname, int port) {
+	private ProjectManager projectManagerInstance;
+
+	public Server(String hostname, int port, ProjectManager proj) {
 		super(hostname, port, new File(WORKING_DIR), true);
+		projectManagerInstance = proj;
+	}
+
+	public Server(String hostname, int port) {
+		this(hostname, port, ProjectManager.getInstance());
 	}
 
 	@Override
@@ -70,7 +75,7 @@ public class Server extends SimpleWebServer {
 			System.out.println(uri);
             String projectName = null;
 			try {
-				projectName = ProjectManager.getInstance().createNewProject(form);
+				projectName = projectManagerInstance.createNewProject(form);
 			} catch (IOException ioe) {
 				return createErrorResponse(ioe, null);
 			}
@@ -78,7 +83,7 @@ public class Server extends SimpleWebServer {
 		} else if (uri.contains(LOAD_PROJECT_REQUEST)) {
 			System.out.println(uri);
 			System.out.println("LOADING OLD PROJECT");
-			String projectName = ProjectManager.getInstance().loadProject(form);
+			String projectName = projectManagerInstance.loadProject(form);
 			return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
 		}
 		return createNoDataResponse();
@@ -133,7 +138,7 @@ public class Server extends SimpleWebServer {
 		return super.translatePath(homeDir, uri);
 	}
 
-	private File webPathTranslater(File homeDir, String uri) {
+	protected File webPathTranslater(File homeDir, String uri) {
 		String path = homeDir.getAbsolutePath();
 		uri = uri.substring(WEB_START_PATH.length()); // we have cut it down
 		if (uri.startsWith("-")) {
@@ -151,7 +156,7 @@ public class Server extends SimpleWebServer {
 	 * @return
 	 * @throws Exception
 	 */
-	private File projectPathTranslater(String uri) throws Exception {
+	protected File projectPathTranslater(String uri) throws Exception {
 		uri = uri.substring(PROJECT_START_PATH.length()); // we have cut it down
 		if (!uri.startsWith("-")) {
 			throw new Exception("Invalid Project path");
@@ -159,7 +164,7 @@ public class Server extends SimpleWebServer {
 
 		String projectName = uri.substring(1, uri.indexOf("/"));
 		uri = uri.substring(uri.indexOf("/"));
-		Project proj = ProjectManager.getInstance().getProject(projectName);
+		Project proj = projectManagerInstance.getProject(projectName);
 		if (proj == null) {
 			throw new Exception("Project does not exist");
 		}

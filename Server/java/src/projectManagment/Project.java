@@ -37,4 +37,8 @@ public class Project {
 	public String getName() {
 		return name;
 	}
+
+	public String toString() {
+		return "\"" + getName() + "\" At: " + directory.getAbsolutePath();
+	}
 }

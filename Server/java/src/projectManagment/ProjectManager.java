@@ -3,6 +3,7 @@ package projectManagment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,7 @@ import utilities.FileManager;
 import connection.FormParser;
 
 public class ProjectManager {
-	
+
 	public static final String PROJECT_FILE = ".dgrproj";
 	public static final String PROJECT_DIRECTORY = ".dgd";
 	private Map<String, Project> projectMap = new HashMap<String,Project>();
