@@ -1,10 +1,19 @@
 package connection;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+
+import org.json.simple.parser.ParseException;
 
 import projectManagment.Project;
 import projectManagment.ProjectManager;
+import utilities.SaveManager;
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.SimpleWebServer;
 
@@ -50,7 +59,7 @@ public class Server extends SimpleWebServer {
         try {
         	form.parse();
         } catch (IOException ioe) {
-            return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
+            return createErrorResponse(ioe, null);
         } catch (ResponseException re) {
             return new Response(re.getStatus(), MIME_PLAINTEXT, re.getMessage());
         }
@@ -63,7 +72,7 @@ public class Server extends SimpleWebServer {
 			try {
 				projectName = ProjectManager.getInstance().createNewProject(form);
 			} catch (IOException ioe) {
-				return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage());
+				return createErrorResponse(ioe, null);
 			}
             return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
 		} else if (uri.contains(LOAD_PROJECT_REQUEST)) {
@@ -75,26 +84,38 @@ public class Server extends SimpleWebServer {
 		return createNoDataResponse();
 	}
 
-	protected final Response createRedirect(String newUri) {
-		Response res = new Response(Response.Status.REDIRECT, NanoHTTPD.MIME_HTML, "<html><body>Redirected: <a href=\"" +
-				newUri + "\">" + newUri + "</a></body></html>");
-		res.addHeader("Accept-Ranges", "bytes");
-		res.addHeader("Location", newUri);
-		return res;
-	}
-
-	protected final Response createNoDataResponse() {
-		Response res = new Response(Response.Status.NO_CONTENT, MIME_HTML, "");
-		return res;
-	}
-
 	/**
 	 * 
 	 * @param session
 	 * @return
 	 */
 	public Response get(IHTTPSession session) {
-		return super.serve(session);
+		if (session.getParms().size() > 0) {
+			System.out.println(session.getParms());
+			System.out.println(session.getUri());
+			File f  = null;
+			try {
+				f = translatePath(null, session.getUri());
+			} catch (Exception e) {
+				e.printStackTrace();
+				return createErrorResponse(e, null);
+			}
+			StringBuffer result;
+			try {
+				result = SaveManager.getInstance().loadObjects(new ArrayList<String>(session.getParms().keySet()), f);
+			} catch (IOException | ParseException e) {
+				e.printStackTrace();
+				return createErrorResponse(e, null);
+			}
+			try {
+				return createStreamingResponse(new ByteArrayInputStream(result.toString().getBytes("UTF-8")));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return createErrorResponse(e, null);
+			}
+		} else {
+			return super.serve(session);
+		}
 	}
 
 	/**
@@ -135,6 +156,7 @@ public class Server extends SimpleWebServer {
 		if (!uri.startsWith("-")) {
 			throw new Exception("Invalid Project path");
 		}
+
 		String projectName = uri.substring(1, uri.indexOf("/"));
 		uri = uri.substring(uri.indexOf("/"));
 		Project proj = ProjectManager.getInstance().getProject(projectName);
@@ -144,7 +166,29 @@ public class Server extends SimpleWebServer {
 
 		File f = new File(proj.getDirectory(), uri);
 		System.out.println("New project path! " + f.getAbsolutePath());
-		System.out.println("Eists " + f.exists());
+		System.out.println("Exists " + f.exists());
 		return f;
+	}
+
+	protected final Response createStreamingResponse(InputStream str) {
+		return new Response(Response.Status.OK, NanoHTTPD.MIME_HTML, str);
+	}
+
+	protected final Response createErrorResponse(Exception e, String message) {
+		return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: " + e.getClass().getSimpleName() + 
+				":" + e.getMessage() + "\n" + message);
+	}
+
+	protected final Response createRedirect(String newUri) {
+		Response res = new Response(Response.Status.REDIRECT, NanoHTTPD.MIME_HTML, "<html><body>Redirected: <a href=\"" +
+				newUri + "\">" + newUri + "</a></body></html>");
+		res.addHeader("Accept-Ranges", "bytes");
+		res.addHeader("Location", newUri);
+		return res;
+	}
+
+	protected final Response createNoDataResponse() {
+		Response res = new Response(Response.Status.NO_CONTENT, MIME_HTML, "");
+		return res;
 	}
 }
