@@ -24,16 +24,14 @@ function InvalidFileTypeException() {
 	}; 
 }
 
-
-
 /**
 * @Class
 * A class that abstracts the type of file behind it
 */
-function AbstractedFile(file) {
+function AbstractedFile(file, url) {
 	var usingChromeApp = chrome ? (chrome.fileSystem ? true : false) : false;
-	var usingNode = false; // until some way to detirmine if node is being used.
-	var usingBrowser = !usingChromeApp && !usingNode;
+	var usingServer = (typeof url != "undefined") && (url != ""); // until some way to detirmine if node is being used.
+	var usingBrowser = !usingChromeApp && !usingServer;
 	/**
 	 * @Field
 	 * Holds the name of the file.
@@ -91,6 +89,27 @@ function AbstractedFile(file) {
 				};
 				reader.readAsText(file);
 			});
+		} else if (usingServer) {
+			alert("Grabbing file as server!");
+			var xmlhttp;
+			if (window.XMLHttpRequest)
+			{// code for IE7+, Firefox, Chrome, Opera, Safari
+				xmlhttp=new XMLHttpRequest();
+			}
+			else
+			{// code for IE6, IE5
+				xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			xmlhttp.onreadystatechange=function() {
+				if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+				{
+					callback(xmlhttp.responseText);
+				} else {
+					callback(undefined);
+				}
+			};
+			xmlhttp.open("GET", url, true);
+			xmlhttp.send();
 		}
 	};
 
@@ -101,18 +120,15 @@ function AbstractedFile(file) {
 	 */
 	this.readFileAsLines = function(callback) {
 		func = function(text) {
+			if (typeof text == "undefined") {
+				console.log("no text was found returning undefined");
+				callback(undefined);
+				return;
+			}
 			console.log("Splitting up!");
 			console.log(text);
-			lines = (""+text).split(/[\r\n]+/g)	
-			callback(new (function(lines) {
-				var currentLineNumber = 0;// tolerate both Windows and Unix linebreaks
-				this.readLine = function() {
-					if (currentLineNumber >= lines.length) {
-						return null;
-					}
-					return lines[currentLineNumber++];
-				}
-			})(lines));
+			var reader = new FileLineReader(text);
+			callback(reader);
 		};
 		this.readFileAsOneString(func);
 	}
@@ -184,4 +200,32 @@ function AbstractedFile(file) {
 			}
 		}
 	})();
+
+	/**
+	 * Breaks up a file into lines and then returns them out
+	 * @Class
+	 */
+	function FileLineReader(text) {
+		lines = (""+text).split(/[\r\n]+/g);// tolerate both Windows and Unix linebreaks
+		var currentLineNumber = 0;
+
+		/**
+		 * @Method
+		 * @return returns a specific line of the file
+		 */
+		this.readLine = function() {
+			if (currentLineNumber >= lines.length) {
+				return null;
+			}
+			return lines[currentLineNumber++];
+		};
+
+		/**
+		 * @Method
+		 * @return true if there are more lines to be read.
+		 */
+		this.hasNext = function() {
+			return currentLineNumber < lines.length;
+		};
+	}
 }

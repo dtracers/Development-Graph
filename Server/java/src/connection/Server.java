@@ -21,7 +21,7 @@ public class Server extends SimpleWebServer {
 	public static final String WORKING_DIR = System.getProperty("user.dir");
 	private static final String PROJECT_START_PATH = "/project";
 	private static final String WEB_START_PATH = "/web";
-	private static final String WEB_FOLDER = "website";
+	private static final String WEB_FOLDER = "website/src";
 	private static final String SERVER_FOLDER = "Server";
 	private static final String NEW_PROJECT_REQUEST = "newProject";
 	private static final String LOAD_PROJECT_REQUEST = "loadProject";

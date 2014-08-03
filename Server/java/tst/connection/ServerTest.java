@@ -74,7 +74,7 @@ public class ServerTest {
     }
 
     /**
-	 * Passes ifthe correct java script is grabbed for loading data.
+	 * Passes if the correct java script is grabbed for loading data.
 	 */
     @Test
     public void testJSon() throws Exception {
