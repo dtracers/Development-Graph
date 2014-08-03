@@ -1,4 +1,5 @@
 /**
+ * @Method
  * Times out the test and then will continue test onward
  * @param assert
  * @param millis
@@ -39,3 +40,21 @@ function logAssertIsAssert(assert) {
 		console.log("Test may have an odd behaviour as the assert object is actually undefined");
 	}
 }
+
+QUnit.done(function( details ) {
+	var url = "/close?name=" + encodeURIComponent(details.name) + "&" + 
+			"failed=" + details.failed + "&total=" + details.total;
+	var xmlhttp;
+	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+		xmlhttp = new XMLHttpRequest();
+	}
+	else {// code for IE6, IE5
+		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	try {
+		xmlhttp.open("PUT", url, false);
+		xmlhttp.send(null);
+	} catch(err) {
+		console.log(err); // silent failure
+	}
+});

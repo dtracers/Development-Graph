@@ -51,15 +51,17 @@ public class Server extends SimpleWebServer {
 			default:
 			case GET: return get(session);
 			case POST: return post(session);
+			case PUT: return put(session);
 		}
 	}
+
 
 	/**
 	 * Handles a post response and parses forms
 	 * @param session
 	 * @return
 	 */
-	public Response post(IHTTPSession session) {
+	protected Response post(IHTTPSession session) {
 	    FormParser form = new FormParser(session);
         try {
         	form.parse();
@@ -94,7 +96,7 @@ public class Server extends SimpleWebServer {
 	 * @param session
 	 * @return
 	 */
-	public Response get(IHTTPSession session) {
+	protected Response get(IHTTPSession session) {
 		if (session.getParms().size() > 0 && session.getUri().contains(".dgd")) {
 			System.out.println(session.getParms());
 			System.out.println(session.getUri());
@@ -121,6 +123,10 @@ public class Server extends SimpleWebServer {
 		} else {
 			return super.serve(session);
 		}
+	}
+
+	protected Response put(IHTTPSession session) {
+		return super.serve(session);
 	}
 
 	/**

@@ -375,7 +375,6 @@ public class JsonWriterTest extends JsonTest {
 		return null;
 	}
 
-	@SuppressWarnings("resource")
 	public static String createResult(Reader source, Map<String, JSONObject> replacement, String key) throws IOException, ParseException {
 		JSONParser parser = new JSONParser();
 		BufferedReader read = new BufferedReader(source);

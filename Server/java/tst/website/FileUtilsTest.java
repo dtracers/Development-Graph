@@ -20,6 +20,7 @@ public class FileUtilsTest {
 	private static final File TEST_DIRECTORY = new File(Server.WORKING_DIR.substring(0, Server.WORKING_DIR.indexOf("Server")) + "FakeTestProject/");
 	private static final String SERVER_DIRECTORY = Server.WORKING_DIR;
 	private static final String TEST_DATA_URL = "/project-" + TEST_PROJECT_NAME + "/.dgd/";
+	private static final long TIMEOUT_TIME = 1000 * 60 * 5; // 5 minutes
 	private static Server serv;
 
 	@BeforeClass
@@ -30,8 +31,14 @@ public class FileUtilsTest {
 		System.out.println("Running server");
 		serv = new TestServer("localHost", 9000);
 		serv.start();
+	}
 
-		java.awt.Desktop.getDesktop().browse(new URI("http://localhost:9000/web/tst/fileHandler/fileUtilsTest.html"));
+	@Test
+	public void test() throws IOException, InterruptedException, URISyntaxException {
+		java.awt.Desktop.getDesktop().browse(new URI("http://localhost:9000/web/tst/fileHandler/fileUtilsTest.html?noglobals"));
+		((TestServer) serv).pause(TIMEOUT_TIME);
+		assertTrue(((TestServer) serv).testEnded());
+		assertEquals(0, ((TestServer) serv).getNumberOfFailedTest());
 	}
 
 	@AfterClass
@@ -42,10 +49,4 @@ public class FileUtilsTest {
 	        serv = null;
     	}
 	}
-
-	@Test
-	public void test() throws IOException {
-		System.in.read();
-	}
-
 }
