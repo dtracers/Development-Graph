@@ -98,9 +98,11 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
 
 	// if the node is a dynamic node then its id is dn + nodeLabel
 	var newNodeId = dynamicNode ? ('dn' + actionLabel + (existingNode ? existingNode.id : '-1')) : 'n' + ++nodeCounter;
+	var featureId = existingNode.id.replace("n","f");
 	var nodeLabel = nodeLabel ? nodeLabel : 'r' + newNodeId;
 	var returnNode = {
 		id: newNodeId,
+		getFeatureId: function() {return featureId},
 		label: nodeLabel,
 		x: nodeX,
 		y: nodeY,

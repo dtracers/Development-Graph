@@ -1,0 +1,12 @@
+[
+    {
+	    "id": "f0",
+        "files" : [
+			{
+				"name" : "Test.java",
+				"directory" : "/src",
+				"lines" : [[3, 5]]
+			}
+        ]
+    }
+]

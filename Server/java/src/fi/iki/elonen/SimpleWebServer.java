@@ -59,6 +59,7 @@ public class SimpleWebServer extends NanoHTTPD {
         put("zip", "application/octet-stream");
         put("exe", "application/octet-stream");
         put("class", "application/octet-stream");
+        put("svg", "image/svg+xml");
     }};
     /**
      * The distribution licence

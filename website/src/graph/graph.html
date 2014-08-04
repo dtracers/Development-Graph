@@ -1,6 +1,7 @@
 <html>
 <head>
 <link rel="import" href = "scriptInclude.html">
+<link rel="import" href = "/web/src/fileHandler/fileImporter.html">
 <style type="text/css">
 	body {
 		margin:0px;
@@ -36,11 +37,10 @@
 <div id="graphContainer"></div>
 <script>
 	var graphManager = new GraphManager();
-	graphManager.load('/project-'+ getProjectFromUrl() +'/.dgd/graph.grp', 'graphContainer', function() {
+	graphManager.load(getDataDirectoryAsUrl() + '/graph', 'graphContainer', function() {
 		graphManager.getNodeClickManager().addClickListener(FeatureCreator, ['overlay']);
 		graphManager.getNodeClickManager().addClickListener(CodeViewCreator, ['overlay']);
 	});
-
 </script>
  <div id="overlay"></div>
 </body>

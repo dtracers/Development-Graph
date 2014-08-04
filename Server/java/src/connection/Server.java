@@ -21,11 +21,11 @@ public class Server extends SimpleWebServer {
 	public static final String WORKING_DIR = System.getProperty("user.dir");
 	protected static final String PROJECT_START_PATH = "/project";
 	protected static final String WEB_START_PATH = "/web";
-	protected static final String WEB_FOLDER = "website/src";
+	protected static final String WEB_FOLDER = "website";
 	protected static final String SERVER_FOLDER = "Server";
 	protected static final String NEW_PROJECT_REQUEST = "newProject";
 	protected static final String LOAD_PROJECT_REQUEST = "loadProject";
-	protected static final String MAIN_PROJECT_PAGE = "/graph/graph.html";
+	protected static final String MAIN_PROJECT_PAGE = "/src/graph/graph.html";
 
 	private ProjectManager projectManagerInstance;
 
@@ -152,6 +152,7 @@ public class Server extends SimpleWebServer {
 		}
 		String newPath = path.substring(0, path.indexOf(SERVER_FOLDER)) + WEB_FOLDER;
 		File f = new File(newPath);
+		System.out.println(new File(f, uri));
 		return new File(f, uri);
 	}
 

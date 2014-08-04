@@ -1,9 +1,10 @@
 package projectManagment;
 
+import static connection.Server.WORKING_DIR;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +79,10 @@ public class ProjectManager {
 			projDir.mkdir();
 		}
 
-		p.getGit().addToIgnore(PROJECT_FILE);
+		p.getGit().addToIgnore(PROJECT_FILE); // ignoring return value
+	}
+
+	public void addProjectToProjectList(Project proj) {
+		File f = new File(WORKING_DIR);
 	}
 }

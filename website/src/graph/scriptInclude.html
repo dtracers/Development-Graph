@@ -12,5 +12,9 @@ function getProjectFromUrl() {
 	url = url.substring(url.indexOf(webStart) + webStart.length);
 	return url.substring(0, url.indexOf('/'));
 }
+
+function getDataDirectoryAsUrl() {
+	return "/project-" + getProjectFromUrl() + "/.dgd";
+}
 </script>
 </head>

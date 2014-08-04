@@ -29,14 +29,35 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 
 	function setUpCodeViewer(e, oldNode) {
 		produceOverlay(e, oldNode, function(codeElement, DocElement, TestElement) {
-			// load the data into the given elements!
+			console.log(e.data.node);
+			alert(getDataDirectoryAsUrl() + "/source?" + e.data.node.getFeatureId());
+			var sourceFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source?" + e.data.node.getFeatureId()); // grabs data from source feature map
+			sourceFileGrabber.readFileAsJson(function(jsonObject) {
+				console.log(jsonObject);
+				alert(jsonObject);
+				jsonObject = jsonObject[0];
+				console.log(jsonObject);
+				fileList = jsonObject.files;
+				for (var i = 0; i < fileList.length; i++ ) {
+					fileObj = fileList[i];
+					console.log(fileObj);
+					var elementS = document.createElement('div');
+					var shadowRoot = elementS.createShadowRoot();
+					shadowRoot.appendChild(fileBoxTemplate);
+					shadowRoot.querySelector(".block").style.backgroundImage = "url('/web/images/doc_file.svg')";
+					//shadowRoot.querySelector("img").src = "/web/images/doc_file.svg";
+					shadowRoot.querySelector("h3").textContent = fileObj["name"];
+					codeElement.appendChild(elementS);
+					console.log(elementS);
+				}
+			});
 		});
 	}
 
-	function loadFileObjectTemplate(shadowRoot) {
+	function loadFileObjectTemplate(importedDocument) {
 		if (typeof FileObjectTemplate == "undefined") {
-			var content = shadowRoot.querySelector("#fileBox").content;
-			fileBoxTemplate = document.importNode(content, true);
+				var content = importedDocument.querySelector("#fileBox").content;
+				fileBoxTemplate = document.importNode(content, true);
 		}
 	}
 
@@ -75,8 +96,8 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 		var testElement = shadowRoot.querySelector('.test');
 
 		document.getElementById(overlayId).style.display = 'block';
-		
-		loadFileObjectTemplate(shadowRoot);
+
+		loadFileObjectTemplate(importedDocument);
 
 		callback(codeElement, docsElement, testElement);
 	}
