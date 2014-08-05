@@ -2,8 +2,11 @@ package projectManagment;
 
 import static connection.Server.WORKING_DIR;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
@@ -16,9 +19,12 @@ public class ProjectManager {
 
 	public static final String PROJECT_FILE = ".dgrproj";
 	public static final String PROJECT_DIRECTORY = ".dgd";
+	public static final String RUN_DIRECTORY = WORKING_DIR.substring(0, WORKING_DIR.indexOf("Server") + "Server".length()) + "/run";
+	public static final String PROJECT_LIST = ".projectList";
 	private Map<String, Project> projectMap = new HashMap<String,Project>();
 
 	private ProjectManager() {
+		loadProjects();
 	}
 
 	private static ProjectManager instance;
@@ -61,6 +67,7 @@ public class ProjectManager {
 		Project p = new Project(form.getPostValue("name"), new File(directory.replaceAll("%2F", "/")));
 		this.addProject(p);
 		System.out.println("DIRECTORY " + p.getDirectoryPath());
+		addProjectToProjectList(p);
 		return p.getName();
 	}
 
@@ -80,9 +87,56 @@ public class ProjectManager {
 		}
 
 		p.getGit().addToIgnore(PROJECT_FILE); // ignoring return value
+		addProjectToProjectList(p);
 	}
 
-	public void addProjectToProjectList(Project proj) {
-		File f = new File(WORKING_DIR);
+	public boolean addProjectToProjectList(Project proj) {
+		System.out.println(RUN_DIRECTORY);
+		File f = new File(RUN_DIRECTORY, PROJECT_LIST);
+		if (f.exists()) {
+			try (BufferedReader r = new BufferedReader(new FileReader(f))) {
+				String nextLine = "";
+				while ((nextLine = r.readLine()) != null) {
+					if (nextLine.contains(proj.getName()) || nextLine.equals(proj.getName())) {
+						return true; // alread yadded
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try (PrintStream stream = new PrintStream(new FileOutputStream(f,true))) {
+			stream.println(proj.getName());
+			stream.println(proj.getDirectoryPath());
+			return true; // just stupdily assume it worked
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public void loadProjects() {
+		File f = new File(RUN_DIRECTORY, PROJECT_LIST);
+		try (BufferedReader r = new BufferedReader(new FileReader(f))) {
+			String nextLine = "";
+			while ((nextLine = r.readLine()) != null) {
+				File dir = new File(r.readLine());
+				Project p = new Project(nextLine, dir);
+				addProject(p);
+			}
+		} catch (IOException e) {
+			//e.printStackTrace();
+		}
+	}
+
+	public static File getProjectListFile() {
+		return new File(RUN_DIRECTORY, PROJECT_LIST);
 	}
 }

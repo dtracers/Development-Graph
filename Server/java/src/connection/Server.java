@@ -21,8 +21,11 @@ public class Server extends SimpleWebServer {
 	public static final String WORKING_DIR = System.getProperty("user.dir");
 	protected static final String PROJECT_START_PATH = "/project";
 	protected static final String WEB_START_PATH = "/web";
+	protected static final String MAIN_DISPLAY_PAGE = "/web/index.html";
+	protected static final String SERVER_FILES = "/server";
 	protected static final String WEB_FOLDER = "website";
 	protected static final String SERVER_FOLDER = "Server";
+	protected static final String PROJECT_LIST = "projectList";
 	protected static final String NEW_PROJECT_REQUEST = "newProject";
 	protected static final String LOAD_PROJECT_REQUEST = "loadProject";
 	protected static final String MAIN_PROJECT_PAGE = "/src/graph/graph.html";
@@ -120,9 +123,9 @@ public class Server extends SimpleWebServer {
 				e.printStackTrace();
 				return createErrorResponse(e, null);
 			}
-		} else {
-			return super.serve(session);
 		}
+		String uri = session.getUri();
+		return super.serve(session);
 	}
 
 	protected Response put(IHTTPSession session) {
@@ -141,7 +144,19 @@ public class Server extends SimpleWebServer {
 		if (uri.startsWith(WEB_START_PATH)) {
 			return webPathTranslater(homeDir, uri);
 		}
+		
+		if (uri.startsWith(SERVER_FILES)) {
+			return serverPathTranslater(homeDir, uri);
+		}
 		return super.translatePath(homeDir, uri);
+	}
+
+	private File serverPathTranslater(File homeDir, String uri) {
+		String localFile = uri.substring(SERVER_FILES.length() + 1); // removes slash
+		if (localFile.startsWith(PROJECT_LIST)) {
+			return ProjectManager.getProjectListFile();
+		}
+		return null;
 	}
 
 	protected File webPathTranslater(File homeDir, String uri) {

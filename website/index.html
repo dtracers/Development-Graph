@@ -4,6 +4,7 @@
 </head>
 <body>
 <h1>Welcome!</h1>
+<div id = "existingProjects"></div>
 <h1>Give the directory of an existing project</h1>
 <div id="drop_zone">
 <input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
@@ -71,5 +72,41 @@
 	<input id = "newName" type ="text" name = "name" placeholder = "Project Name">
 	<input type="submit" value="Submit">
 </form>
+<script>
+	(function() {
+	var file = new AbstractedFile(null, '/server/projectList');
+	file.readFileAsLines(function(fileReader) {
+		try {
+			while (fileReader.hasNext()) {
+				firstLine = fileReader.readLine();
+				secondLine = fileReader.readLine();
+				var form = document.createElement('form');
+				form.action = "loadProject";
+				form.method = "post";
+				var name = document.createElement('input');
+				name.name = "name";
+				name.type = "text";
+				name.value = firstLine;
+				name.setAttribute("type", "hidden");
+				var directory = document.createElement('input');
+				directory.name = "directory";
+				directory.type = "text";
+				directory.value = secondLine;
+				directory.setAttribute("type", "hidden");
+				form.appendChild(name);
+				form.appendChild(directory);
+				var button = document.createElement('button');
+				button.textContent = firstLine;
+				button.type = "subment";
+				form.appendChild(button);
+				document.getElementById('existingProjects').appendChild(form);
+			}
+		} catch(err) {
+			console.log(err);
+			console.log(err.stack);
+		}
+	});
+	})();
+</script>
 </body>
 </html>
