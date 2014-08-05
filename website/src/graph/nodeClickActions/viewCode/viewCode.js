@@ -44,9 +44,11 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 					var elementS = document.createElement('div');
 					var shadowRoot = elementS.createShadowRoot();
 					shadowRoot.appendChild(fileBoxTemplate);
-					shadowRoot.querySelector(".block").style.backgroundImage = "url('/web/images/doc_file.svg')";
-					//shadowRoot.querySelector("img").src = "/web/images/doc_file.svg";
+
+					shadowRoot.querySelector("a").href = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
+					shadowRoot.querySelector(".block").style.backgroundColor = "#249324";
 					shadowRoot.querySelector("h3").textContent = fileObj["name"];
+
 					codeElement.appendChild(elementS);
 					console.log(elementS);
 				}
