@@ -5,20 +5,5 @@
 <script src="sigma-v1.0.2/plugins/sigma.layout.forceAtlas2.min.js"></script>
 <script src="sigma-v1.0.2/plugins/sigma.plugins.neighborhoods.min.js"></script>
 <script src="sigma-v1.0.2/plugins/sigma.renderers.customShapes.min.js"></script>
-<script>
-function getProjectFromUrl() {
-	var url = document.URL;
-	var webStart = 'web-';
-	url = url.substring(url.indexOf(webStart) + webStart.length);
-	return url.substring(0, url.indexOf('/'));
-}
-
-function getDataDirectoryAsUrl() {
-	return "/project-" + getProjectFromUrl() + "/.dgd";
-}
-
-function getSourceDirectoryAsUrl() {
-	return "/project-" + getProjectFromUrl();
-}
-</script>
+<script src="/web/src/fileHandler/urlDecoder.js"></script>
 </head>

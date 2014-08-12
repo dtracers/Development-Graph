@@ -124,7 +124,6 @@ public class Server extends SimpleWebServer {
 				return createErrorResponse(e, null);
 			}
 		}
-		String uri = session.getUri();
 		return super.serve(session);
 	}
 
