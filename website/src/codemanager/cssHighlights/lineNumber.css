@@ -31,6 +31,10 @@ pre .line-number > span:hover {
   background-color:rgba(127, 159, 191, 0.3);
 }
 
+pre .line-number > span.selected {
+  background-color:rgba(127, 159, 191, 0.3);
+}
+
 pre .line-number span::selection {
   background-color:rgba(127, 159, 191, 0.3);
 }
