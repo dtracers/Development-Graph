@@ -1,0 +1,25 @@
+@CHARSET "UTF-8";
+
+.java.hljs .hljs-class .hljs-title {
+	color:#1000A2;
+}
+
+.java.hljs .hljs-keyword {
+	color:#0000FF;
+}
+
+.java.hljs .hljs-string {
+	color:#5900FF;
+}
+
+.java.hljs .hljs-title {
+	color:#000000;
+}
+
+.java.hljs .hljs-comment {
+	color:#3F7F5F;
+}
+
+.java.hljs .hljs-javadoc {
+	color:#3F7FFF;
+}

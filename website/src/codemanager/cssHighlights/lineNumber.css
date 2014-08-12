@@ -1,0 +1,46 @@
+pre {
+  overflow:auto;
+  margin:0 0 1em;
+}
+
+pre .line-number {
+  /* Ukuran line-height antara teks di dalam tag <code> dan <span class="line-number"> harus sama! */
+  /*font:normal normal 12px/14px "Courier New",Courier,Monospace;*/
+  font-family: monospace;
+  color:black;
+  display:block;
+}
+
+pre .line-number {
+  float:left;
+  margin:0 1em 0 -1em;
+  border-right:1px solid;
+  text-align:right;
+  padding-top: -0.5em;
+}
+
+pre .line-number span {
+  display:block;
+  padding:0 .5em 0 1em;
+  font-weight:bold;
+  color:#000000;
+  cursor:pointer;
+}
+
+pre .line-number > span:hover {
+  background-color:rgba(127, 159, 191, 0.3);
+}
+
+pre .line-number span::selection {
+  background-color:rgba(127, 159, 191, 0.3);
+}
+
+pre .line-number span::-moz-selection {
+  background-color:rgba(127, 159, 191, 0.3);
+}
+
+pre .cl {
+  display:block;
+  clear:both;
+}
+
