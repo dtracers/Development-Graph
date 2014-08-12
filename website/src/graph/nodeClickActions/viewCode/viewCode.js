@@ -45,7 +45,9 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 					var shadowRoot = elementS.createShadowRoot();
 					shadowRoot.appendChild(fileBoxTemplate);
 
-					shadowRoot.querySelector("a").href = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
+					var pageUrl = getWebsitePathAsUrl() + "/codeManager/codeHighlighter.html?";
+					var dataUrl = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
+					shadowRoot.querySelector("a").href = pageUrl + dataUrl;
 					shadowRoot.querySelector(".block").style.backgroundColor = "#249324";
 					shadowRoot.querySelector("h3").textContent = fileObj["name"];
 
