@@ -1,7 +1,8 @@
 function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var nodeClickFunctionMap = {};
 	var undoNodeClickFunction;
-	var lastNodeClicked;
+	var lastNodeClicked = undefined;
+	var lastFeatureClicked = undefined;
 	var fa2Runtime = 2000; // 2 seconds seems long enough for the nodes to settle.
 	var localScope = this;
 	var parentRedirect = false;
@@ -37,29 +38,41 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 			lastNodeClicked = undefined;
 		}
 
+		if (lastFeatureClicked && displayGraph.nodes(lastFeatureClicked.id) == undefined) {
+			console.log('the previous feature was removed from the graph and can no longer be accessed');
+			lastFeatureClicked = undefined;
+		}
+
 		// calls the undo click function (may not be implemented for every node)
 		if ((lastNodeClicked != clickedNode || clickedNode.redoClick) && undoNodeClickFunction) {
-			undoNodeClickFunction(lastNodeClicked, e);
+			undoNodeClickFunction(e, lastNodeClicked, lastFeatureClicked);
 			setUndoClickFunction(undefined); // remove the click function now
 		}
 
 		if (lastNodeClicked == clickedNode && !clickedNode.redoClick && !parentRedirect) {
 			return;
 		}
-		
+
 		if (parentRedirect) {
 			parentRedirect = false;
 		}
 
 		// replace old node with new node
 		var oldNode = lastNodeClicked;
+		
 		lastNodeClicked = clickedNode;
-
 
 		var action = clickedNode.actionType;
 		if (!action || action == undefined) {
 			return;
 		}
+
+		var oldFeature = lastFeatureClicked;
+		if (action == 'feature') {
+			lastFeatureClicked = clickedNode;
+			
+		}
+
 		var funcs = nodeClickFunctionMap[action];
 
 		if (!funcs || funcs == undefined) {
@@ -71,8 +84,9 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		if (undoFunc) {
 			setUndoClickFunction(undoFunc);
 		}
+
 		if (clickFunc) {
-			clickFunc(e, oldNode);
+			clickFunc(e, oldNode, oldFeature);
 		}
 
 	};
@@ -112,23 +126,23 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	 * Removes dynamic nodes from other nodes if they exist.
 	 * Adds the dynamic nodes for this specific feature.
 	 */
-	function featureNodeAction(e, oldNode) {
+	function featureNodeAction(e, oldNode, oldFeature) {
 		managerInstance.stopForceAtlas2();
 
 		var clickedNode = e.data.node;
 
-		if (oldNode) {
-			if (oldNode.actionType == 'feature') {
-				displayGraph.removeAllDynamicNodes(oldNode.id, actionList);
-			} else if (oldNode.isDynamic) {
-				if (oldNode.parentNode != clickedNode.id) {
-					displayGraph.removeAllDynamicNodes(oldNode.parentNode, actionList);
+			if (oldNode && oldNode.actionType == 'feature') {
+				displayGraph.removeAllDynamicNodes(oldFeature.id, actionList);
+			} else if (oldNode && oldNode.isDynamic) {
+				if (oldFeature.parentNode != clickedNode.id) {
+					displayGraph.removeAllDynamicNodes(oldFeature.parentNode, actionList);
 				} else {
 					console.log("there will be no more new nodes made today!");
 					return;
 				}
+			 } else if (oldFeature) { //always remove dynamic nodes from the last feature clicked
+				 displayGraph.removeAllDynamicNodes(oldFeature.id, actionList);
 			 }
-		}
 
 		// drops all descendants of the node *if they exist*
 		displayGraph.removeDescendants(clickedNode.id);
