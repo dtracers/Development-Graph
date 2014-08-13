@@ -91,28 +91,10 @@ function AbstractedFile(file, url) {
 				reader.readAsText(file);
 			});
 		} else if (usingServer) {
-			var xmlhttp;
-			if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
-				xmlhttp = new XMLHttpRequest();
-			}
-			else {// code for IE6, IE5
-				xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-			}
+			var xmlhttp = createXmlHttp(function(responseText) {
+				callback(responseText)
+			});
 
-			var timedOut = false;
-			var timeout = setTimeout(function() {
-				timedOut = true;
-				callback(undefined);
-			}, timeoutTime); // one second timeout (may need to be made longer)
-
-			xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-					clearTimeout(timeout);
-					if (!timedOut) {
-					callback(xmlhttp.responseText);
-					}
-				}
-			};
 			xmlhttp.open("GET", url, true);
 			xmlhttp.send();
 		}
@@ -252,5 +234,39 @@ function AbstractedFile(file, url) {
 		this.hasNext = function() {
 			return currentLineNumber < lines.length;
 		};
+	}
+
+	/**
+	 * Creates an XmlHttpRequest that can be used to talk to the server.
+	 * @Method
+	 * @param inputCallback {function} The callback that is called as a response from the server.
+	 * @callback inputCallback(responseText)
+	 * @callbackParam responseText {string} the result of the server message, or undefined if there is an error
+	 * @returns {XMLHttpRequest} also sets the callback
+	 */
+	function createXmlHttp(inputCallback) {
+		var xmlhttp;
+		if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+			xmlhttp = new XMLHttpRequest();
+		}
+		else { // code for IE6, IE5
+			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+		}
+
+		var timedOut = false;
+		var timeout = setTimeout(function() {
+			timedOut = true;
+			callback(undefined);
+		}, timeoutTime); // one second timeout (may need to be made longer)
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				clearTimeout(timeout);
+				if (!timedOut) {
+					inputCallback(xmlhttp.responseText);
+				}
+			}
+		};
+		return xmlhttp;
 	}
 }
