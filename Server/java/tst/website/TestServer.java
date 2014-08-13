@@ -3,6 +3,8 @@ package website;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import connection.Server;
 import fi.iki.elonen.NanoHTTPD.IHTTPSession;
@@ -10,8 +12,8 @@ import fi.iki.elonen.NanoHTTPD.Response;
 
 public class TestServer extends Server {
 	private final static String CLOSE_TRIGGER = "Close";
-	private boolean testEnded = false;
-	private int failedTestNumber;
+	private int failedTestNumber = 1; // if the test never finish then that is 1 failed test.
+	private Map<String, Boolean> mappedEndedTest = new HashMap<String, Boolean>();
 	
 	@Override
 	public Response post(IHTTPSession session) {
@@ -43,12 +45,20 @@ public class TestServer extends Server {
 			stop();
 			return null;
 		}
+		if (session.getUri().equals("/endTestSuite")) {
+			System.out.println(session.getParms());
+			failedTestNumber = Integer.parseInt(session.getParms().get("failed"));
+			String testIdentifier = session.getParms().get("identifier");
+			System.out.println("TEST IDENT: [" + testIdentifier + "]");
+			mappedEndedTest.put(testIdentifier, true);
+			return null;
+		}
 		return super.serve(session);
 	}
 
 	public void stop() {
 		super.stop();
-		testEnded = true;
+		// TODO: set all test to finished here.
 	}
 
 	/**
@@ -56,20 +66,34 @@ public class TestServer extends Server {
 	 * @param timeout
 	 * @throws InterruptedException
 	 */
-	public void pause(long timeout) throws InterruptedException {
+	public void pause(long timeout, final String testIdentifier) throws InterruptedException {
+		if (!mappedEndedTest.containsKey(testIdentifier)) {
+			mappedEndedTest.put(testIdentifier, false);
+		}
 		long startTime = System.currentTimeMillis();
 		long currentTime = System.currentTimeMillis();
-		while (!testEnded && currentTime - startTime < timeout) {
-			Thread.sleep(10);
+		while (!mappedEndedTest.get(testIdentifier) && currentTime - startTime < timeout) {
+			Thread.sleep(100);
 			currentTime = System.currentTimeMillis();
+			//System.out.println("Is [" + testIdentifier + "] still running? " + mappedEndedTest.get(testIdentifier));
 		}
 	}
 
-	public boolean testEnded() {
-		return testEnded;
+	public boolean testEnded(String testIdentifier) {
+		return mappedEndedTest.get(testIdentifier);
 	}
 
 	public int getNumberOfFailedTest() {
 		return failedTestNumber;
+	}
+
+	/**
+	 * Returns a url used for testing javascript files that need the server.
+	 * @param identifier
+	 * @param string
+	 * @return
+	 */
+	public String getTestUrl(String identifier, String string) {
+		return "http://localhost:" + getListeningPort() + "/web-" + identifier + "/tst/" + string;
 	}
 }
