@@ -35,5 +35,14 @@ function getExtensionFromUrl(url) {
 		return undefined;
 	}
 	var extensionIndex = url.lastIndexOf(".");
-	return url.substring(extensionIndex + 1);
+	var ending = url.substring(extensionIndex + 1);
+
+	if (ending.indexOf("?") > -1) {
+		ending = ending.substring(0, ending.indexOf("?"));
+	}
+
+	if (ending.indexOf("#") > -1) {
+		ending = ending.substring(0, ending.indexOf("#"));
+	}
+	return ending;
 }
