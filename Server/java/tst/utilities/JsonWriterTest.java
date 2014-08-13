@@ -361,6 +361,40 @@ public class JsonWriterTest extends JsonTest {
 		jsonEquals(replacedJsonText, result);
 	}
 
+	/* Everything below is deletion from an array*/
+
+	/**
+	 * Passes if the input string is the same as the output string.
+	 * Single deletion
+	 */
+	@Test
+	public void test1Deletion() throws IOException, ParseException { // stage 2 level 5
+		String jsonText = "[{\"ignore\":123}, 5, " + COMPLEX_REPLACEMENT + "]";
+		String replacedJsonText = "[{\"ignore\":123}, 5]";
+
+		Reader source = new StringReader(jsonText);
+		Map<String, JSONObject> map = createMap();
+		map.put("123", null);
+		String result = createResult(source, map, "first");
+		jsonEquals(replacedJsonText, result);
+	}
+
+	/**
+	 * Passes if the input string is the same as the output string.
+	 * Double Replacment
+	 */
+	@Test
+	public void test2MultiDeltion() throws IOException, ParseException { // stage 2.5 level 5
+		String jsonText = "[{\"first\":123}, 5, " + COMPLEX_REPLACEMENT + "]";
+		String replacedJsonText = "[5]";
+
+		Reader source = new StringReader(jsonText);
+		Map<String, JSONObject> map = createMap();
+		map.put("123", null);
+		String result = createResult(source, map, "first");
+		jsonEquals(replacedJsonText, result);
+	}
+
 	public Map<String, JSONObject> createMap() {
 		return new HashMap<String, JSONObject>();
 	}

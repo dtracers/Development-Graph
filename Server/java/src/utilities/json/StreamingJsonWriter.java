@@ -3,7 +3,6 @@ package utilities.json;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.json.simple.JSONObject;
@@ -17,8 +16,8 @@ import org.json.simple.parser.ParseException;
  *
  * This works on the specific principle that the item we are finding is either the first item in an object or not in the object at all
  *
+ * An object can now be deleted from an array BUT NOT ANOTHER OBJECT!
  * TODO: add components for inserting an object into an array and inserting an object into an object.
- * TODO: add optimization for not putting an object more than once into the stream.
  */
 
 public class StreamingJsonWriter implements ContentHandler {
@@ -29,7 +28,6 @@ public class StreamingJsonWriter implements ContentHandler {
 	}
 
 	private int counter = 0;
-	private List<String> keys;
 	private Map<String, JSONObject> objectList = new HashMap<String, JSONObject>();
 	private JSONObject currentObject = null;
 	private String key;
@@ -81,9 +79,10 @@ public class StreamingJsonWriter implements ContentHandler {
 				if (key.equals(matchKey)) {
 					if (checkValues(value)) {
 						key = null;
-						return true;
+						return true; 
 					}
 				}
+				write("{");
 				writeKey(key);
 			}
 			writeValue(value);
@@ -101,7 +100,7 @@ public class StreamingJsonWriter implements ContentHandler {
 
 	private boolean checkValues(Object value) {
 		JSONObject obj = objectList.get(""+value);
-		if (obj != null) {
+		if (objectList.containsKey("" + value)) {
 			key = null;
 			inObject = true;
 			counter = 1;
@@ -114,7 +113,8 @@ public class StreamingJsonWriter implements ContentHandler {
 
 	@Override
 	public boolean startArray() throws ParseException, IOException {
-		if (tracking && !inObject) { // 
+		if (tracking && !inObject) { //
+			write("{");
 			writeKey(key);
 		}
 		tracking = false;
@@ -146,7 +146,8 @@ public class StreamingJsonWriter implements ContentHandler {
 
 	@Override
 	public boolean startObject() throws ParseException, IOException {
-		if (tracking && !inObject) { // 
+		if (tracking && !inObject) {
+			write("{");
 			writeKey(key);
 		}
 		if (!inObject) {
@@ -161,7 +162,7 @@ public class StreamingJsonWriter implements ContentHandler {
 		if (inObject) {
 			counter ++;
 		} else {
-			write("{");
+		//	write("{");
 		}
 		first = true;
 		return true;
@@ -175,9 +176,15 @@ public class StreamingJsonWriter implements ContentHandler {
 		}
 		if (inObject && counter <= 0) {
 			inObject = false;
-			writeReplacementObject(currentObject);
+			if (currentObject != null) {
+				writeReplacementObject(currentObject);
+			}
+			// if it is null then we consider it a deletion
 			currentObject = null;
 		} else {
+			if (first) {
+				write("{");
+			}
 			write("}");
 		}
 		first = false;
@@ -199,8 +206,11 @@ public class StreamingJsonWriter implements ContentHandler {
 	}
 
 	private void writeReplacementObject(JSONObject currentObject) {
-		String result = currentObject.toJSONString();
-		write(result.substring(1));
+		try {
+			currentObject.writeJSONString(output);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void writeKey(String key) {
