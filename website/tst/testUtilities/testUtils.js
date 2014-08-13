@@ -42,8 +42,16 @@ function logAssertIsAssert(assert) {
 }
 
 QUnit.done(function( details ) {
-	var url = "/close?name=" + encodeURIComponent(details.name) + "&" + 
-			"failed=" + details.failed + "&total=" + details.total;
+
+	var identifier = (function() {
+		var url = document.URL;
+		var webStart = 'web-';
+		url = url.substring(url.indexOf(webStart) + webStart.length);
+		return url.substring(0, url.indexOf('/'));
+	})();
+
+	var url = "/endTestSuite?name=" + encodeURIComponent(details.name) + "&" + 
+			"failed=" + details.failed + "&total=" + details.total + "&identifier=" + identifier;
 	var xmlhttp;
 	if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
 		xmlhttp = new XMLHttpRequest();
