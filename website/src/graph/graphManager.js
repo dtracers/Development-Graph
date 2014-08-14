@@ -20,7 +20,7 @@ function GraphManager() {
 			settings: {
 				defaultNodeColor: '#ec5148',
 				labelThreshold: 3,
-				defaultLabelColor: '#ffffff'
+				defaultLabelColor: '#ffffff',
 			}
 		});
 
