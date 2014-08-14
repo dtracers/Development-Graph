@@ -1,0 +1,34 @@
+<script>
+window.codeViewerLoaded = true;
+</script>
+<template id="viewCode">
+	<!-- For some reason css styles are not working -->
+	<style>
+		@import url("/web/src/graph/nodeClickActions/viewCode/codeViewer.css");
+	</style>
+	<div class = "darken">
+		<h1 class = "closeButton">Close</h1>
+		<div class = "table">
+			<div class="code">
+				<h1>Source Code <span id = "addSource">+</span></h1>
+			</div>
+			<div class="docs">
+				<h1>Source Docs <span id = "addDoc">+</span></h1>
+			</div>
+			<div class="test">
+				<h1>Tests <span  id = "addTests">+</span></h1>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="fileBox">
+	<style>
+		@import url("/web/src/graph/nodeClickActions/viewCode/fileBox.css");
+	</style>
+	<div class="block">
+		<a href="" target="_blank"></a>
+		<h3>File Name</h3>
+		<span class="overlay"></span>
+	</div>
+</template>
