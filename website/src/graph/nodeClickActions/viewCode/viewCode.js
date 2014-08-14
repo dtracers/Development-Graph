@@ -6,6 +6,9 @@
  * @param args the id where the overlay will be created
  */
 function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager, args) {
+	var SOURCE_TYPE = "source";
+	var DOC_TYPE = "doc";
+	var TEST_TYPE = "test";
 	var overlayId = args[0];
 	var fileBoxTemplate = undefined;
 	/**
@@ -28,36 +31,63 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 	}
 
 	function setUpCodeViewer(e, oldNode) {
-		produceOverlay(e, oldNode, function(codeElement, DocElement, TestElement) {
+		produceOverlay(e, oldNode, function(codeElement, docElement, testElement) {
 			console.log(e.data.node);
-			alert(getDataDirectoryAsUrl() + "/source?" + e.data.node.getFeatureId());
 			var sourceFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source?" + e.data.node.getFeatureId()); // grabs data from source feature map
-			sourceFileGrabber.readFileAsJson(function(jsonObject) {
-				console.log(jsonObject);
-				alert(jsonObject);
-				jsonObject = jsonObject[0];
-				console.log(jsonObject);
-				fileList = jsonObject.files;
-				for (var i = 0; i < fileList.length; i++ ) {
-					fileObj = fileList[i];
-					console.log(fileObj);
-					var elementS = document.createElement('div');
-					var shadowRoot = elementS.createShadowRoot();
-					shadowRoot.appendChild(fileBoxTemplate);
+			var docFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source_doc?" + e.data.node.getFeatureId()); // grabs data from doc feature map
+			var testFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source_test?" + e.data.node.getFeatureId()); // grabs data from test feature map
 
-					var pageUrl = getWebsitePathAsUrl() + "/codeManager/codeHighlighter.html?";
-					var dataUrl = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
-					shadowRoot.querySelector("a").href = pageUrl + dataUrl;
-					shadowRoot.querySelector(".block").style.backgroundColor = "#249324";
-					shadowRoot.querySelector("h3").textContent = fileObj["name"];
-
-					codeElement.appendChild(elementS);
-					console.log(elementS);
-				}
-			});
+			sourceFileGrabber.readFileAsJson(createJsonHandler(codeElement, SOURCE_TYPE));
+			docFileGrabber.readFileAsJson(createJsonHandler(docElement, DOC_TYPE));
+			testFileGrabber.readFileAsJson(createJsonHandler(testElement, TEST_TYPE));
 		});
 	}
 
+	/**
+	 * @METHOD
+	 * @param parentElement {element} The code block that the resulting data is added to.
+	 * @param type {string}
+	 * @returns A function that interprets a list of json objects.
+	 */
+	function createJsonHandler(parentElement, type) {
+		return function(jsonObject) {
+			if (typeof jsonObject == "undefined") {
+				return;
+			}
+			console.log(jsonObject);
+			jsonObject = jsonObject[0];
+			console.log(jsonObject);
+			fileList = jsonObject.files;
+			for (var i = 0; i < fileList.length; i++ ) {
+				fileObj = fileList[i];
+				console.log(fileObj);
+				var elementS = document.createElement('div');
+				var shadowRoot = elementS.createShadowRoot();
+				shadowRoot.appendChild(fileBoxTemplate);
+
+				var pageUrl = "";
+				var dataUrl = "";
+				if (type == DOC_TYPE && "url" in fileObj) {
+					pageUrl = fileObj["url"]; // they should be an html file that we can directly link to
+				} else if (type == DOC_TYPE) {
+					pageUrl = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"]; // directly load the page.
+				} else if (type == TEST_TYPE && "report" in fileObj) {
+					// dont do anything yet but in case we want to handle that
+				} else if (type == SOURCE_TYPE || type == TEST_TYPE) {
+					pageUrl = getWebsitePathAsUrl() + "/codeManager/codeHighlighter.html?"
+					sourceUrl = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
+					lineUrl = JSON.stringify(fileObj["lines"]);
+					alert(lineUrl);
+					dataUrl = "location=" + sourceUrl + "&lines=" + encodeURIComponent(lineUrl);
+				} 
+				shadowRoot.querySelector("a").href = pageUrl + dataUrl;
+				shadowRoot.querySelector(".block").className += " " + type;
+				shadowRoot.querySelector("h3").textContent = fileObj["name"];
+
+				parentElement.appendChild(elementS);
+			}
+		};
+	}
 	function loadFileObjectTemplate(importedDocument) {
 		if (typeof FileObjectTemplate == "undefined") {
 				var content = importedDocument.querySelector("#fileBox").content;
