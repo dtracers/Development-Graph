@@ -46,3 +46,15 @@ function getExtensionFromUrl(url) {
 	}
 	return ending;
 }
+
+/**
+ * @Method
+ * @param name where we want to grab the paramater from
+ * @returns the value associated with the given name
+ */
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
