@@ -2,6 +2,7 @@ package connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -201,6 +202,10 @@ public class Server extends SimpleWebServer {
 	}
 
 	protected final Response createErrorResponse(Exception e, String message) {
+		if (e instanceof FileNotFoundException) {
+			return new Response(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: " + e.getClass().getSimpleName() + 
+					":" + e.getMessage() + "\n" + message);
+		}
 		return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "SERVER INTERNAL ERROR: " + e.getClass().getSimpleName() + 
 				":" + e.getMessage() + "\n" + message);
 	}
