@@ -12,9 +12,9 @@
 <body>
 <pre><code id = "codeBlock"></code></pre>
 <script>
-	var query = window.location.search.substring(1); // gets the ?
-	var file = new AbstractedFile(null, query);
-	var language = getLanguageFromUrl(hljs, query);
+	var sourceLocation = getParameterByName("location");
+	var file = new AbstractedFile(null, sourceLocation);
+	var language = getLanguageFromUrl(hljs, sourceLocation);
 	if (typeof language == "undefined") {
 		language = "";
 	}
