@@ -22,6 +22,50 @@ function addLineNumbers(element) {
     }
 }
 
+/**
+ * TODO: test this
+ * @param lineList
+ */
+function expandLineList(lineList) {
+	var resultList = [];
+	for (var i = 0; i < lineList.length; i++) {
+		if (typeof lineList[i] == "number") {
+			alert("number");
+			resultList.push(lineList[i]);
+		} else {
+			var start = lineList[i][0];
+			var end = lineList[i][1];
+			for (j = start; j <= end; j++) {
+				resultList.push(j);
+			}
+		}
+	}
+	return resultList;
+}
+
+function addFeatureHighlight(lineNumberList, element) {
+
+	var lines = element.innerHTML.split(/\n/);
+	console.log(lines);
+	var inBlock = false;
+    for (var j = 0; j < lines.length; j++) {
+        if (lineNumberList.indexOf(j+1) > -1) {
+        	alert("My work here is done!");
+        	if (!inBlock) {
+        		lines[j] = '<span class="featureHighlightedCode">' + lines[j];
+        		inBlock = true;
+        	}
+        } else if (inBlock) {
+        	lines[j-1] += '</span>';
+        	inBlock = false;
+        }
+    }
+    var total = "";
+    for (var j = 0; j < lines.length; j++) {
+    	total += lines[j] + "\n";
+    }
+    element.innerHTML = total;
+}
 function addLineHighlighter(element) {
 	element.getElementsByClassName("line-number")[0].addEventListener ("mouseup", function(e) {
 		console.log(e);

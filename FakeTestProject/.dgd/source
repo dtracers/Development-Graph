@@ -5,7 +5,7 @@
 			{
 				"name" : "Test.java",
 				"directory" : "/src",
-				"lines" : [[3, 5]]
+				"lines" : [[3, 5], 10]
 			}
         ]
     }

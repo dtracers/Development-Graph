@@ -3,6 +3,7 @@
 <link rel="import" href="/web/src/fileHandler/fileImporter.html">
 <link rel="stylesheet" type="text/css" href="cssHighlights/java.css">
 <link rel="stylesheet" type="text/css" href="cssHighlights/lineNumber.css">
+<link rel="stylesheet" type="text/css" href="cssHighlights/featureHighlights.css">
 
 <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/styles/default.min.css">
 <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.1/highlight.min.js"></script>
@@ -25,7 +26,14 @@
 		console.log(codeBlock);
 		addLineNumbers(codeBlock);
 		addLineHighlighter(codeBlock);
+
 		hljs.highlightBlock(codeBlock);
+
+		alert(getParameterByName("lines"));
+		var inputList = JSON.parse(getParameterByName("lines"));
+		var lineList = expandLineList(inputList);
+		alert(lineList);
+		addFeatureHighlight(lineList, codeBlock);
 	});
 </script>
 </body>
