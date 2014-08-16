@@ -10,11 +10,10 @@ div#title {
   
   /*Background of title elements*/
   background: linear-gradient(45deg,transparent 50%,white 50%), linear-gradient(-45deg,blue 50%,white 50%);
-  background-size: 50px 50px
+  background-size: 350px 20px;
+  background:hover{
+    width:300px;
+    
+  }
   
 } 
-div:hover{
-  width: 520px;
-  height: 320px;
-  
-}
