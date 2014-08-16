@@ -75,10 +75,15 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 					// dont do anything yet but in case we want to handle that
 				} else if (type == SOURCE_TYPE || type == TEST_TYPE) {
 					pageUrl = getWebsitePathAsUrl() + "/codeManager/codeHighlighter.html?"
-					sourceUrl = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
-					lineUrl = JSON.stringify(fileObj["lines"]);
-					alert(lineUrl);
-					dataUrl = "location=" + sourceUrl + "&lines=" + encodeURIComponent(lineUrl);
+					var sourceUrl = getSourceDirectoryAsUrl() + fileObj["directory"] + "/" + fileObj["name"];
+
+					var encodedLineUrl = "";
+					if ("lines" in fileObj) {
+						var lineUrl = JSON.stringify(fileObj["lines"]);
+						encodedLineUrl =  "&lines=" + encodeURIComponent(lineUrl);
+					}
+
+					dataUrl = "location=" + sourceUrl + encodedLineUrl;
 				} 
 				shadowRoot.querySelector("a").href = pageUrl + dataUrl;
 				shadowRoot.querySelector(".block").className += " " + type;
@@ -88,6 +93,7 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 			}
 		};
 	}
+
 	function loadFileObjectTemplate(importedDocument) {
 		if (typeof FileObjectTemplate == "undefined") {
 				var content = importedDocument.querySelector("#fileBox").content;

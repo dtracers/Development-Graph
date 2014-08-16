@@ -141,6 +141,21 @@ function AbstractedFile(file, url) {
 
 	/**
 	 * @Method
+	 * Writes a file to the server using put
+	 */
+	this.writeToFile = function(fileLocation) {
+		if (usingServer) {
+			if (typeof fileLocation == "undefined") {
+				fileLocation = url;
+			}
+			var client = new XMLHttpRequest();
+			   client.open("PUT", fileLocation, false);
+			   client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
+			   client.send("test");
+		}
+	}
+	/**
+	 * @Method
 	 * sets the file text a
 	 */
 	this.setFileTextAndSave = function(fileText) {
@@ -256,7 +271,7 @@ function AbstractedFile(file, url) {
 		var timedOut = false;
 		var timeout = setTimeout(function() {
 			timedOut = true;
-			callback(undefined);
+			inputCallback(undefined);
 		}, timeoutTime); // one second timeout (may need to be made longer)
 
 		xmlhttp.onreadystatechange = function() {
