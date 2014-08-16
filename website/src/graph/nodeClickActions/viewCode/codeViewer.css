@@ -3,6 +3,7 @@
 	border-collapse: collapse;
 	width: 100%;
 	table-layout: fixed;
+	position:relative;
 }
 .table > div {
 	display: table-cell;
@@ -39,13 +40,19 @@ h1 {
 	color:green;
 }
 
-h1 span {
+.code, .docs, .test {
+	overflow:scroll;
+}
+
+h1 .button {
   position:relative;
   padding:0; margin:0;
   cursor: pointer;
+  text-decoration:none;
+  color:inherit; /*grabs color form parent element*/
 }
 
-h1 span:before {
+h1 .button:before {
     content:"";
     position:absolute;
     display:inline-block;
@@ -59,23 +66,10 @@ h1 span:before {
     border-style:solid;
 }
 
-/*
-//another possible option 
-span {
-    display: inline-block;
-    width: 0.6em;
-    height: 0.6em;
-    line-height: 0.47em;
-    text-align: center;
-    border: 3px solid black;
-    border-radius: 500px;
-    cursor: pointer;
-}
-*/
-h1 span:hover {
+h1 .button:hover {
 	color:#000000;
 }
 
-h1 span:active {
+h1 .button:active {
 	color:#FFFFFF;
 }
