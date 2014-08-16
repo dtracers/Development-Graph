@@ -1,15 +1,22 @@
 <html>
 <head>
-<link rel="import" href="src/fileHandler/fileImporter.html" />
-<link type="text/css" href="stylesheet.css" />
+<link rel="import" href="src/fileHandler/fileImporter.html"></link>
+<link href="stylesheet.css" type="text/css" ></link>
 </head>
 <body>
+<div id="title">
 <h1>Welcome!</h1>
 <div id = "existingProjects"></div>
 <h1>Give the directory of an existing project</h1>
 <div id="drop_zone">
+<div class="inline" id="drop_zone">
 <input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
 </div>
+
+
+
+
+
 <script>
   		function handleFileSelect(evt) {
 			evt.stopPropagation();
@@ -63,16 +70,21 @@
 		dropZone.addEventListener('drop', handleFileSelect, false);
 		document.getElementById('files').addEventListener('change', handleFileSelect, false);
 	</script>
+<div class="inline">
 <form action ="loadProject" method="post" >
 	<input id = "directory" type ="text" value = "" name = "directory" hidden>
 	<input id = "existingName" type ="text" value = "" name = "name" hidden>
 	<input type="submit" value="Submit">
 </form>
+</div>
+</div>
+<div>
 <form action = "newProject" method="post">
 	<h1>Or make a new project</h1>
 	<input id = "newName" type ="text" name = "name" placeholder = "Project Name">
 	<input type="submit" value="Submit">
 </form>
+</div>
 <script>
 	(function() {
 	var file = new AbstractedFile(null, '/server/projectList');
@@ -110,4 +122,6 @@
 	})();
 </script>
 </body>
+</div>
+<style type="text/css"></style>
 </html>
