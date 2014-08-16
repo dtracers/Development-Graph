@@ -84,7 +84,9 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 					}
 
 					dataUrl = "location=" + sourceUrl + encodedLineUrl;
-				} 
+				}
+
+				// todo change this into a web component option.
 				shadowRoot.querySelector("a").href = pageUrl + dataUrl;
 				shadowRoot.querySelector(".block").className += " " + type;
 				shadowRoot.querySelector("h3").textContent = fileObj["name"];
