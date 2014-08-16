@@ -81,6 +81,10 @@
 			while (fileReader.hasNext()) {
 				firstLine = fileReader.readLine();
 				secondLine = fileReader.readLine();
+				if (firstLine == "" || typeof firstLine == "undefined") {
+					// skipping making this project.
+					continue;
+				} 
 				var form = document.createElement('form');
 				form.action = "loadProject";
 				form.method = "post";

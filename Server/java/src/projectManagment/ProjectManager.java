@@ -58,6 +58,8 @@ public class ProjectManager {
 		Project p = new Project(projectName, f);
 		createNewProjectData(p);
 		this.addProject(p);
+		System.out.println("ADDING PROJECT TO PROJECT LIST OF FILES!");
+		addProjectToProjectList(p);
 		return projectName;
 	}
 
@@ -87,17 +89,17 @@ public class ProjectManager {
 		}
 
 		p.getGit().addToIgnore(PROJECT_FILE); // ignoring return value
-		addProjectToProjectList(p);
 	}
 
 	public boolean addProjectToProjectList(Project proj) {
-		System.out.println(RUN_DIRECTORY);
+		System.out.println("Project file list " + RUN_DIRECTORY);
 		File f = new File(RUN_DIRECTORY, PROJECT_LIST);
 		if (f.exists()) {
 			try (BufferedReader r = new BufferedReader(new FileReader(f))) {
 				String nextLine = "";
 				while ((nextLine = r.readLine()) != null) {
 					if (nextLine.contains(proj.getName()) || nextLine.equals(proj.getName())) {
+						System.out.println("Project is matched!" + nextLine + " = " + proj.getName());
 						return true; // alread yadded
 					}
 				}
@@ -115,6 +117,8 @@ public class ProjectManager {
 		try (PrintStream stream = new PrintStream(new FileOutputStream(f,true))) {
 			stream.println(proj.getName());
 			stream.println(proj.getDirectoryPath());
+			System.out.println("PROJECt NAME " + proj.getName());
+			System.out.println("PROJECt DIRECTORY " + proj.getDirectoryPath());
 			return true; // just stupdily assume it worked
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -128,6 +132,10 @@ public class ProjectManager {
 			String nextLine = "";
 			while ((nextLine = r.readLine()) != null) {
 				File dir = new File(r.readLine());
+				if (nextLine.isEmpty()) {
+					System.out.println("Ignoring line!");
+					continue;
+				}
 				Project p = new Project(nextLine, dir);
 				addProject(p);
 			}
