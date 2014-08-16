@@ -15,7 +15,7 @@
 <script>
 	var sourceLocation = getParameterByName("location");
 	var file = new AbstractedFile(null, sourceLocation);
-	var language = getLanguageFromUrl(hljs, sourceLocation);
+	var language = CODE_UTILS.getLanguageFromUrl(hljs, sourceLocation);
 	if (typeof language == "undefined") {
 		language = "";
 	}
@@ -24,16 +24,17 @@
 		codeBlock.className = language;
 		codeBlock.textContent = string;
 		console.log(codeBlock);
-		addLineNumbers(codeBlock);
-		addLineHighlighter(codeBlock);
+		CODE_UTILS.addLineNumbers(codeBlock);
+		CODE_UTILS.addLineHighlighter(codeBlock);
 
 		hljs.highlightBlock(codeBlock);
 
-		alert(getParameterByName("lines"));
 		var inputList = JSON.parse(getParameterByName("lines"));
-		var lineList = expandLineList(inputList);
-		alert(lineList);
-		addFeatureHighlight(lineList, codeBlock);
+		var lineList = CODE_UTILS.expandLineList(inputList);
+		CODE_UTILS.addFeatureHighlight(lineList, codeBlock);
+		CODE_UTILS.addFeatureNumberHighlight(lineList, codeBlock);
+		CODE_UTILS.setupLineSelection(codeBlock);
+		CODE_UTILS.addLineHighlighter(codeBlock);
 	});
 </script>
 </body>
