@@ -1,12 +1,1 @@
-[
-    {
-	    "id": "f0",
-        "files" : [
-			{
-				"name" : "Test.java",
-				"directory" : "/src",
-				"lines" : [[3, 5], 10]
-			}
-        ]
-    }
-]
+[{"id":"f0","files":[{"directory":"\/src","name":"Test.java","lines":[[3,5],10]},{"extension":"java","directory":"\/src","name":"FileToBeAdded.java"}]}]
