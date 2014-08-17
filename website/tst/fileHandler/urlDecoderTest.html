@@ -13,6 +13,7 @@
   <script>
   		var expectedProjectName = "fakeProject"; // as defined in the java side.
   		var fakeUrl = "/web-project/fakeUrl.html";
+  		var complexUrl = "/web-project/.hidden/fakeUrl.html?searching#whatzup.hello";
   		
   		/**
   		 * @Test
@@ -27,7 +28,7 @@
   		 * @Test
   		 * Passes if the correct extension is grabed from the given url
   		 */
-		QUnit.test( "get correct extension given a url", function( assert ) {
+		QUnit.test( "get correct extension given default url (ends in .html)", function( assert ) {
 			var extension = getExtensionFromUrl(fakeUrl);
 			assert.equal("html", extension);
 		});
@@ -36,7 +37,7 @@
   		 * @Test
   		 * Passes if the correct extension is grabed from the given url
   		 */
-		QUnit.test( "get correct extension given a url", function( assert ) {
+		QUnit.test( "get correct extension from real url", function( assert ) {
 			var extension = getExtensionFromUrl(document.URL);
 			assert.equal("html", extension);
 		});
@@ -45,7 +46,7 @@
   		 * @Test
   		 * Passes if the correct extension is grabed from the given url
   		 */
-		QUnit.test( "get correct extension given a url", function( assert ) {
+		QUnit.test( "get correct extension given a url with a hashtag", function( assert ) {
 			var extension = getExtensionFromUrl(fakeUrl + "#somehashthingy");
 			assert.equal("html", extension);
 		});
@@ -54,8 +55,17 @@
   		 * @Test
   		 * Passes if the correct extension is grabed from the given url
   		 */
-		QUnit.test( "get correct extension given a url", function( assert ) {
+		QUnit.test( "get correct extension given a url with a searc", function( assert ) {
 			var extension = getExtensionFromUrl(fakeUrl + "?somequerythingy");
+			assert.equal("html", extension);
+		});
+
+		/**
+  		 * @Test
+  		 * Passes if the correct extension is grabed from the given url
+  		 */
+		QUnit.test( "get correct extension given complex url (has a hidden folder)", function( assert ) {
+			var extension = getExtensionFromUrl(complexUrl);
 			assert.equal("html", extension);
 		});
   </script>

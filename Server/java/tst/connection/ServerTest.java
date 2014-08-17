@@ -75,6 +75,7 @@ public class ServerTest {
 
     /**
 	 * Passes if the correct java script is grabbed for loading data.
+	 * TODO: fix this test (or code so it passes)
 	 */
     @Test
     public void testJSon() throws Exception {
@@ -84,7 +85,7 @@ public class ServerTest {
     	map.put("n0", "");
     	when(session.getParms()).thenReturn(map);
     	when(session.getMethod()).thenReturn(Method.GET);
-    	when(session.getUri()).thenReturn(TEST_DATA_URL + "graph.grp");
+    	when(session.getUri()).thenReturn(TEST_DATA_URL + "graph");
     	Response res = serv.serve(session);
     	String result = convert(res.getData());
     	String objectHardCode = "[{\"id\": \"n0\","
@@ -108,7 +109,7 @@ public class ServerTest {
 
     public Server createServer() throws IOException {
     	System.out.println("Running server");
-		Server serv = new Server("localHost", 9000);
+		Server serv = new Server("localHost", 9002);
 		serv.start();
 		return serv;
     }
