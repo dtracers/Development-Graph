@@ -1,0 +1,45 @@
+<head>
+	<link rel="import" href="/web/src/fileHandler/fileImporter.html">
+	<script src = "codeFileAttacher.js"></script>
+	<link rel="stylesheet" type="text/css" href="cssHighlights/java.css">
+</head>
+<body>
+<button id="FileSelector">select File</button>
+<button id="UrlSelector">add Url</button>
+</div>
+</div>
+<script>
+	CODE_ATTACHER.loadFeatureData();
+	document.getElementById("FileSelector").onclick = function() {
+		var link = document.createElement('link');
+		link.rel = 'import';
+		link.href = '/web/src/fileHandler/navigation/fileNavigator.html';
+		var id = "navigatorImporter"
+		link.id = id;
+		link.onload = function(e) {
+			var link = document.querySelector('#' + id);
+		    var content = link.import;
+
+		    console.log(content);
+		    // Grab DOM from warning.html's document.
+		    var el = content.querySelector('body');
+
+		    document.getElementById("fileSelection").appendChild(el.cloneNode(true));
+
+		    startNavigator(getSourceDirectoryAsUrl(), CODE_ATTACHER.createAttachResponse(true));
+		};
+		link.onerror = function(e) {
+			alert("Error");
+		};
+		document.head.appendChild(link);
+	};
+</script>
+<!-- an optional template for loading data from a url -->
+<template id="UrlLoaderTemplate"></template>
+
+<div id="fileSelection">
+</div>
+
+<div id="urlSelection">
+</div>
+</body>
