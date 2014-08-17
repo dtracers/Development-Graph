@@ -263,6 +263,7 @@ function AbstractedFile(file, url) {
 	/**
 	 * @Method
 	 * Writes a file to the server using put
+	 * @param fileData
 	 */
 	this.writeToFile = function(fileData) {
 		fileLocation = this.getAbsolutePath() + "/" + this.getFullName();
@@ -270,23 +271,21 @@ function AbstractedFile(file, url) {
 			var client = new XMLHttpRequest();
 			   client.open("PUT", fileLocation, false);
 			   client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
-			   client.send("test");
+			   client.send(fileData);
 		}
 	};
 
 	/**
-	 * @Method
-	 * sets the file text a
+	 * @param json
+	 * Writes the data to the file as a json object.
 	 */
-	this.setFileTextAndSave = function(fileText) {
-		
-	};
-
 	this.writeFileAsJson = function(json) {
 		if (!isArray(json)) {
 			json = [json]; // wrap it in an array for consistancy
 		}
+		this.writeToFile(JSON.stringify(json));
 	}
+
 	/**
 	 * @Method
 	 * Returns a file builder that will allow you to add one line at a time and then save the file.

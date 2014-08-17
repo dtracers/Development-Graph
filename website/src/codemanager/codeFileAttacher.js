@@ -69,6 +69,7 @@ CODE_ATTACHER = new (function() {
 
 	function writeData() {
 		var fileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/" + type + "?" + featureId);
-		fielGrabber.writeJsonToFile(featureFileObject);
+		alert(fileGrabber.getAbsolutePath());
+		fielGrabber.writeFileAsJson(featureFileObject);
 	}
 })();
