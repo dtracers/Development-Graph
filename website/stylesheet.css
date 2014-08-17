@@ -9,12 +9,34 @@ div#title {
   
   /*Background of title elements*/
   background: linear-gradient(45deg,transparent 50%,white 50%), linear-gradient(-45deg,blue 50%,white 50%);
-  background-size: 350px 20px;
-  background:hover{
-    width:300px;
-    
+  background-size: 300px 50px;
+  
+    /*current bg is for sizing purposes only*/
   }
  div.inline {
-	display: inline;
+	display: inline-table;
 	}
   
+div#title:hover{
+  background-color: cadetblue;
+}
+input.introbutton{
+  border-style: solid;
+  border-width: 4px;
+  background: azure;
+  font-family: 'Chivo', sans-serif; 
+  
+}
+
+input.introbutton:hover{
+  background: aqua;
+}
+
+input.introbutton:hover{
+  background: blue;
+}
+
+h1:hover{
+  transform: scale(1,2);
+  
+}
