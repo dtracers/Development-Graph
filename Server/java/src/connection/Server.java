@@ -42,9 +42,12 @@ public class Server extends SimpleWebServer {
 		this(hostname, port, ProjectManager.getInstance());
 	}
 
+	/**
+	 * Returns true if the URI is safe, false otherwise.
+	 */
 	@Override
 	public boolean isUriSafe(String uri) {
-		return !(uri.startsWith("src/main") || uri.contains("../"));
+		return !(uri.startsWith("/src/") || uri.contains("../") || uri.equals("/"));
 	}
 
 	/**
