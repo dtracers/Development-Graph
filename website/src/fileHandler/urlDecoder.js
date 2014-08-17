@@ -34,17 +34,20 @@ function getExtensionFromUrl(url) {
 	if (url.indexOf(".") < 0) {
 		return undefined;
 	}
+
+	if (url.indexOf("?") > -1) {
+		url = url.substring(0, url.indexOf("?"));
+	}
+
+	if (url.indexOf("#") > -1) {
+		url = url.substring(0, url.indexOf("#"));
+	}
+
 	var extensionIndex = url.lastIndexOf(".");
-	var ending = url.substring(extensionIndex + 1);
-
-	if (ending.indexOf("?") > -1) {
-		ending = ending.substring(0, ending.indexOf("?"));
+	if (extensionIndex < 0) {
+		return undefined;
 	}
-
-	if (ending.indexOf("#") > -1) {
-		ending = ending.substring(0, ending.indexOf("#"));
-	}
-	return ending;
+	return url.substring(extensionIndex + 1);
 }
 
 /**
