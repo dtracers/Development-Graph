@@ -1,8 +1,8 @@
 <script>
 window.codeViewerLoaded = true;
 </script>
+<script src="/web/src/codeManager/codeFileAttacher.js"></script>
 <template id="viewCode">
-	<!-- For some reason css styles are not working -->
 	<style>
 		@import url("/web/src/graph/nodeClickActions/viewCode/codeViewer.css");
 	</style>
@@ -10,13 +10,16 @@ window.codeViewerLoaded = true;
 		<h1 class = "closeButton">Close</h1>
 		<div class = "table">
 			<div class="code">
-				<h1>Source Code <span id = "addSource">+</span></h1>
+				<h1>Source Code <a class="button" href="/web/src/codeManager/codeLoader.html#source" target="_blank">+</a></h1>
+				<div class = "fileLoader"></div>
 			</div>
 			<div class="docs">
-				<h1>Source Docs <span id = "addDoc">+</span></h1>
+				<h1>Source Docs <a class="button" href="/web/src/codeManager/codeLoader.html#docs" target="_blank">+</a></h1>
+				<div class = "fileLoader"></div>
 			</div>
 			<div class="test">
-				<h1>Tests <span  id = "addTests">+</span></h1>
+				<h1>Tests <a class="button" href="/web/src/codeManager/codeLoader.html#test" target="_blank">+</a></h1>
+				<div class = "fileLoader"></div>
 			</div>
 		</div>
 	</div>
