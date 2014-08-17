@@ -1,0 +1,38 @@
+<html>
+<head>
+	<script src="fileNavigator.js"></script>
+	<link rel="import" href="/web/src/fileHandler/fileImporter.html">
+	<script>
+
+		/**
+		* @Method
+		* @param sourceDirectory The directory (url) where to start looking for the file
+		* @callback resourceCallback
+		* @callbackParam {string} the path of the file.
+		*/
+		function startNavigator(sourceDirectory, resourceCallback) {
+			var element = document.querySelector("#Navigator-fileSelection");
+			element.src = sourceDirectory + "/";
+
+			document.querySelector("#foundResource").onclick = function() {
+				var path = document.querySelector("#Navigator-fileSelection").contentWindow.location.href;
+				console.log(path);
+				filePath = path.substring(path.indexOf(sourceDirectory) + sourceDirectory.length);
+				resourceCallback(filePath);
+			}
+		}
+		function addStyleSheet() {
+			var cssLink = document.createElement("link");
+			cssLink.href = "/web/src/fileHandler/navigation/fileNavigator.css"; 
+			cssLink .rel = "stylesheet"; 
+			cssLink .type = "text/css"; 
+			document.querySelector("#Navigator-fileSelection").contentWindow.document.head.appendChild(cssLink);
+		}
+	</script>
+</head>
+<body>
+<button id="foundResource">select When File Found</button>
+<iframe id="Navigator-fileSelection" width = "100%" height="90%" onload = "addStyleSheet()">
+</iframe>
+</body>
+</html>

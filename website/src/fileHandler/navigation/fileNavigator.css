@@ -1,0 +1,50 @@
+li {
+	position: relative;
+}
+
+/* Stupid macs */
+a[href$=".DS_Store"], a[href$=".DS_Store"] + span  {
+	position: absolute;
+  	visibility: hidden;
+	pointer-events: none;
+	cursor: default;
+	text-decoration: none;
+}
+
+a[href$=".DS_Store"]:before {
+	content: "hidden";
+	visibility: visible;
+	color:#000000;
+	text-decoration:none;
+}
+
+/* ignore my private files */
+a[href$=".dgrproj"], a[href$=".dgrproj"] + span  {
+	position: absolute;
+  	visibility: hidden;
+	pointer-events: none;
+	cursor: default;
+	text-decoration: none;
+}
+
+a[href$=".dgrproj"]:before {
+	content: "hidden";
+	visibility: visible;
+	color:#000000;
+	text-decoration:none;
+}
+
+a[href$=".dgd/"] {
+	position: absolute;
+  	visibility: hidden;
+	pointer-events: none;
+	cursor: default;
+	text-decoration: none;
+}
+
+a[href$=".dgd/"]:before {
+	content: "hidden";
+	visibility: visible;
+	color:#000000;
+	text-decoration:none;
+}
