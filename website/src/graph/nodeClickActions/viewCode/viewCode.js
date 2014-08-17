@@ -141,8 +141,17 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 
 		loadFileObjectTemplate(importedDocument);
 
+		var featureId = e.data.node.getFeatureId();
+		addLoaderDetails(codeElement, featureId);
+		addLoaderDetails(docsElement, featureId);
+		addLoaderDetails(testElement, featureId);
 		callback(codeElement, docsElement, testElement);
 	}
 
 	clickManager.setClickFunction('viewCode', createCodeViewHtmlImport);
+
+	function addLoaderDetails(element, featureId) {
+		buttonElement = element.querySelector('.button');
+		buttonElement.href = getWebsitePathAsUrl() + buttonElement.dataset.url + "?feature=" + featureId + "&type=" + buttonElement.dataset.type;
+	}
 }
