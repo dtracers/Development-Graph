@@ -29,10 +29,19 @@ function InvalidFileTypeException() {
 * A class that abstracts the type of file behind it
 */
 function AbstractedFile(file, url) {
+	if (typeof file == "string" && typeof url == "undefined") {
+		url = file;
+	}
 	var usingChromeApp = chrome ? (chrome.fileSystem ? true : false) : false;
 	var usingServer = (typeof url != "undefined") && (url != "");
 	var usingBrowser = !usingChromeApp && !usingServer;
-	var timeoutTime = 1000;
+	var TIMEOUT_TIME = 1000;
+
+	/**
+	 * @Field
+	 * Holds the path to the file.
+	 */
+	var path = "";
 	/**
 	 * @Field
 	 * Holds the name of the file.
@@ -64,6 +73,115 @@ function AbstractedFile(file, url) {
 	this.getFileObject = function() {
 		return fileObject;
 	};
+
+	/**
+	 * @returns {string} The name of the file minus the extension.
+	 */
+	this.getName = function() {
+		return name;
+	};
+
+	/**
+	 * @returns {string} The name of the file minus the extension.
+	 */
+	this.getFullName = function() {
+		return name + fileExtension;
+	};
+
+	/**
+	 * @returns {string} The name of the file minus the extension.
+	 */
+	this.getExtension = function() {
+		return fileExtension;
+	};
+
+	/**
+	 * @Method
+	 */
+	this.isDirectory = function() {
+		return isDirectory;
+	};
+
+	/**
+	 * @Method
+	 */
+	this.getAbsolutePath = function() {
+		return path;
+	};
+
+	/**
+	 * @Method
+	 */
+	this.toString = function() {
+		return name + fileExtension + " - is a Directory: " + isDirectory;
+	};
+
+	/**
+	 * @Method
+	 * Creates a json object from this file.
+	 */
+	this.createJson = function() {
+		return {
+			"name" : this.getFullName(),
+			"extension" : this.getExtension(),
+			"directory" : this.getAbsolutePath()
+		};
+	};
+
+	/**
+	 * @Method
+	 * Assigns the values of the file for simple retrieving.
+	 */
+	(function() {
+		if (usingChromeApp) {
+			isDirectory = file.isDirectory;
+			var splitIndex = file.name.indexOf(".");
+			if (splitIndex == -1) {
+				name = file.name;
+			} else {
+				name = file.name.substring(0, splitIndex);
+				fileExtension = file.name.substring(splitIndex);
+			}
+		} else if (usingBrowser) {
+			var splitIndex = file.name.indexOf(".");
+			if (splitIndex == -1) {
+				name = file.name;
+				isDirectory = true;
+			} else {
+				isDirectory = false; // i guess we assume that
+				name = file.name.substring(0, splitIndex);
+				fileExtension = file.name.substring(splitIndex);
+			}
+		} else if (usingServer) {
+			fileExtension = getExtensionFromUrl(url);
+			var shortUrl = url;
+			if (url.indexOf("?") > -1) {
+				shortUrl = url.substring(0, url.indexOf("?"));
+			}
+
+			if (shortUrl.indexOf("#") > -1) {
+				shortUrl = shortUrl.substring(0, shortUrl.indexOf("#"));
+			}
+			path = shortUrl;
+			if (typeof fileExtension == "undefined") {
+				if (shortUrl.endsWith("/")) {
+					isDirectory = true;
+					shortUrl = shortUrl.substring(0, shortUrl.length - 1);
+					name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1); // if it is a directory it will still return a name
+				} else {
+					isDirectory = false;
+					name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1);
+				}
+			} else {
+				isDirectory = false; // i guess we assume that
+				name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1, shortUrl.indexOf(fileExtension));
+			}
+			path = path.substring(0, path.indexOf(name)); // remove the name as we are already storing that info.
+			if (path.endsWith("/")) {
+				path = path.substring(0, path.length - 1);
+			}
+		}
+	})();
 
 	/**
 	 * @Method
@@ -153,7 +271,8 @@ function AbstractedFile(file, url) {
 			   client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
 			   client.send("test");
 		}
-	}
+	};
+
 	/**
 	 * @Method
 	 * sets the file text a
@@ -170,57 +289,7 @@ function AbstractedFile(file, url) {
 
 	};
 
-	this.getName = function() {
-		return name;
-	};
-
-	this.getFullName = function() {
-		return name + fileExtension;
-	};
-
-	this.getExtension = function() {
-		return extenstion;
-	};
-
-	/**
-	 * @Method
-	 */
-	this.isDirectory = function() {
-		return isDirectory;
-	};
-
-	/**
-	 * @Method
-	 */
-	this.toString = function() {
-		return name + fileExtension + " - is a Directory: " + isDirectory;
-	};
-
-	/**
-	 * @Method
-	 */
-	(function() {
-		if (usingChromeApp) {
-			isDirectory = file.isDirectory;
-			var splitIndex = file.name.indexOf(".");
-			if (splitIndex == -1) {
-				name = file.name;
-			} else {
-				name = file.name.substring(0, splitIndex);
-				fileExtension = file.name.substring(splitIndex);
-			}
-		} else if (usingBrowser) {
-			var splitIndex = file.name.indexOf(".");
-			if (splitIndex == -1) {
-				name = file.name;
-				isDirectory = true;
-			} else {
-				isDirectory = false; // i guess we assume that
-				name = file.name.substring(0, splitIndex);
-				fileExtension = file.name.substring(splitIndex);
-			}
-		}
-	})();
+	/* HELPER METHOD AND CLASSES*/
 
 	/**
 	 * Breaks up a file into lines and then returns them out
@@ -272,7 +341,7 @@ function AbstractedFile(file, url) {
 		var timeout = setTimeout(function() {
 			timedOut = true;
 			inputCallback(undefined);
-		}, timeoutTime); // one second timeout (may need to be made longer)
+		}, TIMEOUT_TIME); // one second timeout (may need to be made longer)
 
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
@@ -283,5 +352,34 @@ function AbstractedFile(file, url) {
 			}
 		};
 		return xmlhttp;
+	}
+
+	/**
+	 * @return the extension from a URL
+	 * @Method
+	 * @see urlDecoder.getExtensionFromUrl(url)
+	 */
+	function getExtensionFromUrl(url) {
+		if (url.indexOf(".") < 0) {
+			return undefined;
+		}
+
+		if (url.indexOf("?") > -1) {
+			url = url.substring(0, url.indexOf("?"));
+		}
+
+		if (url.indexOf("#") > -1) {
+			url = url.substring(0, url.indexOf("#"));
+		}
+
+		var extensionIndex = url.lastIndexOf(".");
+		if (extensionIndex < 0) {
+			return undefined;
+		}
+		return url.substring(extensionIndex + 1);
+	}
+
+	function isArray(what) {
+	    return Object.prototype.toString.call(what) === '[object Array]';
 	}
 }
