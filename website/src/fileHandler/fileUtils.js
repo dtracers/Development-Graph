@@ -85,13 +85,16 @@ function AbstractedFile(file, url) {
 	 * @returns {string} The name of the file minus the extension.
 	 */
 	this.getFullName = function() {
-		return name + fileExtension;
+		return this.getExtension() + this.getName();
 	};
 
 	/**
-	 * @returns {string} The name of the file minus the extension.
+	 * @returns {string} The extension. If no extension is defined then it will return empty string.
 	 */
 	this.getExtension = function() {
+		if (typeof fileExtension == "undefined" || fileExtension == null) {
+			return "";
+		}
 		return fileExtension;
 	};
 
@@ -261,11 +264,9 @@ function AbstractedFile(file, url) {
 	 * @Method
 	 * Writes a file to the server using put
 	 */
-	this.writeToFile = function(fileLocation) {
+	this.writeToFile = function(fileData) {
+		fileLocation = this.getAbsolutePath() + "/" + this.getFullName();
 		if (usingServer) {
-			if (typeof fileLocation == "undefined") {
-				fileLocation = url;
-			}
 			var client = new XMLHttpRequest();
 			   client.open("PUT", fileLocation, false);
 			   client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
@@ -281,6 +282,11 @@ function AbstractedFile(file, url) {
 		
 	};
 
+	this.writeFileAsJson = function(json) {
+		if (!isArray(json)) {
+			json = [json]; // wrap it in an array for consistancy
+		}
+	}
 	/**
 	 * @Method
 	 * Returns a file builder that will allow you to add one line at a time and then save the file.
@@ -355,7 +361,8 @@ function AbstractedFile(file, url) {
 	}
 
 	/**
-	 * @return the extension from a URL
+	 * @param url {String}
+	 * @return the extension from a URL {String}
 	 * @Method
 	 * @see urlDecoder.getExtensionFromUrl(url)
 	 */
@@ -372,8 +379,12 @@ function AbstractedFile(file, url) {
 			url = url.substring(0, url.indexOf("#"));
 		}
 
+		if (url.endsWith("/")) {
+			url = url.substring(0, url.length -1)
+		}
 		var extensionIndex = url.lastIndexOf(".");
-		if (extensionIndex < 0) {
+		var lastSlashIndex = url.lastIndexOf("/");
+		if (extensionIndex < 0 || extensionIndex < lastSlashIndex) {
 			return undefined;
 		}
 		return url.substring(extensionIndex + 1);

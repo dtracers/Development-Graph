@@ -43,8 +43,12 @@ function getExtensionFromUrl(url) {
 		url = url.substring(0, url.indexOf("#"));
 	}
 
+	if (url.endsWith("/")) {
+		url = url.substring(0, url.length -1)
+	}
 	var extensionIndex = url.lastIndexOf(".");
-	if (extensionIndex < 0) {
+	var lastSlashIndex = url.lastIndexOf("/");
+	if (extensionIndex < 0 || extensionIndex < lastSlashIndex) {
 		return undefined;
 	}
 	return url.substring(extensionIndex + 1);
