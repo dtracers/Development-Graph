@@ -54,6 +54,11 @@ function AbstractedFile(file, url) {
 	var fileExtension = "";
 	/**
 	 * @Field
+	 * Holds extra paramaters (really only applies if it is a url)
+	 */
+	var extraParamaters = "";
+	/**
+	 * @Field
 	 * Hold true if the file is a directory.
 	 */
 	var isDirectory = undefined;
@@ -85,7 +90,7 @@ function AbstractedFile(file, url) {
 	 * @returns {string} The name of the file minus the extension.
 	 */
 	this.getFullName = function() {
-		return this.getExtension() + this.getName();
+		return this.getName() + "." + this.getExtension();
 	};
 
 	/**
@@ -133,6 +138,14 @@ function AbstractedFile(file, url) {
 
 	/**
 	 * @Method
+	 * Creates a url from this file object
+	 */
+	this.createUrl = function() {
+		
+	};
+
+	/**
+	 * @Method
 	 * Assigns the values of the file for simple retrieving.
 	 */
 	(function() {
@@ -156,6 +169,7 @@ function AbstractedFile(file, url) {
 				fileExtension = file.name.substring(splitIndex);
 			}
 		} else if (usingServer) {
+			var extras = "";
 			fileExtension = getExtensionFromUrl(url);
 			var shortUrl = url;
 			if (url.indexOf("?") > -1) {
@@ -166,7 +180,7 @@ function AbstractedFile(file, url) {
 				shortUrl = shortUrl.substring(0, shortUrl.indexOf("#"));
 			}
 			path = shortUrl;
-			if (typeof fileExtension == "undefined") {
+			if (typeof fileExtension == "undefined" ) {
 				if (shortUrl.endsWith("/")) {
 					isDirectory = true;
 					shortUrl = shortUrl.substring(0, shortUrl.length - 1);
@@ -178,10 +192,14 @@ function AbstractedFile(file, url) {
 			} else {
 				isDirectory = false; // i guess we assume that
 				name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1, shortUrl.indexOf(fileExtension));
+
 			}
 			path = path.substring(0, path.indexOf(name)); // remove the name as we are already storing that info.
 			if (path.endsWith("/")) {
 				path = path.substring(0, path.length - 1);
+			}
+			if (name.endsWith(".")) {
+				name = name.substring(0, name.length - 1);
 			}
 		}
 	})();
@@ -266,10 +284,9 @@ function AbstractedFile(file, url) {
 	 * @param fileData
 	 */
 	this.writeToFile = function(fileData) {
-		fileLocation = this.getAbsolutePath() + "/" + this.getFullName();
 		if (usingServer) {
 			var client = new XMLHttpRequest();
-			   client.open("PUT", fileLocation, false);
+			   client.open("PUT", url, false);
 			   client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
 			   client.send(fileData);
 		}

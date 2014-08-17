@@ -35,7 +35,6 @@ CODE_ATTACHER = new (function() {
 		}
 		fileObject = myFile.createJson();
 		featureFileObject.files.push(fileObject);
-		writeData();
 	};
 
 	/**
@@ -67,9 +66,10 @@ CODE_ATTACHER = new (function() {
 		});
 	};
 
-	function writeData() {
-		var fileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/" + type + "?" + featureId);
+	this.writeData = function writeData() {
+		var fileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/" + type + "?json");
 		alert(fileGrabber.getAbsolutePath());
-		fielGrabber.writeFileAsJson(featureFileObject);
+		console.log(featureFileObject);
+		fileGrabber.writeFileAsJson(featureFileObject);
 	}
 })();

@@ -2,11 +2,14 @@ package connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 
@@ -132,7 +135,35 @@ public class Server extends SimpleWebServer {
 	}
 
 	protected Response put(IHTTPSession session) {
-		return super.serve(session);
+		Response res = null;
+		if (session.getParms().containsKey("json")) {
+			System.out.println("JSON STYLE PUTTING");
+			try {
+				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()));
+			} catch (Exception e) {
+				e.printStackTrace();
+				res = createErrorResponse(e, e.getMessage());
+			}
+			res = createNoDataResponse();
+		} else {
+			res = super.serve(session);
+		}
+		return res;
+	}
+
+	/**
+	 * 
+	 * @param session
+	 * @return
+	 * @throws IOException
+	 * @throws ResponseException
+	 */
+	public final InputStream readInputData(IHTTPSession session) throws IOException, ResponseException {
+		InputStream stream = null;
+		Map<String, String> data = new HashMap<String, String>();
+		session.parseBody(data);
+		stream = new FileInputStream(new File(data.get("content")));
+		return stream;
 	}
 
 	/**
@@ -170,7 +201,7 @@ public class Server extends SimpleWebServer {
 		}
 		String newPath = path.substring(0, path.indexOf(SERVER_FOLDER)) + WEB_FOLDER;
 		File f = new File(newPath);
-		System.out.println(new File(f, uri));
+		//System.out.println(new File(f, uri));
 		return new File(f, uri);
 	}
 
@@ -196,7 +227,6 @@ public class Server extends SimpleWebServer {
 
 		File f = new File(proj.getDirectory(), uri);
 		System.out.println("New project path! " + f.getAbsolutePath());
-		System.out.println("Exists " + f.exists());
 		return f;
 	}
 

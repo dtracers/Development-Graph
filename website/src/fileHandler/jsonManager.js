@@ -1,25 +1,11 @@
 /**
- * 
- * @param url The url for where the file is located.
- */
-function loadJson(url, listOfId, callback) {
-	url += "?";
-	for (id in listOfId) {
-		url += "&" + id;
-	}
-	$.getJSON(url, function( data ) {
-		callback(data);
-	});
-}
-
-/**
- * Saves objects.
- * They must be specified as either ins
+ * Replaces old objects with new objects
  * @param url
  * @param objectArray
  */
 function updateJson(url, objectMap) {
-	
+	var f = new AbstractedFile(undefined, url);
+	f.updateJson(objectMap);
 }
 
 /**
