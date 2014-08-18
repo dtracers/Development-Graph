@@ -17,7 +17,6 @@ import org.json.simple.parser.ParseException;
  * This works on the specific principle that the item we are finding is either the first item in an object or not in the object at all
  *
  * An object can now be deleted from an array BUT NOT ANOTHER OBJECT!
- * TODO: add components for inserting an object into an array and inserting an object into an object.
  */
 
 public class StreamingJsonWriter implements ContentHandler {
@@ -192,10 +191,26 @@ public class StreamingJsonWriter implements ContentHandler {
 	}
 
 	/**
+	 * Returns true if it is currently replacing an object.
+	 * @return
+	 */
+	protected boolean inObject() {
+		return inObject;
+	}
+
+	/**
+	 * Return true if the current state is the first element in an array of an object
+	 * @return
+	 */
+	protected boolean isInFirstElement() {
+		return first;
+	}
+
+	/**
 	 * Silently catches the exception thrown by writing.
 	 * @param str
 	 */
-	private void write(String str) {
+	protected void write(String str) {
 		try {
 			if (!inObject) {
 				output.write(str);
@@ -205,7 +220,7 @@ public class StreamingJsonWriter implements ContentHandler {
 		}
 	}
 
-	private void writeReplacementObject(JSONObject currentObject) {
+	protected void writeReplacementObject(JSONObject currentObject) {
 		try {
 			currentObject.writeJSONString(output);
 		} catch (IOException e) {

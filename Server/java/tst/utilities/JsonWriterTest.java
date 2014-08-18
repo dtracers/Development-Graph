@@ -171,7 +171,7 @@ public class JsonWriterTest extends JsonTest {
 	}
 
 	@SuppressWarnings("resource")
-	public static String createResult(Reader source) throws IOException, ParseException {
+	public String createResult(Reader source) throws IOException, ParseException {
 		JSONParser parser = new JSONParser();
 		BufferedReader read = new BufferedReader(source);
 		StringWriter str = new StringWriter();
@@ -409,7 +409,7 @@ public class JsonWriterTest extends JsonTest {
 		return null;
 	}
 
-	public static String createResult(Reader source, Map<String, JSONObject> replacement, String key) throws IOException, ParseException {
+	public String createResult(Reader source, Map<String, JSONObject> replacement, String key) throws IOException, ParseException {
 		JSONParser parser = new JSONParser();
 		BufferedReader read = new BufferedReader(source);
 		StringWriter str = new StringWriter();
