@@ -139,7 +139,8 @@ public class Server extends SimpleWebServer {
 		if (session.getParms().containsKey("json")) {
 			System.out.println("JSON STYLE PUTTING");
 			try {
-				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()));
+				boolean insert = session.getParms().containsKey("insert");
+				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()), insert);
 			} catch (Exception e) {
 				e.printStackTrace();
 				res = createErrorResponse(e, e.getMessage());

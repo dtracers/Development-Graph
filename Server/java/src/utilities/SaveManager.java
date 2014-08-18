@@ -23,6 +23,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import fi.iki.elonen.NanoHTTPD.Response;
+import utilities.json.StreamingJsonInserter;
 import utilities.json.StreamingJsonReader;
 import utilities.json.StreamingJsonWriter;
 
@@ -72,7 +73,7 @@ public class SaveManager {
 		return instance;
 	}
 
-	public void saveData(InputStream readInputData, File savePath) throws SaveException {
+	public void saveData(InputStream readInputData, File savePath, boolean insert) throws SaveException {
 		Object obj;
 		try {
 			obj = convertStreamToString(readInputData);
@@ -82,27 +83,65 @@ public class SaveManager {
 		if (obj == null) {
 			throw new SaveException("Input data does not exist");
 		}
-		ArrayList list;
+		JSONArray list;
 		try {
 			list = (JSONArray) obj;
 		} catch(ClassCastException e) {
 			throw new SaveException("Data does not exist as an array", e);
 		}
-		try {
-			saveData(savePath, list);
-		} catch (IOException | ParseException e) {
-			throw new SaveException("Exception while saving data", e);
+
+		if (!savePath.exists() || isFileEmpty(savePath)) {
+			try {
+				System.out.println(list);
+				savePath.createNewFile();
+				FileWriter out = new FileWriter(savePath);
+				list.writeJSONString(out);
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				if (!insert) {
+					replaceData(savePath, list);
+				}
+			} catch (IOException | ParseException e) {
+				throw new SaveException("Exception while saving data", e);
+			}
 		}
 	}
 
-	private void saveData(File savePath, ArrayList<JSONAware> list) throws IOException, ParseException, SaveException {
-		
+	private void insertData(File savePath, JSONArray list) throws IOException, ParseException, SaveException {
 		// we write to a temporary location and then just delete the old file and rename the current file.
 		File tempFile = new File(savePath.getParentFile(), savePath.getName() + "temp");
-		System.out.println("CREATING TEMPORATY FILE");
-		System.out.println(tempFile);
-		System.out.println("REAL FILE");
-		System.out.println(savePath);
+
+		FileReader read = new FileReader(savePath);
+		JSONParser parser = new JSONParser();
+
+		FileWriter writer = new FileWriter(tempFile);
+		StreamingJsonInserter finder = new StreamingJsonInserter(writer);
+		finder.setMatchKey("id");
+		Map<String, JSONObject> saveMap = new HashMap<String, JSONObject>();
+
+		ArrayList<JSONAware> arrayList = list;
+		for (JSONAware object: arrayList) {
+			if (object instanceof JSONObject && ((JSONObject) object).containsKey("id")) {
+				finder.addInsertionObject(""+((JSONObject) object).get("id"), ((JSONObject) object));
+			}
+		}
+		finder.setReplacementMap(saveMap);
+		parser.parse(read, finder, true);
+		writer.close();
+		read.close();
+
+		if (!replaceTempFile(tempFile, savePath)) {
+			throw new SaveException("Unable to replace old file with new file");
+		}
+	}
+
+	private void replaceData(File savePath, JSONArray list) throws IOException, ParseException, SaveException {
+		// we write to a temporary location and then just delete the old file and rename the current file.
+		File tempFile = new File(savePath.getParentFile(), savePath.getName() + "temp");
 
 		FileReader read = new FileReader(savePath);
 		JSONParser parser = new JSONParser();
@@ -111,7 +150,9 @@ public class SaveManager {
 		StreamingJsonWriter finder = new StreamingJsonWriter(writer);
 		finder.setMatchKey("id");
 		Map<String, JSONObject> saveMap = new HashMap<String, JSONObject>();
-		for (JSONAware object: list) {
+
+		ArrayList<JSONAware> arrayList = list;
+		for (JSONAware object: arrayList) {
 			if (object instanceof JSONObject && ((JSONObject) object).containsKey("id")) {
 				saveMap.put(""+((JSONObject) object).get("id"), ((JSONObject) object));
 			}
@@ -127,23 +168,36 @@ public class SaveManager {
 	}
 
 	private boolean replaceTempFile(File tempFile, File realFile) {
-		try (BufferedReader br = new BufferedReader(new FileReader(tempFile))) {
-			if (br.readLine() != null) {
-				// file is not empty
-				if (realFile.delete()) {
-					tempFile.renameTo(realFile);
-					if (tempFile.exists() && tempFile.getName() == realFile.getName()) {
-						return true;
-					}
-				}
+		if (!isFileEmpty(tempFile)) {
+			String oldFileName = realFile.getName();
+			if (realFile.delete()) {
+				tempFile.renameTo(realFile);
+				return true;
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}   
+		}
 		return false;
 	}
+
 	private static Object convertStreamToString(java.io.InputStream is) throws IOException, ParseException {
 			Reader reader = new InputStreamReader(is, "UTF-8");
 			return new JSONParser().parse(reader);
+	}
+
+	/**
+	 * Returns true if the file is empty.
+	 * If any Exceptions are thrown the file is assumed to be empty.
+	 * @param file
+	 * @return
+	 */
+	private boolean isFileEmpty(File file) {
+		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			String result = br.readLine();
+			if (result != null && !"".equals(result)) {
+				return false;
+			}
+		}  catch (IOException e) {
+			return true;
+		}
+		return true;
 	}
 }
