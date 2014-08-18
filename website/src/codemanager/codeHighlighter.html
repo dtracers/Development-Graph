@@ -29,10 +29,12 @@
 
 		hljs.highlightBlock(codeBlock);
 
-		var inputList = JSON.parse(getParameterByName("lines"));
-		var lineList = CODE_UTILS.expandLineList(inputList);
-		CODE_UTILS.addFeatureHighlight(lineList, codeBlock);
-		CODE_UTILS.addFeatureNumberHighlight(lineList, codeBlock);
+		if (getParameterByName("lines")) {
+			var inputList = JSON.parse(getParameterByName("lines"));
+			var lineList = CODE_UTILS.expandLineList(inputList);
+			CODE_UTILS.addFeatureHighlight(lineList, codeBlock);
+			CODE_UTILS.addFeatureNumberHighlight(lineList, codeBlock);
+		}
 		CODE_UTILS.setupLineSelection(codeBlock);
 		CODE_UTILS.addLineHighlighter(codeBlock);
 	});
