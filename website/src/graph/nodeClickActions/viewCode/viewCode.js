@@ -63,7 +63,7 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 				console.log(fileObj);
 				var elementS = document.createElement('div');
 				var shadowRoot = elementS.createShadowRoot();
-				shadowRoot.appendChild(fileBoxTemplate);
+				shadowRoot.appendChild(fileBoxTemplate.cloneNode(true));
 
 				var pageUrl = "";
 				var dataUrl = "";
