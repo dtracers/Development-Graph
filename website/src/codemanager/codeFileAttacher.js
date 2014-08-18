@@ -12,12 +12,13 @@ function handleDragOver(evt) {
  * @Class
  */
 CODE_ATTACHER = new (function() {
-	
+
 	// grab type and feautriId myself
 
 	var type = getParameterByName("type");
 	var featureId = getParameterByName("feature");
 	var featureFileObject;
+	var newFeature = false;
 
 	/**
 	 * @Method
@@ -25,6 +26,9 @@ CODE_ATTACHER = new (function() {
 	 * Using the url it adds the file to the list of files for a given feature
 	 */
 	var fileHandler = function(file) {
+		if (typeof featureFileObject == "undefined") {
+			createFeature();
+		}
 		console.log(file);
 		var myFile = new AbstractedFile(file);
 		var fileName = "";
@@ -44,8 +48,8 @@ CODE_ATTACHER = new (function() {
 	 */
 	this.createAttachResponse = function(asFile) {
 		var SOURCE_TYPE = "source";
-		var DOC_TYPE = "doc";
-		var TEST_TYPE = "test";
+		var DOC_TYPE = "source_doc";
+		var TEST_TYPE = "source_test";
 		if (asFile) {
 			return fileHandler;
 		} else {
@@ -60,16 +64,31 @@ CODE_ATTACHER = new (function() {
 	this.loadFeatureData = function() {
 		var fileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/" + type + "?" + featureId);
 		fileGrabber.readFileAsJson(function(json) {
+			if (typeof json == "undefined") {
+				featureFileObject = undefined;
+				return;
+			}
 			featureFileObject = json[0];
 			console.log(featureFileObject);
 			alert(featureFileObject);
 		});
 	};
 
+	/**
+	 * Writes the data into the file
+	 */
 	this.writeData = function writeData() {
-		var fileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/" + type + "?json");
+		var fileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/" + type + "?json" + (newFeature ? "&insert" : ""));
 		alert(fileGrabber.getAbsolutePath());
 		console.log(featureFileObject);
 		fileGrabber.writeFileAsJson(featureFileObject);
+	}
+
+	function createFeature() {
+		newFeature = true;
+		featureFileObject = {
+				"id":featureId,
+				"files" :[],
+		};
 	}
 })();
