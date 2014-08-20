@@ -1,67 +1,41 @@
 function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var nodeClickFunctionMap = {};
 	var undoNodeClickFunction;
-	var lastNodeClicked = undefined;
 	var lastFeatureClicked = undefined;
 	var fa2Runtime = 2000; // 2 seconds seems long enough for the nodes to settle.
 	var localScope = this;
 	var parentRedirect = false;
 
 	/**
-	 * 
+	 * @Method
+	 * Sets the click function for a certian node type.
+	 * @param nodeType {String} The type of node the click function is assigned to.
+	 * @param func {Function} The function that is executed when a node with the correct type is clicked.
 	 */
-	this.setClickFunction = function setClickFunction(nodeType, func, undoFunc) {
-		nodeClickFunctionMap[nodeType] = [func, undoFunc];
-	};
-
-	/**
-	 * this sets a function for what to do when a different node that is not the last node is clicked.
-	 *
-	 * The arguments for this recieving function is the lastNodeClicked then the new node that was clicked
-	 */
-	function setUndoClickFunction(func) {
-		undoNodeClickFunction = func;
+	this.setClickFunction = function setClickFunction(nodeType, func) {
+		nodeClickFunctionMap[nodeType] = func;
 	};
 
 	/**
 	 * This is called when every node is clicked.
-	 * This checks to see if an undo click function exist and if it does then that is called.
+	 *
 	 * After the prechecks are done then the click function is called.
+	 * @param e {Event} contains the event data for a node click.
 	 */
 	function clickFunction(e) {
 		var clickedNode = e.data.node;
 		console.log('node ' + clickedNode.label + 'has been clicked');
 
-		// in case the node was removed before another node was clicked.  (it should behave like the first node click in a graph)
-		if (lastNodeClicked && displayGraph.nodes(lastNodeClicked.id) == undefined) {
-			console.log('the previous node was removed from the graph and can no longer be accessed');
-			lastNodeClicked = undefined;
-		}
-
 		if (lastFeatureClicked && displayGraph.nodes(lastFeatureClicked.id) == undefined) {
 			console.log('the previous feature was removed from the graph and can no longer be accessed');
+			alert("Previous feature was removed from the graph");
 			lastFeatureClicked = undefined;
 		}
 
-		// calls the undo click function (may not be implemented for every node)
-		if ((lastNodeClicked != clickedNode || clickedNode.redoClick) && undoNodeClickFunction) {
-			undoNodeClickFunction(e, lastNodeClicked, lastFeatureClicked);
-			setUndoClickFunction(undefined); // remove the click function now
-		}
-
-		if (lastNodeClicked == clickedNode && !clickedNode.redoClick && !parentRedirect) {
+		// If it is the same node we return as the state has not changed.
+		if (lastFeatureClicked && lastFeatureClicked.id == clickedNode.id) {
 			return;
 		}
-
-		if (parentRedirect) {
-			parentRedirect = false;
-		}
-
-		// replace old node with new node
-		var oldNode = lastNodeClicked;
-		
-		lastNodeClicked = clickedNode;
-
 		var action = clickedNode.actionType;
 		if (!action || action == undefined) {
 			return;
@@ -70,23 +44,16 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		var oldFeature = lastFeatureClicked;
 		if (action == 'feature') {
 			lastFeatureClicked = clickedNode;
-			
 		}
 
-		var funcs = nodeClickFunctionMap[action];
+		var clickFunction = nodeClickFunctionMap[action];
 
-		if (!funcs || funcs == undefined) {
+		if (!clickFunction || clickFunction == undefined) {
 			return;
 		}
 
-		var clickFunc = funcs[0];
-		var undoFunc = funcs[1];
-		if (undoFunc) {
-			setUndoClickFunction(undoFunc);
-		}
-
-		if (clickFunc) {
-			clickFunc(e, oldNode, oldFeature);
+		if (clickFunction) {
+			clickFunction(e, oldFeature);
 		}
 
 	};
@@ -95,16 +62,6 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		managerInstance.bind('clickNode', clickFunction);
 	};
 
-	this.lastClickedNodeHasBeenRemoved = function(event) {
-		var clickedNode = event.data.node;
-		if (clickedNode.isDynamic) {
-			var node = displayGraph.nodes(clickedNode.parentNode);
-			if (node) {
-				lastNodeClicked = node;
-				parentRedirect = true;
-			}
-		}
-	}
 	/*********
 	 * There are 7 different types of default actions:<ul>
 	 * <li> a feature node is clicked (this will open up a list of dynamically created subnodes				: feature</li>
@@ -126,23 +83,12 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	 * Removes dynamic nodes from other nodes if they exist.
 	 * Adds the dynamic nodes for this specific feature.
 	 */
-	function featureNodeAction(e, oldNode, oldFeature) {
+	function featureNodeAction(e, oldFeature) {
 		managerInstance.stopForceAtlas2();
 
 		var clickedNode = e.data.node;
 
-			if (oldNode && oldNode.actionType == 'feature') {
-				displayGraph.removeAllDynamicNodes(oldFeature.id, actionList);
-			} else if (oldNode && oldNode.isDynamic) {
-				if (oldFeature.parentNode != clickedNode.id) {
-					displayGraph.removeAllDynamicNodes(oldFeature.parentNode, actionList);
-				} else {
-					console.log("there will be no more new nodes made today!");
-					return;
-				}
-			 } else if (oldFeature) { //always remove dynamic nodes from the last feature clicked
-				 displayGraph.removeAllDynamicNodes(oldFeature.id, actionList);
-			 }
+		removeNodes(clickedNode, oldFeature);
 
 		// drops all descendants of the node *if they exist*
 		displayGraph.removeDescendants(clickedNode.id);
@@ -171,10 +117,12 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		managerInstance.timedForceAtlas2(fa2Runtime);
 	}
 
-	function viewChildrenAction(e, oldNode) {
-		console.log("clicked node!");
+	function viewChildrenAction(e, oldFeature) {
 		var clickedNode = e.data.node;
-		displayGraph.removeAllDynamicNodes(oldNode.id, actionList, true);
+		console.log("clicked view children!");
+
+		removeNodes(clickedNode, oldFeature);
+
 		var graph = realGraph.getChildGraph(clickedNode.parentNode);
 		console.log(graph);
 		displayGraph.read(graph);
@@ -201,4 +149,13 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		scope.setClickFunction('feature', featureNodeAction);
 		scope.setClickFunction('viewChildren', viewChildrenAction);
 	})(this);
+
+	/**
+	 * Remove the dynamic nodes from the given feature.
+	 */
+	function removeNodes(clickedNode, oldFeature) {
+		if (oldFeature) { //always remove dynamic nodes from the last feature clicked
+			displayGraph.removeAllDynamicNodes(oldFeature.id, actionList);
+		}
+	}
 }
