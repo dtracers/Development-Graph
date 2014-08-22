@@ -21,6 +21,7 @@ function GraphManager() {
 				defaultNodeColor: '#ec5148',
 				labelThreshold: 3,
 				defaultLabelColor: '#ffffff',
+				sideMargin: 5,
 			}
 		});
 
