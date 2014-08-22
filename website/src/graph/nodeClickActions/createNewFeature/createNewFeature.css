@@ -1,0 +1,22 @@
+.form {
+	padding: 10px;
+	color:#000000;
+	background-color:#FFFFFF;
+	margin: auto;
+    opacity: 0.9;
+    display:inline-block;
+    -webkit-box-shadow: 0px 0px 19px 16px rgba(255,255,255,1);
+	-moz-box-shadow: 0px 0px 19px 16px rgba(255,255,255,1);
+	box-shadow: 0px 0px 19px 16px rgba(255,255,255,1);
+	textContent:center;
+}
+h1 {
+	color:#000000;
+    opacity: 1;
+    text-shadow: 2px 2px #ffffff;
+}
+
+input, button {
+	opacity: 1;
+	background-color: #ffffff;
+}

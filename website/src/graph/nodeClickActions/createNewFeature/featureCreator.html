@@ -3,29 +3,33 @@ window.featureCreatorLoaded = true;
 </script>
 <template id="createNewFeature">
 	<style>
-	.form {
-		color:#000000;
-		margin: auto;
-	    opacity: 1;
-	    display:inline-block;
-	}
-	h1 {
-		color:#000000;
-	    opacity: 1;
-	    text-shadow: 2px 2px #ffffff;
-	}
-	
-	input, button {
-		opacity: 1;
-		background-color: #ffffff;
-	}
+		@import url("/web/src/graph/nodeClickActions/createNewFeature/createNewFeature.css");
 	</style>
 	<div class = "form">
-		<h1>Feature Name</h1>
-		<input type="text" class = "featureName">
-		<h1>Feature Description</h1>
-		<h1>Link to documents</h1>
+	<form action="javascript:void(0)">
+		<h3>Feature Name</h3>
+		<input type="text" class = "featureName" name = "featureName" required>
+		<h3>Feature Description</h3>
+		<textarea rows="10" cols="70" name = "description" required></textarea><br>
+		<input type="checkbox" name="haveCode" value="haveCode">Does this feature have code?<br>
+		<input type="checkbox" name="isImplementation" value="isImplementation">Is this feature an implementation detail?
+		<div><p>Select the current state of the feature: 
+		<select required>
+			<option value="notStarted" selected>notStarted</option>
+			<option value="incomplete">incomplete</option>
+			<option value="finished">finished</option>
+			<option value="bug">bug</option>
+		</select>
+		</p>
+		</div>
+		<div class = "catagory">
+		Enter Catagories (comma separated)<br>
+		<textarea rows="2" cols="30" name = "catagories"></textarea><br>
+		<!-- This is where the catagory list will go -->
+
+		</div>
 		<h1></h1>
-		<button class = "save">Save feature</button>
+		<input class = "save" type="submit" value = "Save Feature">
+	</form>
 	</div>
 </template>

@@ -31,7 +31,8 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	 * Saves the data of the form to a new node
 	 */
 	function saveData(e, formData) {
-		var nameElement = formData.querySelector('.featureName');
+		var Featurename = formData.querySelector('.featureName').value;
+		var feateDescription = formData.querySelector('.featureName');
 		document.getElementById(overlayId).style.display = 'none';
 	}
 
@@ -51,7 +52,7 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 		saveButton.onclick = function() {
 			saveData(e, shadowRoot);
 		};
-		document.getElementById(overlayId).style.display = 'block';
+		document.getElementById(overlayId).style.display = 'flex';
 	}
 
 	clickManager.setClickFunction('newFeature', createNewFeature);
