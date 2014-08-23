@@ -1,17 +1,24 @@
 /**
  * @Method
- * @param feature
- * @param realGraph
- * @param parentNode
- * @param callback
+ * @param feature {Feature}
+ * @param realGraph {Graph}
+ * @param parentNode {Node}
+ * @param callback {Function}
+ * @param firstNode {Boolean}
  * @callback callback Is only called if the files are all written correctly
  */
-function saveNewFeature(feature, parentNode, realGraph, displayGraph, callback) {
+function saveNewFeature(feature, parentNode, realGraph, displayGraph, callback, firstNode) {
 	console.log(feature);
 	// TODO: make this work nicer?
 	var newNode = realGraph.createNewNode(parentNode, false, 0.1, 0.1, feature.name, 'feature');
+	if (!parentNode && firstNode) {
+		newNode.id = "n0";
+	}
 	feature.id = newNode.getFeatureId();
-	var newEdge = realGraph.createNewEdge(parentNode, newNode, false);
+	var newEdge = undefined;
+	if (parentNode) {
+		newEdge = realGraph.createNewEdge(parentNode, newNode, false);
+	}
 	// then we save all the info
 
 	var featureSaver = new AbstractedFile(getDataDirectoryAsUrl() + "/features?json&insert");
@@ -19,15 +26,22 @@ function saveNewFeature(feature, parentNode, realGraph, displayGraph, callback) 
 	featureSaver.writeFileAsJson(feature, function(result) {
 		console.log("Data from server 1");
 		console.log(result);
-		var parameters = "&" + newNode.id + "=nodes&" + newEdge.id + "=edges"
+		var writtingObjects = [newNode];
+		var parameters = "&" + newNode.id + "=nodes";
+		if (newEdge) {
+			parameters+= "&" + newEdge.id + "=edges";
+			writtingObjects.push(newEdge);
+		}
 		var graphSaver = new AbstractedFile(getDataDirectoryAsUrl() + "/graph?json&insert" + parameters);
-		graphSaver.writeFileAsJson([newNode, newEdge], function(result) {
+		graphSaver.writeFileAsJson(writtingObjects, function(result) {
 			console.log("Data from server 2");
 			console.log(result);
 			// then we load it into the display graph
 
 			displayGraph.addNode(newNode);
-			displayGraph.addEdge(newEdge);
+			if (newEdge) {
+				displayGraph.addEdge(newEdge);
+			}
 
 			if (callback) {
 				callback();

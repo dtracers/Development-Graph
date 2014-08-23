@@ -9,11 +9,12 @@ function GraphManager() {
 	var realGraphInstance;
 
 	/**
+	 * @Method
 	 * @param dataLocation {string} the loaction of the graph data
 	 * @param placementId {string} the id for where the graph goes
 	 * @param postSetupFunction {function} called after the graph is setup
 	 */
-	this.load = function (dataLocation, placementId, postSetupFunction) {
+	this.load = function (dataLocation, placementId, postSetupFunction, noNodeFunction) {
 		console.log(sigma.classes);
 		managerInstance = new sigma({
 			container: placementId,
@@ -29,17 +30,40 @@ function GraphManager() {
 		sigma.parsers.json(dataLocation, {
 		}, function(s) {
 		  	realGraphInstance = s.graph;
-		  	var node = realGraphInstance.nodes('n0');
-		  	displayGraphInstance.addNode(node); // loads the starting node into the graph
-		  	managerInstance.refresh();
 
 		  	nodeClickManager = new NodeClickManager(realGraphInstance, displayGraphInstance, managerInstance);
 
 		  	nodeClickManager.startClickListener();
 
-		  	managerInstance.timedForceAtlas2(2000);
-		  	
-		  	postSetupFunction();
+		  	var node = realGraphInstance.nodes('n0');
+
+		  	var endingFunction = function() {
+		  		alert("Loading graph");
+
+			  	managerInstance.refresh();
+
+			  	managerInstance.timedForceAtlas2(2000);
+			  	
+			  	postSetupFunction();
+		  	};
+
+		  	if (!node) {
+		  		alert("NO NODES IN GRAPH");
+		  		var name = getProjectFromUrl();
+		  		var featureData = {
+						name: getProjectFromUrl(),
+						description: "The description of the project (currently not filled in)",
+						haveCode: false,
+						isImplementeation: false,
+						featureState: "notStarted",
+						catagories: "",
+						creator: undefined/* somehow find a way to get the creator from git */
+				};
+		  		saveNewFeature(featureData, undefined, realGraphInstance, displayGraphInstance, endingFunction, true);
+		  	} else {
+		  		displayGraphInstance.addNode(node); // loads the starting node into the graph
+		  		endingFunction();
+		  	}
 		});
 	}
 
@@ -49,11 +73,13 @@ function GraphManager() {
 }
 
 /**
+ * @Class
  * Where all of the methods added to the graph and sigma go
  */
 (function() {
 
 /**
+ * @Method
  * Runs ForceAtlas2 for a time designated by the number of milliseconds involved.
  *
  * @param millis {number}
@@ -71,6 +97,7 @@ sigma.prototype.timedForceAtlas2 = function(millis) {
 };
 
 /**
+ * @Method
  * Generates an rfc4122 version 4 compliant solution.
  *
  * found at http://stackoverflow.com/a/2117523/2187510
@@ -153,6 +180,7 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
 });
 
 /**
+ * @Method
  * Creates a new edge from the existing nodes.  
  * @param sourceNode {node}
  * @param targetNode {node}
@@ -169,6 +197,7 @@ sigma.classes.graph.addMethod('createNewEdge', function createNewEdge(sourceNode
 });
 
 /**
+ * @Method
  * Grabs the child graph of the node.
  * 
  * Children are defined by having edges that point away from the given node.
@@ -193,6 +222,7 @@ sigma.classes.graph.addMethod('getChildGraph', function getChildGraph(sourceNode
 });
 
 /**
+ * @Method
  * Removes all descendant of the given node from the graph.
  *
  * @param sourceNodeId {string} This is the node that we want to remove the descendants from.
@@ -211,6 +241,7 @@ sigma.classes.graph.addMethod('removeDescendants', function removeDescendants(so
 });
 
 /**
+ * @Method
  * Drops all of the dynamic nodes from its parent node.
  */
 sigma.classes.graph.addMethod('removeAllDynamicNodes', function removeAllDynamicNodes(parentNodeId, actionList, printErrors) {

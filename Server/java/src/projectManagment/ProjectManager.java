@@ -73,7 +73,12 @@ public class ProjectManager {
 		return p.getName();
 	}
 
-	private void createNewProjectData(Project p) throws IOException {
+	/**
+	 * 
+	 * @param p
+	 * @throws IOException
+	 */
+	private static void createNewProjectData(Project p) throws IOException {
 		if (p.isProjectReadOnly()) {
 			throw new IOException("Can not create project data");
 		}
@@ -82,6 +87,7 @@ public class ProjectManager {
 		PrintStream stream = new PrintStream(new FileOutputStream(projFile));
 		stream.println(p.getName());
 		stream.println(p.getDirectoryPath());
+		stream.close();
 
 		File projDir = new File(p.getDirectory(), "/.dgd");
 		if (!projDir.exists()) {
@@ -89,9 +95,10 @@ public class ProjectManager {
 		}
 
 		p.getGit().addToIgnore(PROJECT_FILE); // ignoring return value
+		GraphManager.initializeGraph(projDir.toPath());
 	}
 
-	public boolean addProjectToProjectList(Project proj) {
+	public static boolean addProjectToProjectList(Project proj) {
 		System.out.println("Project file list " + RUN_DIRECTORY);
 		File f = new File(RUN_DIRECTORY, PROJECT_LIST);
 		if (f.exists()) {
