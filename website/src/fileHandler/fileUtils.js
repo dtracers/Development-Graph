@@ -25,10 +25,26 @@ function InvalidFileTypeException() {
 }
 
 /**
+ * @Class
+ */
+function ServerTimeOutException() {
+	return {
+	    name:        "InvalidFileTypeException", 
+	    level:       10, 
+	    message:     "File given was not a valid type", 
+	    htmlMessage: "File given was not a valid type", 
+	    toString:    function() {return this.name + ": " + this.message;} 
+	}; 
+}
+
+/**
 * @Class
 * A class that abstracts the type of file behind it
 */
 function AbstractedFile(file, url) {
+	var OK = 200;
+	var CREATED = 201;
+	var NO_CONTENT = 204;
 	if (typeof file == "string" && typeof url == "undefined") {
 		url = file;
 	}
@@ -283,9 +299,9 @@ function AbstractedFile(file, url) {
 	 * Writes a file to the server using put
 	 * @param fileData
 	 */
-	this.writeToFile = function(fileData) {
+	this.writeToFile = function(fileData, callback) {
 		if (usingServer) {
-			var client = new XMLHttpRequest();
+			var client = createXmlHttp(callback);
 			   client.open("PUT", url, false);
 			   client.setRequestHeader("Content-Type", "text/plain;charset=UTF-8");
 			   client.send(fileData);
@@ -296,11 +312,11 @@ function AbstractedFile(file, url) {
 	 * @param json
 	 * Writes the data to the file as a json object.
 	 */
-	this.writeFileAsJson = function(json) {
+	this.writeFileAsJson = function(json, callback) {
 		if (!isArray(json)) {
 			json = [json]; // wrap it in an array for consistancy
 		}
-		this.writeToFile(JSON.stringify(json));
+		this.writeToFile(JSON.stringify(json), callback);
 	}
 
 	/**
@@ -347,7 +363,7 @@ function AbstractedFile(file, url) {
 	 * @Method
 	 * @param inputCallback {function} The callback that is called as a response from the server.
 	 * @callback inputCallback(responseText)
-	 * @callbackParam responseText {string} the result of the server message, or undefined if there is an error
+	 * @callbackParam responseText {string} the result of the server message, or {@link ServerTimeOutException if the call takes too long}
 	 * @returns {XMLHttpRequest} also sets the callback
 	 */
 	function createXmlHttp(inputCallback) {
@@ -359,20 +375,26 @@ function AbstractedFile(file, url) {
 			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 		}
 
-		var timedOut = false;
-		var timeout = setTimeout(function() {
-			timedOut = true;
-			inputCallback(undefined);
-		}, TIMEOUT_TIME); // one second timeout (may need to be made longer)
-
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-				clearTimeout(timeout);
-				if (!timedOut) {
-					inputCallback(xmlhttp.responseText);
+		if (inputCallback && typeof inputCallback === "function") {
+			var timedOut = false;
+			var timeout = setTimeout(function() {
+				timedOut = true;
+				inputCallback(new ServerTimeOutException());
+			}, TIMEOUT_TIME); // one second timeout (may need to be made longer)
+	
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == 4 && (xmlhttp.status == OK || xmlhttp.status == CREATED || xmlhttp.status == NO_CONTENT)) {
+					clearTimeout(timeout);
+					if (!timedOut) {
+						if (xmlhttp.status == NO_CONTENT) {
+							inputCallback("");
+						} else {
+							inputCallback(xmlhttp.responseText);
+						}
+					}
 				}
-			}
-		};
+			};
+		}
 		return xmlhttp;
 	}
 
