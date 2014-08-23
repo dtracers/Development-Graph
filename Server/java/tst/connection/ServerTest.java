@@ -89,7 +89,7 @@ public class ServerTest {
     	Response res = serv.serve(session);
     	String result = convert(res.getData());
     	String objectHardCode = "[{\"id\": \"n0\","
-    			+ "\"label\": \"Development Graph specific graph\","
+    			+ "\"label\": \"Fake Project main feature\","
     			+ "\"actionType\" : \"feature\",\"x\": 0,\"y\": 0,\"size\": 2}]";
     	JsonTest.jsonEquals(objectHardCode, result);
     }

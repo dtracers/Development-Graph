@@ -2,6 +2,7 @@
 window.featureCreatorLoaded = true;
 </script>
 <template id="createNewFeature">
+	<script src="/web/src/featureManager/featureManager.js"></script>
 	<style>
 		@import url("/web/src/graph/nodeClickActions/createNewFeature/createNewFeature.css");
 	</style>
@@ -11,10 +12,10 @@ window.featureCreatorLoaded = true;
 		<input type="text" class = "featureName" name = "featureName" required>
 		<h3>Feature Description</h3>
 		<textarea rows="10" cols="70" name = "description" required></textarea><br>
-		<input type="checkbox" name="haveCode" value="haveCode">Does this feature have code?<br>
-		<input type="checkbox" name="isImplementation" value="isImplementation">Is this feature an implementation detail?
+		<input type="checkbox" name="haveCode" value="true">Does this feature have code?<br>
+		<input type="checkbox" name="isImplementation" value="true">Is this feature an implementation detail?
 		<div><p>Select the current state of the feature: 
-		<select required>
+		<select name="featureState" required>
 			<option value="notStarted" selected>notStarted</option>
 			<option value="incomplete">incomplete</option>
 			<option value="finished">finished</option>
@@ -24,7 +25,7 @@ window.featureCreatorLoaded = true;
 		</div>
 		<div class = "catagory">
 		Enter Catagories (comma separated)<br>
-		<textarea rows="2" cols="30" name = "catagories"></textarea><br>
+		<textarea rows="2" cols="30" name = "catagories" required></textarea><br>
 		<!-- This is where the catagory list will go -->
 
 		</div>

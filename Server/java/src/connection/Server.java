@@ -119,7 +119,7 @@ public class Server extends SimpleWebServer {
 			}
 			StringBuffer result;
 			try {
-				result = SaveManager.getInstance().loadObjects(new ArrayList<String>(session.getParms().keySet()), f);
+				result = SaveManager.getInstance().loadObjects(new ArrayList<String>(session.getParms().keySet()), f.toPath());
 			} catch (IOException | ParseException e) {
 				e.printStackTrace();
 				return createErrorResponse(e, null);
@@ -139,7 +139,7 @@ public class Server extends SimpleWebServer {
 		if (session.getParms().containsKey("json")) {
 			System.out.println("JSON STYLE PUTTING");
 			try {
-				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()), session.getParms());
+				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()).toPath(), session.getParms());
 				if (session.getParms().containsKey("insert")) {
 					res = new Response(Response.Status.CREATED, MIME_HTML, "");
 				}

@@ -160,7 +160,7 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
  * @returns {edge}
  */
 sigma.classes.graph.addMethod('createNewEdge', function createNewEdge(sourceNode, targetNode, dynamic) {
-	var edgeId = sourceNode.id + '' + targetNode.id;
+	var edgeId = 'e' + sourceNode.id + '' + targetNode.id;
 	return {
 		id: edgeId,
 		source: sourceNode.id,
