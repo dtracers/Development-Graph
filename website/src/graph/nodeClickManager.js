@@ -136,9 +136,6 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		managerInstance.refresh();
 
 		managerInstance.timedForceAtlas2(fa2Runtime);
-
-		// tell the event to set the node to the parent
-		localScope.lastClickedNodeHasBeenRemoved(e); // we have to send it the event
 	}
 
 	this.addClickListener = function(listener, args) {
