@@ -7,12 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import org.json.simple.parser.ParseException;
 
+import projectManagment.NoSuchProjectException;
 import projectManagment.Project;
 import projectManagment.ProjectManager;
 import utilities.SaveManager;
@@ -95,11 +99,17 @@ public class Server extends SimpleWebServer {
 		} else if (uri.contains(LOAD_PROJECT_REQUEST)) {
 			System.out.println(uri);
 			System.out.println("LOADING OLD PROJECT");
-			String projectName = projectManagerInstance.loadProject(form);
-			return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
+			try {
+				String projectName = projectManagerInstance.loadProject(form);
+				return createRedirect(WEB_START_PATH +'-' + projectName + MAIN_PROJECT_PAGE);
+			} catch (NoSuchProjectException e) {
+				e.printStackTrace();
+				return createErrorRedirect(MAIN_DISPLAY_PAGE, e, "Error while loading old project");
+			}
 		}
 		return createNoDataResponse();
 	}
+
 
 	/**
 	 * 
@@ -137,7 +147,6 @@ public class Server extends SimpleWebServer {
 	protected Response put(IHTTPSession session) {
 		Response res = createNoDataResponse();
 		if (session.getParms().containsKey("json")) {
-			System.out.println("JSON STYLE PUTTING");
 			try {
 				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()).toPath(), session.getParms());
 				if (session.getParms().containsKey("insert")) {
@@ -255,5 +264,19 @@ public class Server extends SimpleWebServer {
 
 	protected final Response createNoDataResponse() {
 		return new Response(Response.Status.NO_CONTENT, MIME_HTML, "");
+	}
+
+	private Response createErrorRedirect(String newUri, Exception e, String message) {
+		String errorString = "?message=ERROR";
+		try {
+			errorString = "?message=" + URLEncoder.encode(message, "UTF-8") + "&error=" + URLEncoder.encode(e.getMessage(), "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			e1.printStackTrace();
+		}
+		Response res = new Response(Response.Status.REDIRECT, NanoHTTPD.MIME_HTML, "<html><body>Redirected: <a href=\"" +
+				newUri + "\">" + newUri + errorString + "</a><h1>" + message +" </h1><h1>" + e.getMessage() + "</h1></body></html>");
+		res.addHeader("Accept-Ranges", "bytes");
+		res.addHeader("Location", newUri + errorString);
+		return res;
 	}
 }

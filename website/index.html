@@ -2,7 +2,7 @@
 <head>
 <link rel="import" href="src/fileHandler/fileImporter.html"></link>
 <link href="stylesheet.css" type="text/css" ></link>
-<script src="src/projectFileReader.js"></script>
+<script src="src/fileHandler/projectLoader.js"></script>
 
 <link rel="stylesheet" type="text/css" href="stylesheet.css"></link>
 <link href='http://fonts.googleapis.com/css?family=Chivo:900italic' rel='stylesheet' type='text/css'>
@@ -79,6 +79,18 @@
 			console.log(err.stack);
 		}
 	});
+	})();
+</script>
+<script>
+	(function() {
+		var message = getParameterByName("message");
+		var error = getParameterByName("error");
+		if (message) {
+			alert(message)
+		}
+		if (error) {
+			alert(error);
+		}
 	})();
 </script>
 </body>

@@ -38,7 +38,6 @@ function GraphManager() {
 		  	var node = realGraphInstance.nodes('n0');
 
 		  	var endingFunction = function() {
-		  		alert("Loading graph");
 
 			  	managerInstance.refresh();
 
@@ -48,7 +47,6 @@ function GraphManager() {
 		  	};
 
 		  	if (!node) {
-		  		alert("NO NODES IN GRAPH");
 		  		var name = getProjectFromUrl();
 		  		var featureData = {
 						name: getProjectFromUrl(),

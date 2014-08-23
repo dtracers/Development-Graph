@@ -9,6 +9,9 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,14 +66,22 @@ public class ProjectManager {
 		return projectName;
 	}
 
-	public String loadProject(FormParser form) {
+	public String loadProject(FormParser form) throws NoSuchProjectException {
 
 		String directory = form.getPostValue("directory");
 		Project p = new Project(form.getPostValue("name"), new File(directory.replaceAll("%2F", "/")));
+		validateProject(p.getDirectoryPath());
 		this.addProject(p);
 		System.out.println("DIRECTORY " + p.getDirectoryPath());
 		addProjectToProjectList(p);
 		return p.getName();
+	}
+
+	private void validateProject(String directoryPath) throws NoSuchProjectException {
+		Path path = FileSystems.getDefault().getPath(directoryPath);
+		if (!Files.exists(path)) {
+			throw new NoSuchProjectException("There is not project with path " + directoryPath);
+		}
 	}
 
 	/**
