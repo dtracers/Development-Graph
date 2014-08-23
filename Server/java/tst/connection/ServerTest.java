@@ -75,7 +75,7 @@ public class ServerTest {
 
     /**
 	 * Passes if the correct java script is grabbed for loading data.
-	 * TODO: fix this test (or code so it passes)
+	 * TODO: fix this test (or code so it passes).
 	 */
     @Test
     public void testJSon() throws Exception {

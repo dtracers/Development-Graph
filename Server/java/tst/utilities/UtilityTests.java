@@ -10,7 +10,7 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({IdFirstTest.class, JsonReaderTest.class, JsonWriterTest.class})
+@SuiteClasses({IdFirstTest.class, JsonReaderTest.class, JsonWriterTest.class, JsonInsertionTest.class, SaveManagerTest.class})
 public class UtilityTests {
 
 }
