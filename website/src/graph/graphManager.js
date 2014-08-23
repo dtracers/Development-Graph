@@ -71,6 +71,24 @@ sigma.prototype.timedForceAtlas2 = function(millis) {
 };
 
 /**
+ * Generates an rfc4122 version 4 compliant solution.
+ *
+ * found at http://stackoverflow.com/a/2117523/2187510
+ * and further improved at
+ * http://stackoverflow.com/a/8809472/2187510
+ */
+function generateUUID() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (d + Math.random()*16)%16 | 0;
+        d = Math.floor(d/16);
+        return (c=='x' ? r : (r&0x7|0x8)).toString(16);
+    });
+    return uuid;
+};
+
+/**
+ * @Method
  * Creates and returns a new node which can then be added to the graph
  * @param existingNode {node} it is the parent node of either a new feature or a new dynamic node
  * @param dynamicNode {boolean}
@@ -98,8 +116,8 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
 	}
 
 	// if the node is a dynamic node then its id is dn + nodeLabel
-	var newNodeId = dynamicNode ? ('dn' + actionLabel + (existingNode ? existingNode.id : '-1')) : 'n' + ++nodeCounter;
-	var featureId = existingNode.id.replace("n","f");
+	var newNodeId = dynamicNode ? ('dn' + actionLabel + (existingNode ? existingNode.id : '-1')) : 'n' + generateUUID();
+	var featureId = (dynamicNode ? existingNode.id : newNodeId).replace("n","f");
 	var nodeLabel = nodeLabel ? nodeLabel : 'r' + newNodeId;
 	var returnNode = {
 		id: newNodeId,
