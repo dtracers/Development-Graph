@@ -135,17 +135,18 @@ public class Server extends SimpleWebServer {
 	}
 
 	protected Response put(IHTTPSession session) {
-		Response res = null;
+		Response res = createNoDataResponse();
 		if (session.getParms().containsKey("json")) {
 			System.out.println("JSON STYLE PUTTING");
 			try {
-				boolean insert = session.getParms().containsKey("insert");
-				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()), insert);
+				SaveManager.getInstance().saveData(readInputData(session), translatePath(new File(WORKING_DIR), session.getUri()), session.getParms());
+				if (session.getParms().containsKey("insert")) {
+					res = new Response(Response.Status.CREATED, MIME_HTML, "");
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				res = createErrorResponse(e, e.getMessage());
 			}
-			res = createNoDataResponse();
 		} else {
 			res = super.serve(session);
 		}
@@ -253,7 +254,6 @@ public class Server extends SimpleWebServer {
 	}
 
 	protected final Response createNoDataResponse() {
-		Response res = new Response(Response.Status.NO_CONTENT, MIME_HTML, "");
-		return res;
+		return new Response(Response.Status.NO_CONTENT, MIME_HTML, "");
 	}
 }
