@@ -27,20 +27,22 @@
 	    text-align: center;
 	}
 </style>
+<script src="overlay.js"></script>
 <script src="graphManager.js"></script>
 <script src="nodeClickManager.js"></script>
-<script src="nodeClickActions/createNewFeature/createNewFeature.js"></script>
-<script src="nodeClickActions/viewCode/viewCode.js"></script>
-<script src = "/web/src/featureManager/featureManager.js"></script>
+<script src="/web/src/featureManager/featureManager.js"></script>
+<link rel="import" href="nodeClickActions/actionsImport.html" onload = "startGraph()">
 </head>
 <body>
 <div id="graphContainer"></div>
 <script>
-	var graphManager = new GraphManager();
-	graphManager.load(getDataDirectoryAsUrl() + '/graph', 'graphContainer', function() {
-		graphManager.getNodeClickManager().addClickListener(FeatureCreator, ['overlay']);
-		graphManager.getNodeClickManager().addClickListener(CodeViewCreator, ['overlay']);
-	});
+	function startGraph() {
+		var graphManager = new GraphManager();
+		graphManager.load(getDataDirectoryAsUrl() + '/graph', 'graphContainer', function() {
+			graphManager.getNodeClickManager().addClickListener(FeatureCreator, ['overlay']);
+			graphManager.getNodeClickManager().addClickListener(CodeViewCreator, ['overlay']);
+		});
+	}
 </script>
  <div id="overlay"></div>
 </body>

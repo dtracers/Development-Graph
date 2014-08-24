@@ -1,5 +1,5 @@
 /**
- *
+ * @Class
  * @param realGraph
  * @param displayGraph
  * @param managerInstance
@@ -7,24 +7,19 @@
  * @param overlayId the id where the overlay will be created
  */
 function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, args) {
+	this.superConstructor();
+	localScope = this;
+	//this.Inherits(Overlay);
+	//Inherit(this, Overlay);
+
 	var overlayId = args[0];
 	/**
 	 * Pops up an overlay
 	 */
 	function createNewFeature(e, oldNode) {
-		if (!window.featureCreatorLoaded) {
-			// load window here 
-			var fileref = document.createElement('link');
-			fileref.id = "createNewFeatureImport";
-			fileref.setAttribute("rel", "import");
-			fileref.setAttribute("href", 'nodeClickActions/createNewFeature/featureCreator.html');
-			document.querySelector("head").appendChild(fileref);
-			fileref.onload = function(event) {
-				produceOverlay(e, oldNode, event);
-			}
-		} else {
+		localScope.loadHtml("createNewFeatureImport", 'nodeClickActions/createNewFeature/featureCreator.html', function() {
 			produceOverlay(e, oldNode);
-		}
+		});
 	}
 
 	/**
@@ -32,8 +27,6 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 	 */
 	function saveData(featureNode, shadowRoot) {
 		var parentNode = featureNode;
-		console.log("SAVING DATA");
-		console.log(shadowRoot);
 		var defaults = {};
 		defaults['haveCode'] = false;
 		defaults['isImplementation'] = false;
@@ -67,7 +60,7 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 		saveNewFeature(featureData, parentNode, realGraph, displayGraph, function() {
 			managerInstance.refresh();
 			managerInstance.timedForceAtlas2(2000);
-			document.getElementById(overlayId).style.display = 'none';
+			localScope.close(overlayId, shadowRoot);
 		});
 	}
 
@@ -163,8 +156,14 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 		saveButton.onclick = function() {
 			saveData(oldNode, shadowRoot);
 		};
+		var closeButton = shadowRoot.querySelector('span.close');
+		closeButton.onclick = function() {
+			localScope.close(overlayId, shadowRoot);
+		}
 		document.getElementById(overlayId).style.display = 'flex';
 	}
 
 	clickManager.setClickFunction('newFeature', createNewFeature);
 }
+
+FeatureCreator.Inherits(Overlay);

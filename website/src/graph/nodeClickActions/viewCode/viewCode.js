@@ -6,6 +6,11 @@
  * @param args the id where the overlay will be created
  */
 function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager, args) {
+	this.superConstructor();
+	localScope = this;
+	//this.Inherits(Overlay);
+	//Inherit(this, Overlay);
+
 	var SOURCE_TYPE = "source";
 	var DOC_TYPE = "doc";
 	var TEST_TYPE = "test";
@@ -15,31 +20,34 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 	 * Pops up an overlay
 	 */
 	function createCodeViewHtmlImport(e, oldNode) {
-		if (!window.codeViewerLoaded) {
-			// load window here 
-			var fileref = document.createElement('link');
-			fileref.id = "viewCodeImport";
-			fileref.setAttribute("rel", "import");
-			fileref.setAttribute("href", 'nodeClickActions/viewCode/codeViewer.html');
-			document.querySelector("head").appendChild(fileref);
-			fileref.onload = function(event) {
-				setUpCodeViewer(e, oldNode);
-			}
-		} else {
+		localScope.loadHtml("viewCodeImport", 'nodeClickActions/viewCode/codeViewer.html', function() {
 			setUpCodeViewer(e, oldNode);
-		}
+		});
+	}
+
+	/**
+	 * Refreshed the code block
+	 */
+	function refreshCodeBlocks(codeElement, docElement, testElement, featureId) {
+		console.log("Refreshfing code block")
+		var sourceFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source?" + featureId); // grabs data from source feature map
+		var docFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source_doc?" + featureId); // grabs data from doc feature map
+		var testFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source_test?" + featureId); // grabs data from test feature map
+
+		sourceFileGrabber.readFileAsJson(createJsonHandler(codeElement.querySelector(".boxes"), SOURCE_TYPE));
+		docFileGrabber.readFileAsJson(createJsonHandler(docElement.querySelector(".boxes"), DOC_TYPE));
+		testFileGrabber.readFileAsJson(createJsonHandler(testElement.querySelector(".boxes"), TEST_TYPE));
 	}
 
 	function setUpCodeViewer(e, oldNode) {
 		produceOverlay(e, oldNode, function(codeElement, docElement, testElement) {
-			console.log(e.data.node);
-			var sourceFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source?" + e.data.node.getFeatureId()); // grabs data from source feature map
-			var docFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source_doc?" + e.data.node.getFeatureId()); // grabs data from doc feature map
-			var testFileGrabber = new AbstractedFile(undefined, getDataDirectoryAsUrl() + "/source_test?" + e.data.node.getFeatureId()); // grabs data from test feature map
-
-			sourceFileGrabber.readFileAsJson(createJsonHandler(codeElement, SOURCE_TYPE));
-			docFileGrabber.readFileAsJson(createJsonHandler(docElement, DOC_TYPE));
-			testFileGrabber.readFileAsJson(createJsonHandler(testElement, TEST_TYPE));
+			refreshCodeBlocks(codeElement, docElement, testElement, e.data.node.getFeatureId());
+			
+			addVisibilityFunction(function(event, isHidden, visibilityState) {
+				if (!isHidden) {
+					refreshCodeBlocks(codeElement, docElement, testElement, e.data.node.getFeatureId());
+				}
+			});
 		});
 	}
 
@@ -54,9 +62,14 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 			if (typeof jsonObject == "undefined") {
 				return;
 			}
+			parentElement.innerHTML = "";
 			console.log(jsonObject);
 			jsonObject = jsonObject[0];
 			console.log(jsonObject);
+			if (jsonObject === undefined || typeof jsonObject === "undefined") {
+				return;
+			}
+			
 			fileList = jsonObject.files;
 			for (var i = 0; i < fileList.length; i++ ) {
 				fileObj = fileList[i];
@@ -104,14 +117,6 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 	}
 
 	/**
-	 * @Method
-	 * closes the code view to give back the view of the graph itself.
-	 */
-	function closeCodeView(e, shadowRoot) {
-		document.getElementById(overlayId).style.display = 'none';
-	}
-
-	/**
 	 * Produces the grayed overlay where the node data is inserted
 	 * @param e {event}
 	 * @param oldNode {Node}
@@ -130,7 +135,8 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 
 		var closeButton = shadowRoot.querySelector('.closeButton');
 		closeButton.onclick = function() {
-			closeCodeView(e, shadowRoot);
+			localScope.close(overlayId, shadowRoot);
+			//closeCodeView(e, shadowRoot);
 		};
 
 		var codeElement = shadowRoot.querySelector('.code');
@@ -155,3 +161,5 @@ function CodeViewCreator(realGraph, displayGraph, managerInstance, clickManager,
 		buttonElement.href = getWebsitePathAsUrl() + buttonElement.dataset.url + "?feature=" + featureId + "&type=" + buttonElement.dataset.type;
 	}
 }
+
+CodeViewCreator.Inherits(Overlay);
