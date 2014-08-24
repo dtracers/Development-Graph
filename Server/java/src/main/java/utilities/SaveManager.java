@@ -2,6 +2,7 @@ package utilities;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -307,6 +308,17 @@ public class SaveManager {
 		if (!Files.exists(path)) {
 			return;
 		}
+		File file = path.toFile();
+        file.setExecutable(false);
+        file.setReadable(true);
+        file.setWritable(true);
+         
+        //change permission to 777 for all the users
+        //no option for group and others
+        file.setExecutable(false, false);
+        file.setReadable(true, false);
+        file.setWritable(true, false);
+
 		//using PosixFilePermission to set file permissions 777
         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
         //add owners permission
