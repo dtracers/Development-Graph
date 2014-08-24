@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -70,7 +72,14 @@ public class ProjectManager {
 	public String loadProject(FormParser form) throws NoSuchProjectException {
 
 		String directory = form.getPostValue("directory");
-		Project p = new Project(form.getPostValue("name"), new File(directory.replaceAll("%2F", "/").replaceAll("/", File.separator)));
+		String location = null;
+		try {
+			location = URLDecoder.decode(directory, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// handles the most basic options but not all of them
+			location = directory.replaceAll("%2F", "/").replaceAll("%5C", "\\").replaceAll("%3A", ":").replaceAll("+", " ");
+		}
+		Project p = new Project(form.getPostValue("name"), new File(location));
 		validateProject(p.getDirectoryPath());
 		this.addProject(p);
 		System.out.println("DIRECTORY " + p.getDirectoryPath());

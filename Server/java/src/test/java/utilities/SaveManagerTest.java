@@ -45,15 +45,7 @@ public class SaveManagerTest extends JsonTest {
 		SaveManager.setFilePermissionsForEveryone(TEST_DIRECTORY);
 
 		SaveManager.setFilePermissionsForEveryone(EMPTY_FILE);
-		try {
-			Files.createFile(EMPTY_FILE);
-		} catch(Exception e) {
-			try {
-				EMPTY_FILE.toFile().createNewFile();
-			} catch(Exception e2) {
-				
-			}
-		}
+		Files.createFile(EMPTY_FILE);
 		// moves the backup to ensure that the fake graph is always the same
 		final Path FAKE_GRAPH_BACKUP = Paths.get(TEST_DIRECTORY.toString(), "fakeGraphBackup");
 		Files.move(FAKE_GRAPH_BACKUP, FAKE_GRAPH_BACKUP, StandardCopyOption.REPLACE_EXISTING);
@@ -63,20 +55,12 @@ public class SaveManagerTest extends JsonTest {
 
 	@After
 	public void tearDown() throws Exception {
-		try {
-			Files.deleteIfExists(EMPTY_FILE);
-		} catch (Exception e) {
-
-		}
-		try {
-			Files.deleteIfExists(EMPTY_FILE_TEMP);
-		} catch (Exception e) {
-
-		}
+		Files.deleteIfExists(EMPTY_FILE);
+		Files.deleteIfExists(EMPTY_FILE_TEMP);
 		try {
 			Files.deleteIfExists(CREATION_FILE);
 		} catch (Exception e) {
-
+			e.printStackTrace();
 		}
 	}
 
@@ -118,6 +102,21 @@ public class SaveManagerTest extends JsonTest {
 
 		assertTrue(!Files.exists(EMPTY_FILE));
 		assertTrue(Files.exists(EMPTY_FILE_TEMP));
+	}
+
+	@Test
+	public void testReplaceEmptyToCreationFile() throws Exception {
+
+		// sanity check
+		assertTrue(Files.exists(EMPTY_FILE));
+		assertTrue(!Files.exists(CREATION_FILE));
+
+		// NOTE: I am calling this method with the reverse inputs
+		// EMPTY_FILE is the temp file in this case
+		assertTrue(SaveManager.replaceRealWithTemp(EMPTY_FILE, CREATION_FILE));
+
+		assertTrue(!Files.exists(EMPTY_FILE));
+		assertTrue(Files.exists(CREATION_FILE));
 	}
 
 	@Test
