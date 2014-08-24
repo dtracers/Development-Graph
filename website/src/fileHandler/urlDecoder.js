@@ -25,6 +25,12 @@ function getWebsitePathAsUrl() {
 	return "/web-" + getProjectFromUrl() + "/src";
 }
 
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
 /**
  * Returns the file extension of a file given a url
  * @param url
@@ -46,6 +52,7 @@ function getExtensionFromUrl(url) {
 	if (url.endsWith("/")) {
 		url = url.substring(0, url.length -1)
 	}
+
 	var extensionIndex = url.lastIndexOf(".");
 	var lastSlashIndex = url.lastIndexOf("/");
 	if (extensionIndex < 0 || extensionIndex < lastSlashIndex) {
