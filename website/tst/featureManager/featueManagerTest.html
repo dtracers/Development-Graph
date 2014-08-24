@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>QUnit Example</title>
+  <link rel="import" href="/web/tst/testUtilities/testUtilities.html">
+</head>
+<body>
+  <h1>SOME OF THESE TEST MUST BE RAN WITH A SERVER AND WILL NOT PASS WITHOUT IT</h1>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src = "/web/src/fileHandler/fileUtils.js"></script> <!-- The file being tested! -->
+  <script>
+		after(function () {
+			alert("AFTER");
+		});
+  		// TODO: mock these objects out adn create tests on them!
+		test( "file object creation test", function() {
+			var file = new AbstractedFile(null, "/project-TestProject/.dgd/graph.grp?n0&n1");
+			ok(true, "No errors while creating test" );
+		});
+
+		/**
+		 * @Test
+		 * Passes if the file is read and the correct values are returned.
+		 * This specifically tests the line reader
+		 */
+		asyncTest("File object reading test", function() {
+			var file = new AbstractedFile(null, "/project-TestProject/.dgd/testFile?test0");
+	
+			// timeout so we dont wait for file to be read
+			var timeout = asyncTimeout(assert, 300, "server took too long to respond");
+	
+			file.readFileAsOneString(function(text) {
+				clearInterval(timeout);
+	
+				failIfUndefined(assert, text, "file contents are undefined");
+	
+				var expected = "[{\"id\": \"test0\",\"name\" : \"test\"}]";
+				assertJsonEquals(assert, expected, text);
+	
+				QUnit.start();
+			});
+		});
+  </script>
+</body>
+</html>

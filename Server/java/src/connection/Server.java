@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
-
 import org.json.simple.parser.ParseException;
 
 import projectManagment.NoSuchProjectException;

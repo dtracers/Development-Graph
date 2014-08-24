@@ -8,6 +8,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,12 +22,12 @@ import org.junit.Test;
 public class SaveManagerTest extends JsonTest {
 
 	/* Paths for our use */
-	final Path TEST_DIRECTORY = FileSystems.getDefault().getPath("tst", "testData");
-	final Path FAKE_GRAPH = FileSystems.getDefault().getPath(TEST_DIRECTORY.toString(), "fakeGraph");
+	final Path TEST_DIRECTORY = Paths.get("tst", "testData");
+	final Path FAKE_GRAPH = Paths.get(TEST_DIRECTORY.toString(), "fakeGraph");
 	final Path FAKE_GRAPH_BACKUP = null; // to make sure no one tries to use it in a test
-	final Path EMPTY_FILE = FileSystems.getDefault().getPath(TEST_DIRECTORY.toString(), "emptyFile");
-	final Path EMPTY_FILE_TEMP = FileSystems.getDefault().getPath(TEST_DIRECTORY.toString(), "emptyFiletemp");
-	final Path CREATION_FILE = FileSystems.getDefault().getPath(TEST_DIRECTORY.toString(), "creationFile");
+	final Path EMPTY_FILE = Paths.get(TEST_DIRECTORY.toString(), "emptyFile");
+	final Path EMPTY_FILE_TEMP = Paths.get(TEST_DIRECTORY.toString(), "emptyFiletemp");
+	final Path CREATION_FILE = Paths.get(TEST_DIRECTORY.toString(), "creationFile");
 
 	final String FAKE_GRAPH_DATA_NODE1 = "{\"id\": \"n0\",\"label\": \"Fake Project main feature\",\"actionType\" : \"feature\",\"x\": 0,\"y\": 0,\"size\": 2}";
 	final String FAKE_GRAPH_DATA_EDGE1 = "{\"id\": \"e0\",\"source\": \"n0\",\"target\": \"n1\"}";
@@ -43,9 +44,8 @@ public class SaveManagerTest extends JsonTest {
 	@Before
 	public void setUp() throws Exception {
 		Files.createFile(EMPTY_FILE);
-
 		// moves the backup to ensure that the fake graph is always the same
-		final Path FAKE_GRAPH_BACKUP = FileSystems.getDefault().getPath(TEST_DIRECTORY.toString(), "fakeGraphBackup");
+		final Path FAKE_GRAPH_BACKUP = Paths.get(TEST_DIRECTORY.toString(), "fakeGraphBackup");
 		Files.move(FAKE_GRAPH_BACKUP, FAKE_GRAPH_BACKUP, StandardCopyOption.REPLACE_EXISTING);
 
 		manager = new SaveManager();

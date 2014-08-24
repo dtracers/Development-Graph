@@ -2,26 +2,22 @@ package utilities;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONAware;
@@ -29,7 +25,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import fi.iki.elonen.NanoHTTPD.Response;
 import utilities.json.StreamingJsonInserter;
 import utilities.json.StreamingJsonReader;
 import utilities.json.StreamingJsonWriter;
@@ -272,8 +267,10 @@ public class SaveManager {
 	 * @throws IOException
 	 */
 	public static boolean replaceRealWithTemp(Path tempPath, Path realFile) throws IOException {
+		setFilePermissionsForEveryone(realFile);
 		Files.deleteIfExists(realFile);
 		Files.move(tempPath, realFile, StandardCopyOption.ATOMIC_MOVE);
+		setFilePermissionsForEveryone(realFile);
 		return true;
 	}
 
@@ -301,6 +298,31 @@ public class SaveManager {
 	}
 
 	public static Path createTemporyPath(Path file) {
-		return file.resolveSibling(file.getFileName() + "temp");
+		Path path = file.resolveSibling(file.getFileName() + "temp");
+		setFilePermissionsForEveryone(path);
+		return path;
+	}
+
+	public static void setFilePermissionsForEveryone(Path path) {
+		//using PosixFilePermission to set file permissions 777
+        Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+        //add owners permission
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        perms.add(PosixFilePermission.OWNER_EXECUTE);
+        //add group permissions
+        perms.add(PosixFilePermission.GROUP_READ);
+        perms.add(PosixFilePermission.GROUP_WRITE);
+        perms.add(PosixFilePermission.GROUP_EXECUTE);
+        //add others permissions
+        perms.add(PosixFilePermission.OTHERS_READ);
+        perms.add(PosixFilePermission.OTHERS_WRITE);
+        perms.add(PosixFilePermission.OTHERS_EXECUTE);
+
+        try {
+			Files.setPosixFilePermissions(path, perms);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

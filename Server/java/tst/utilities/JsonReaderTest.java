@@ -70,7 +70,7 @@ public class JsonReaderTest extends JsonTest {
 
 		List<String> keys = createList(map);
 		Map<String, String> result = createResult(source, keys, "id");
-		
+
 		//map.remove("56"); // this object should never exist
 		jsonEquals(map, result);
 	}
