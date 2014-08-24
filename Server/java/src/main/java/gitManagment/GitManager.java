@@ -22,6 +22,7 @@ public class GitManager {
 	 */
 	public boolean addToIgnore(String addition) {
 		File f = new File(directory, GIT_IGNORE);
+        f.mkdir();
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(f));
 			String nextLine = "";

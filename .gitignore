@@ -16,3 +16,5 @@ hs_err_pid*
 *.pyc
 .dgrproj
 Server/run/.projectList
+Server/java/target/
+nb*

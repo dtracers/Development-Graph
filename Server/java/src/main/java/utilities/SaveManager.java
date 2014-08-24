@@ -324,7 +324,7 @@ public class SaveManager {
 
         try {
 			Files.setPosixFilePermissions(path, perms);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -39,7 +38,7 @@ public class ServerTest {
 
 	/**
 	 * Passes if the path is translated and the file exists.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
     @Test
     public void testWebTranslate() throws Exception {
@@ -52,7 +51,7 @@ public class ServerTest {
 
     /**
 	 * Passes if the path is translated and the file exists.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
     @Test
     public void testWebTranslateProjectName() throws Exception {
@@ -65,7 +64,7 @@ public class ServerTest {
 
     /**
 	 * Passes if the path is translated and the file exists.
-	 * @throws Exception 
+	 * @throws Exception
 	 */
     @Test
     public void testProjectTranslate() throws Exception {
@@ -98,7 +97,7 @@ public class ServerTest {
     }
 
     /**
-     * Tears down the test fixture. 
+     * Tears down the test fixture.
      * (Called after every test case method.)
      */
     @After

@@ -1,10 +1,7 @@
 package utilities;
 
-import static org.junit.Assert.*;
-
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -16,13 +13,15 @@ import java.util.Map;
 import java.util.Scanner;
 
 import org.junit.After;
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
 public class SaveManagerTest extends JsonTest {
 
 	/* Paths for our use */
-	final Path TEST_DIRECTORY = Paths.get("tst", "testData");
+	final Path TEST_DIRECTORY = Paths.get("src", "test", "resources", "testData");
 	final Path FAKE_GRAPH = Paths.get(TEST_DIRECTORY.toString(), "fakeGraph");
 	final Path FAKE_GRAPH_BACKUP = null; // to make sure no one tries to use it in a test
 	final Path EMPTY_FILE = Paths.get(TEST_DIRECTORY.toString(), "emptyFile");
