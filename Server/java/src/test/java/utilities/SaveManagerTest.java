@@ -26,7 +26,7 @@ public class SaveManagerTest extends JsonTest {
 	final Path FAKE_GRAPH_BACKUP = null; // to make sure no one tries to use it in a test
 	final Path EMPTY_FILE = Paths.get(TEST_DIRECTORY.toString(), "emptyFile");
 	final Path EMPTY_FILE_TEMP = Paths.get(TEST_DIRECTORY.toString(), "emptyFiletemp");
-	final Path CREATION_FILE = Paths.get(TEST_DIRECTORY.toString(), "creationFile");
+	final Path CREATION_FILE = Paths.get(TEST_DIRECTORY.toString(), "noFile");
 
 	final String FAKE_GRAPH_DATA_NODE1 = "{\"id\": \"n0\",\"label\": \"Fake Project main feature\",\"actionType\" : \"feature\",\"x\": 0,\"y\": 0,\"size\": 2}";
 	final String FAKE_GRAPH_DATA_EDGE1 = "{\"id\": \"e0\",\"source\": \"n0\",\"target\": \"n1\"}";
@@ -42,7 +42,18 @@ public class SaveManagerTest extends JsonTest {
 
 	@Before
 	public void setUp() throws Exception {
-		Files.createFile(EMPTY_FILE);
+		SaveManager.setFilePermissionsForEveryone(TEST_DIRECTORY);
+
+		SaveManager.setFilePermissionsForEveryone(EMPTY_FILE);
+		try {
+			Files.createFile(EMPTY_FILE);
+		} catch(Exception e) {
+			try {
+				EMPTY_FILE.toFile().createNewFile();
+			} catch(Exception e2) {
+				
+			}
+		}
 		// moves the backup to ensure that the fake graph is always the same
 		final Path FAKE_GRAPH_BACKUP = Paths.get(TEST_DIRECTORY.toString(), "fakeGraphBackup");
 		Files.move(FAKE_GRAPH_BACKUP, FAKE_GRAPH_BACKUP, StandardCopyOption.REPLACE_EXISTING);
@@ -52,9 +63,21 @@ public class SaveManagerTest extends JsonTest {
 
 	@After
 	public void tearDown() throws Exception {
-		Files.deleteIfExists(EMPTY_FILE);
-		Files.deleteIfExists(EMPTY_FILE_TEMP);
-		Files.deleteIfExists(CREATION_FILE);
+		try {
+			Files.deleteIfExists(EMPTY_FILE);
+		} catch (Exception e) {
+
+		}
+		try {
+			Files.deleteIfExists(EMPTY_FILE_TEMP);
+		} catch (Exception e) {
+
+		}
+		try {
+			Files.deleteIfExists(CREATION_FILE);
+		} catch (Exception e) {
+
+		}
 	}
 
 	@Test(expected = NoSuchFileException.class)

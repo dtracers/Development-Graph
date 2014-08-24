@@ -96,11 +96,20 @@ public class SaveManager {
 		}
 
 		if (!Files.exists(savePath) || isFileEmpty(savePath)) {
+			setFilePermissionsForEveryone(savePath);
+			if (!Files.exists(savePath)) {
+				try {
+					Files.createFile(savePath);
+				} catch (IOException e) {
+					throw new SaveException("Exception Creating File", e);
+				}
+			}
 			try {
 				System.out.println(list);
 				Writer out = Files.newBufferedWriter(savePath, UTF8);
 				list.writeJSONString(out);
 				out.close();
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 				throw new SaveException("Exception while saving data", e);
@@ -309,13 +318,13 @@ public class SaveManager {
 			return;
 		}
 		File file = path.toFile();
-        file.setExecutable(false);
+        file.setExecutable(true);
         file.setReadable(true);
         file.setWritable(true);
          
         //change permission to 777 for all the users
         //no option for group and others
-        file.setExecutable(false, false);
+        file.setExecutable(true, false);
         file.setReadable(true, false);
         file.setWritable(true, false);
 
@@ -337,7 +346,9 @@ public class SaveManager {
         try {
 			Files.setPosixFilePermissions(path, perms);
 		} catch (Exception e) {
-			e.printStackTrace();
+			if (!(e instanceof UnsupportedOperationException)) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

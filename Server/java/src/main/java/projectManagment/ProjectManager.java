@@ -22,7 +22,7 @@ public class ProjectManager {
 
 	public static final String PROJECT_FILE = ".dgrproj";
 	public static final String PROJECT_DIRECTORY = ".dgd";
-	public static final String RUN_DIRECTORY = WORKING_DIR.substring(0, WORKING_DIR.indexOf("Server") + "Server".length()) + "/run";
+	public static final String RUN_DIRECTORY = WORKING_DIR.substring(0, WORKING_DIR.indexOf("Server") + "Server".length()) + File.separator + "run";
 	public static final String PROJECT_LIST = ".projectList";
 	private Map<String, Project> projectMap = new HashMap<String,Project>();
 
@@ -69,7 +69,7 @@ public class ProjectManager {
 	public String loadProject(FormParser form) throws NoSuchProjectException {
 
 		String directory = form.getPostValue("directory");
-		Project p = new Project(form.getPostValue("name"), new File(directory.replaceAll("%2F", "/")));
+		Project p = new Project(form.getPostValue("name"), new File(directory.replaceAll("%2F", "/").replaceAll("/", File.separator)));
 		validateProject(p.getDirectoryPath());
 		this.addProject(p);
 		System.out.println("DIRECTORY " + p.getDirectoryPath());
