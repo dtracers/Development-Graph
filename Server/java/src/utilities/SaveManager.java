@@ -304,6 +304,9 @@ public class SaveManager {
 	}
 
 	public static void setFilePermissionsForEveryone(Path path) {
+		if (!Files.exists(path)) {
+			return;
+		}
 		//using PosixFilePermission to set file permissions 777
         Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
         //add owners permission

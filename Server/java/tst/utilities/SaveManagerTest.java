@@ -189,7 +189,6 @@ public class SaveManagerTest extends JsonTest {
 		values.put("2", "data");
 
 		manager.saveData(stream, CREATION_FILE, values);
-		System.out.println("WTF?" + COMPLEX_DATA_INSERT);
 		compareFileData(COMPLEX_DATA_INSERT, CREATION_FILE);
 	}
 
