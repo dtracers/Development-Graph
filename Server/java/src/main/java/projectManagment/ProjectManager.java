@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import utilities.FileManager;
+import utilities.SaveManager;
 import connection.FormParser;
 
 public class ProjectManager {
@@ -106,6 +107,7 @@ public class ProjectManager {
 		}
 
 		p.getGit().addToIgnore(PROJECT_FILE); // ignoring return value
+		p.getGit().addToIgnore(".dgd/*" + SaveManager.TEMP_EXTENSION); // ignoring return value
 		GraphManager.initializeGraph(projDir.toPath());
 	}
 

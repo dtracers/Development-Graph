@@ -25,7 +25,7 @@ public class SaveManagerTest extends JsonTest {
 	final Path FAKE_GRAPH = Paths.get(TEST_DIRECTORY.toString(), "fakeGraph");
 	final Path FAKE_GRAPH_BACKUP = null; // to make sure no one tries to use it in a test
 	final Path EMPTY_FILE = Paths.get(TEST_DIRECTORY.toString(), "emptyFile");
-	final Path EMPTY_FILE_TEMP = Paths.get(TEST_DIRECTORY.toString(), "emptyFiletemp");
+	final Path EMPTY_FILE_TEMP = Paths.get(TEST_DIRECTORY.toString(), "emptyFile" + SaveManager.TEMP_EXTENSION);
 	final Path CREATION_FILE = Paths.get(TEST_DIRECTORY.toString(), "noFile");
 
 	final String FAKE_GRAPH_DATA_NODE1 = "{\"id\": \"n0\",\"label\": \"Fake Project main feature\",\"actionType\" : \"feature\",\"x\": 0,\"y\": 0,\"size\": 2}";

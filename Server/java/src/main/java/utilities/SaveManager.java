@@ -35,6 +35,7 @@ public class SaveManager {
 
 	private final static Charset UTF8 = Charset.forName("UTF-8");
 	private static SaveManager instance = null;
+	public static final String TEMP_EXTENSION = ".tmp";
 
 	public static SaveManager getInstance() {
 		if (instance == null) {
@@ -308,7 +309,7 @@ public class SaveManager {
 	}
 
 	public static Path createTemporyPath(Path file) {
-		Path path = file.resolveSibling(file.getFileName() + "temp");
+		Path path = file.resolveSibling(file.getFileName() + TEMP_EXTENSION);
 		setFilePermissionsForEveryone(path);
 		return path;
 	}
