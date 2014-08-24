@@ -182,6 +182,8 @@ public class Server extends SimpleWebServer {
 	 */
 	@Override
 	public File translatePath(File homeDir, String uri) throws Exception {
+		System.out.println("Translating path " + homeDir);
+		System.out.println("Translating path " + uri);
 		if (uri.startsWith(PROJECT_START_PATH)) {
 			return projectPathTranslater(uri);
 		}
