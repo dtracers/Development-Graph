@@ -216,6 +216,7 @@ public class Server extends SimpleWebServer {
 		File f = new File(newPath);
 		//System.out.println(new File(f, uri));
 		uri = uri.replace("/", File.separator);
+		System.out.println("Replaced uri " + uri);
 		File resultFile = new File(f, uri);
 		System.out.println("New project path! " + resultFile.getAbsolutePath());
 		return resultFile;
@@ -242,6 +243,7 @@ public class Server extends SimpleWebServer {
 		}
 
 		uri = uri.replace("/", File.separator);
+		System.out.println("Replaced uri " + uri);
 		File f = new File(proj.getDirectory(), uri);
 		System.out.println("New project path! " + f.getAbsolutePath());
 		return f;

@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,14 +25,15 @@ import utilities.JsonTest;
 
 public class ServerTest {
 	private static final String TEST_PROJECT_NAME = "TestProject";
-	private static final File TEST_DIRECTORY = new File(Server.WORKING_DIR.substring(0, Server.WORKING_DIR.indexOf("Server")) + "FakeTestProject/");
+	private static final Path TEST_DIRECTORY = FileSystems.getDefault().getPath(Server.WORKING_DIR.substring(0, Server.WORKING_DIR.indexOf("Server")), "FakeTestProject");
+	//private static final File TEST_DIRECTORY = new File(Server.WORKING_DIR.substring(0, Server.WORKING_DIR.indexOf("Server")) + "FakeTestProject" + File.pathSeparator);
 	private static final String SERVER_DIRECTORY = Server.WORKING_DIR;
 	private static final String TEST_DATA_URL = "/project-" + TEST_PROJECT_NAME + "/.dgd/";
 	Server serv;
 
 	@BeforeClass
 	public static void createFakeProject() {
-		Project p = new Project(TEST_PROJECT_NAME, TEST_DIRECTORY);
+		Project p = new Project(TEST_PROJECT_NAME, TEST_DIRECTORY.toFile());
 		ProjectManager.getInstance().addProject(p);
 	}
 
@@ -69,7 +72,7 @@ public class ServerTest {
     	serv = createServer();
     	File result = serv.translatePath(new File(SERVER_DIRECTORY), "/project-" + TEST_PROJECT_NAME + "/.dgd");
     	System.out.println(result);
-    	assertTrue(result.getAbsolutePath().startsWith(TEST_DIRECTORY.getAbsolutePath()));
+    	assertTrue(result.getAbsolutePath().startsWith(TEST_DIRECTORY.toFile().getAbsolutePath()));
     	assertTrue(result.exists());
     }
 
