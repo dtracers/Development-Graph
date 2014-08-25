@@ -39,7 +39,18 @@ CODE_ATTACHER = new (function() {
 		}
 		fileObject = myFile.createJson();
 		featureFileObject.files.push(fileObject);
+		addFileToList(fileName);
 	};
+
+	/**
+	 * @Method
+	 */
+	function addFileToList(fileName) {
+		var holder = document.getElementById("selectedFiles");
+		var insert = document.createElement("div");
+		insert.innerHTML = fileName;
+		holder.appendChild(insert);
+	}
 
 	/**
 	 * @Method
@@ -69,8 +80,6 @@ CODE_ATTACHER = new (function() {
 				return;
 			}
 			featureFileObject = json[0];
-			console.log(featureFileObject);
-			alert(featureFileObject);
 		});
 	};
 

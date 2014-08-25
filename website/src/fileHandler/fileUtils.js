@@ -8,7 +8,8 @@ if (typeof String.prototype.endsWith !== 'function') {
  * @Class
  */
 function FileNotFoundException(fileThatWasNotFound) {
-	return { 
+	return {
+		type:        FileNotFoundException,
 	    name:        "FileNotFoundException", 
 	    level:       10, 
 	    message:     "File: " + fileThatWasNotFound + " Was not found", 
@@ -20,8 +21,23 @@ function FileNotFoundException(fileThatWasNotFound) {
 /**
  * @Class
  */
+function NoDataExceptionException() {
+	return { 
+		type:        NoDataExceptionException,
+	    name:        "NoDataException", 
+	    level:       10, 
+	    message:     "No Data", 
+	    htmlMessage: "No data",
+	    toString:    function() {return this.name + ": " + this.message;} 
+	}; 
+}
+
+/**
+ * @Class
+ */
 function InvalidFileTypeException() {
 	return {
+		type:        InvalidFileTypeException,
 	    name:        "InvalidFileTypeException", 
 	    level:       10, 
 	    message:     "File given was not a valid type", 
@@ -35,12 +51,25 @@ function InvalidFileTypeException() {
  */
 function ServerTimeOutException() {
 	return {
-	    name:        "InvalidFileTypeException", 
+		type:        ServerTimeOutException,
+	    name:        "ServerTimeOutException", 
 	    level:       10, 
-	    message:     "File given was not a valid type", 
-	    htmlMessage: "File given was not a valid type", 
+	    message:     "The server took to long to respond", 
+	    htmlMessage: "The server took to long to respond", 
 	    toString:    function() {return this.name + ": " + this.message;} 
 	}; 
+}
+
+/**
+ * @Method
+ * @param obj
+ * @returns {Boolean}
+ */
+function objectIsException(obj) {
+	return obj.type === FileNotFoundException
+			|| obj.type === InvalidFileTypeException
+			|| obj.type === ServerTimeOutException
+			|| obj.type === NoDataExceptionException;
 }
 
 /**
@@ -186,7 +215,8 @@ function AbstractedFile(file, url) {
 				name = file.name;
 				isDirectory = true;
 			} else {
-				isDirectory = false; // i guess we assume that
+				// i guess we assume that
+				isDirectory = false;
 				name = file.name.substring(0, splitIndex);
 				fileExtension = file.name.substring(splitIndex);
 			}
@@ -202,21 +232,23 @@ function AbstractedFile(file, url) {
 				shortUrl = shortUrl.substring(0, shortUrl.indexOf("#"));
 			}
 			path = shortUrl;
-			if (typeof fileExtension == "undefined" ) {
+			if (typeof fileExtension == "undefined") {
 				if (shortUrl.endsWith("/")) {
 					isDirectory = true;
 					shortUrl = shortUrl.substring(0, shortUrl.length - 1);
-					name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1); // if it is a directory it will still return a name
+					// if it is a directory it will still return a name
+					name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1);
 				} else {
 					isDirectory = false;
 					name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1);
 				}
 			} else {
 				isDirectory = false; // i guess we assume that
-				name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1, shortUrl.indexOf(fileExtension));
-
+				name = shortUrl.substring(shortUrl.lastIndexOf("/") + 1,
+						shortUrl.indexOf(fileExtension));
 			}
-			path = path.substring(0, path.indexOf(name)); // remove the name as we are already storing that info.
+			// remove the name as we are already storing that info.
+			path = path.substring(0, path.indexOf(name));
 			if (path.endsWith("/")) {
 				path = path.substring(0, path.length - 1);
 			}
@@ -268,9 +300,15 @@ function AbstractedFile(file, url) {
 	 */
 	this.readFileAsLines = function(callback) {
 		var func = function(text) {
-			if (typeof text == "undefined") {
+			console.log("Reading as lines!");
+			console.log(text);
+			if (typeof text === "undefined") {
 				console.log("no text was found returning undefined");
-				callback(undefined);
+				callback(NoDataException());
+				return;
+			} else if (objectIsException(text)) {
+				console.log("an excpetion occured while trying to read as lines");
+				callback(text);
 				return;
 			}
 			console.log("Splitting up!");
@@ -279,7 +317,7 @@ function AbstractedFile(file, url) {
 			callback(reader);
 		};
 		this.readFileAsOneString(func);
-	}
+	};
 
 	/**
 	 * @Method
@@ -341,7 +379,8 @@ function AbstractedFile(file, url) {
 	 * @Class
 	 */
 	function FileLineReader(text) {
-		var lines = ("" + text).split(/[\r\n]+/g);// tolerate both Windows and Unix linebreaks
+		// tolerate both Windows and Unix linebreaks
+		var lines = ("" + text).split(/[\r\n]+/g);
 		var currentLineNumber = 0;
 
 		/**
@@ -366,18 +405,23 @@ function AbstractedFile(file, url) {
 
 	/**
 	 * Creates an XmlHttpRequest that can be used to talk to the server.
+	 * 
 	 * @Method
-	 * @param inputCallback {function} The callback that is called as a response from the server.
+	 * @param inputCallback
+	 *            {function} The callback that is called as a response from the
+	 *            server.
 	 * @callback inputCallback(responseText)
-	 * @callbackParam responseText {string} the result of the server message, or {@link ServerTimeOutException if the call takes too long}
+	 * @callbackParam responseText {string} the result of the server message, or
+	 *                {@link ServerTimeOutException if the call takes too long}
 	 * @returns {XMLHttpRequest} also sets the callback
 	 */
 	function createXmlHttp(inputCallback) {
 		var xmlhttp;
-		if (window.XMLHttpRequest) { // code for IE7+, Firefox, Chrome, Opera, Safari
+		if (window.XMLHttpRequest) {
+			// code for IE7+, Firefox, Chrome, Opera, Safari
 			xmlhttp = new XMLHttpRequest();
-		}
-		else { // code for IE6, IE5
+		} else {
+			// code for IE6, IE5
 			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
 		}
 
@@ -386,10 +430,12 @@ function AbstractedFile(file, url) {
 			var timeout = setTimeout(function() {
 				timedOut = true;
 				inputCallback(new ServerTimeOutException());
-			}, TIMEOUT_TIME); // one second timeout (may need to be made longer)
-	
+			}, TIMEOUT_TIME);
+			// one second timeout (may need to be made longer)
+
 			xmlhttp.onreadystatechange = function() {
-				if (xmlhttp.readyState == 4 && (xmlhttp.status == OK || xmlhttp.status == CREATED || xmlhttp.status == NO_CONTENT)) {
+				if (xmlhttp.readyState == 4
+						&& (xmlhttp.status == OK || xmlhttp.status == CREATED || xmlhttp.status == NO_CONTENT)) {
 					clearTimeout(timeout);
 					if (!timedOut) {
 						if (xmlhttp.status == NO_CONTENT) {
@@ -424,7 +470,7 @@ function AbstractedFile(file, url) {
 		}
 
 		if (url.endsWith("/")) {
-			url = url.substring(0, url.length -1)
+			url = url.substring(0, url.length - 1)
 		}
 		var extensionIndex = url.lastIndexOf(".");
 		var lastSlashIndex = url.lastIndexOf("/");
@@ -435,6 +481,6 @@ function AbstractedFile(file, url) {
 	}
 
 	function isArray(what) {
-	    return Object.prototype.toString.call(what) === '[object Array]';
+		return Object.prototype.toString.call(what) === '[object Array]';
 	}
 }

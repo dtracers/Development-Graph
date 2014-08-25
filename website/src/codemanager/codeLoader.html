@@ -6,8 +6,6 @@
 <body>
 <button id="FileSelector">select File</button>
 <button id="UrlSelector">add Url</button>
-</div>
-</div>
 <script>
 	CODE_ATTACHER.loadFeatureData();
 	document.getElementById("FileSelector").onclick = function() {
@@ -35,6 +33,8 @@
 	};
 </script>
 <button onclick="CODE_ATTACHER.writeData()">Save Data</button>
+<div id = "selectedFiles">
+</div>
 <!-- an optional template for loading data from a url -->
 <template id="UrlLoaderTemplate"></template>
 

@@ -13,38 +13,53 @@
 </div>
 
 <div id = "existingProjects"></div>
-<h1>Give the directory of an existing project</h1>
-<div class="inline" id="dropzonediv">
-<div class="inline" id="drop_zone">
-<input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
-</div>
+<div id = "OldProjs">
+	<h1>Give the directory of an existing project at an already accessed directory</h1>
+	<div class="inline" id="dropzonediv">
+		<div class="inline" id="drop_zone">
+			<input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
+		</div>
 
-<script>
-	// Setup the dnd listeners.
-	var dropZone = document.getElementById('drop_zone');
-	dropZone.addEventListener('dragover', handleDragOver, false);
-	dropZone.addEventListener('drop', handleFileSelect, false);
-	document.getElementById('files').addEventListener('change', handleFileSelect, false);
-</script>
-<div class="inline">
-<form action ="loadProject" method="post" >
-	<input id = "directory" type ="text" value = "" name = "directory" hidden>
-	<input id = "existingName" type ="text" value = "" name = "name" hidden>
-	<input class="introbutton" type="submit" value="Submit">
-</form>
-</div>
+		<script>
+			// Setup the dnd listeners.
+			var dropZone = document.getElementById('drop_zone');
+			dropZone.addEventListener('dragover', handleDragOver, false);
+			dropZone.addEventListener('drop', handleFileSelect, false);
+			document.getElementById('files').addEventListener('change', handleFileSelect, false);
+		</script>
+
+		<div class="inline">
+			<form action ="loadProject" method="post" >
+				<input id = "directory" type ="text" value = "" name = "directory" hidden>
+				<input id = "existingName" type ="text" value = "" name = "name" hidden>
+				<input class="introbutton" type="submit" value="Submit">
+			</form>
+		</div>
+	</div>
 </div>
 <div>
-<form action = "newProject" method="post">
-	<h1>Or make a new project</h1>
-	<input id = "newName" type ="text" name = "name" placeholder = "Project Name">
-	<input class="introbutton" type="submit" value="Submit">
-</form>
+	<form action ="newProject" method="post" >
+		<h1>Load an existing project at a new directory (or on a different computer)</h1>
+		<input id = "directory" type ="text" value = "" name = "directory" hidden>
+		<input id = "existingName" type ="text" value = "" name = "name" hidden>
+		<input class="introbutton" type="submit" value="Submit">
+	</form>
+</div>
+<div>
+	<form action = "newProject" method="post">
+		<h1>Or make a new project</h1>
+		<input id = "newName" type ="text" name = "name" placeholder = "Project Name">
+		<input class="introbutton" type="submit" value="Submit">
+	</form>
 </div>
 <script>
 	(function() {
 	var file = new AbstractedFile(null, '/server/projectList');
 	file.readFileAsLines(function(fileReader) {
+		console.log(fileReader);
+		if (objectIsException(fileReader)) {
+			return;
+		}
 		try {
 			while (fileReader.hasNext()) {
 				firstLine = fileReader.readLine();
@@ -73,6 +88,9 @@
 				button.type = "subment";
 				form.appendChild(button);
 				document.getElementById('existingProjects').appendChild(form);
+			}
+			if (document.querySelectorAll("#existingProjects > *").length > 0) {
+				document.getElementById('OldProjs').style.display = "none";
 			}
 		} catch(err) {
 			console.log(err);

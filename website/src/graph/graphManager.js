@@ -24,6 +24,8 @@ function GraphManager() {
 				defaultLabelColor: '#ffffff',
 				defaultEdgeColor: '#83878D',
 				sideMargin: 5,
+				hideEdgesOnMove: true,
+				batchEdgesDrawing: true,
 			}
 		});
 

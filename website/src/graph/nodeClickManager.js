@@ -3,7 +3,7 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var undoNodeClickFunction;
 	var lastFeatureClicked = undefined;
 	var refreshNextClick = false;
-	var fa2Runtime = 10000; // 2 seconds seems long enough for the nodes to settle.
+	var fa2Runtime = 2000; // 2 seconds seems long enough for the nodes to settle.
 	var localScope = this;
 	var colorManager = new ColorManager();
 
