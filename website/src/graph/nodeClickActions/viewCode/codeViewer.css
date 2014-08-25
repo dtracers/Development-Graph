@@ -41,7 +41,10 @@ h1 {
 }
 
 .code, .docs, .test {
-	overflow:scroll;
+}
+
+.block {
+	overflow:auto;
 }
 
 h1 .button {

@@ -2,6 +2,7 @@
 window.codeViewerLoaded = true;
 </script>
 <script src="/web/src/codeManager/codeFileAttacher.js"></script>
+<script src="/web/src/utilities/visibility.js"></script>
 <template id="viewCode">
 	<style>
 		@import url("/web/src/graph/nodeClickActions/viewCode/codeViewer.css");
@@ -11,12 +12,15 @@ window.codeViewerLoaded = true;
 		<div class = "table">
 			<div class="code">
 				<h1>Source Code <a class="button" data-url="/codeManager/codeLoader.html" data-type="source" target="_blank">+</a></h1>
+				<div class="boxes"></div>
 			</div>
 			<div class="docs">
 				<h1>Source Docs <a class="button" data-url="/codeManager/codeLoader.html" data-type="source_doc" target="_blank">+</a></h1>
+				<div class="boxes"></div>
 			</div>
 			<div class="test">
 				<h1>Tests <a class="button" data-url="/codeManager/codeLoader.html" data-type="source_test" target="_blank">+</a></h1>
+				<div class="boxes"></div>
 			</div>
 		</div>
 	</div>

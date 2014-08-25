@@ -38,7 +38,7 @@ function saveNewFeature(feature, parentNode, realGraph, displayGraph, callback, 
 			console.log(result);
 			// then we load it into the display graph
 
-			displayGraph.addNode(newNode);
+			displayGraph.addNodeToDisplay(newNode);
 			if (newEdge) {
 				displayGraph.addEdge(newEdge);
 			}

@@ -19,9 +19,10 @@ function GraphManager() {
 		managerInstance = new sigma({
 			container: placementId,
 			settings: {
-				defaultNodeColor: '#ec5148',
+				defaultNodeColor: '#FF00FF',// '#ec5148'
 				labelThreshold: 3,
 				defaultLabelColor: '#ffffff',
+				defaultEdgeColor: '#83878D',
 				sideMargin: 5,
 			}
 		});
@@ -59,7 +60,7 @@ function GraphManager() {
 				};
 		  		saveNewFeature(featureData, undefined, realGraphInstance, displayGraphInstance, endingFunction, true);
 		  	} else {
-		  		displayGraphInstance.addNode(node); // loads the starting node into the graph
+		  		displayGraphInstance.addNodeToDisplay(node); // loads the starting node into the graph
 		  		endingFunction();
 		  	}
 		});
@@ -122,7 +123,7 @@ function generateUUID() {
  * @param nodeLabel {string}
  * @param actionLabel {string}
  * @param nodeExtraData
- * @param color {string}
+ * @param color {String}
  * @returns {node}
  */
 sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNode, dynamicNode, adjustX, adjustY, nodeLabel, actionLabel, nodeExtraData, color) {
@@ -157,7 +158,11 @@ sigma.classes.graph.addMethod('createNewNode', function createNewNode(existingNo
 	};
 
 	if (color) {
-		returnNode.color = color;
+		if (typeof color === "string") {
+			returnNode.color = color;
+		} else {
+			returnNode.color = color.getNodeColor(newNodeId, actionLabel, dynamicNode);
+		}
 	}
 
 	if (dynamicNode && existingNode) {
@@ -194,6 +199,17 @@ sigma.classes.graph.addMethod('createNewEdge', function createNewEdge(sourceNode
 	}
 });
 
+var colorManager = new ColorManager();
+/**
+ * @Method
+ * The correct way to add a node to the display.
+ */
+sigma.classes.graph.addMethod('addNodeToDisplay', function removeDescendants(node) {
+	node.color = colorManager.getNodeColor(node.id, node.actionType, node.isDynamic);
+	this.addNode(node);
+	return this;
+});
+
 /**
  * @Method
  * Grabs the child graph of the node.
@@ -211,7 +227,9 @@ sigma.classes.graph.addMethod('getChildGraph', function getChildGraph(sourceNode
 	};
 	// it starts out empty
 	for (var nodeId in nodes) {
-		resultantGraph.nodes.push(this.nodes(nodeId));
+		var node = this.nodes(nodeId);
+		node.color = colorManager.getNodeColor(node.id, node.actionType, node.isDynamic);
+		resultantGraph.nodes.push(node);
 		for (var edgeId in nodes[nodeId]) {
 			resultantGraph.edges.push(nodes[nodeId][edgeId]);
 		}

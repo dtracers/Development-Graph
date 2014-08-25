@@ -2,9 +2,10 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	var nodeClickFunctionMap = {};
 	var undoNodeClickFunction;
 	var lastFeatureClicked = undefined;
-	var fa2Runtime = 2000; // 2 seconds seems long enough for the nodes to settle.
+	var refreshNextClick = false;
+	var fa2Runtime = 10000; // 2 seconds seems long enough for the nodes to settle.
 	var localScope = this;
-	var parentRedirect = false;
+	var colorManager = new ColorManager();
 
 	/**
 	 * @Method
@@ -33,9 +34,15 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		}
 
 		// If it is the same node we return as the state has not changed.
-		if (lastFeatureClicked && lastFeatureClicked.id == clickedNode.id) {
+		// but we continue if it a refreshNext click is true
+		if (!refreshNextClick && (lastFeatureClicked && lastFeatureClicked.id == clickedNode.id)) {
 			return;
 		}
+
+		if (refreshNextClick) {
+			refreshNextClick = false;
+		}
+
 		var action = clickedNode.actionType;
 		if (!action || action == undefined) {
 			return;
@@ -93,17 +100,17 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		// drops all descendants of the node *if they exist*
 		displayGraph.removeDescendants(clickedNode.id);
 
-		var viewChildNode = displayGraph.createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, '#0f0');
+		var viewChildNode = displayGraph.createNewNode(clickedNode, true, -1, 0, 'View Children', 'viewChildren', clickedNode.id, colorManager);
 		var viewDocumentationNode = displayGraph.createNewNode(clickedNode, true, -1, 1, 'Feature Docs',
-				'viewDocumentation', clickedNode.id, '#0f0');
-		var viewCodeNode = displayGraph.createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, '#0f0');
-		var editNode = displayGraph.createNewNode(clickedNode, true, 1, 1, 'Edit this feature', 'edit', clickedNode.id, '#0f0');
-		var viewIssuesNode = displayGraph.createNewNode(clickedNode, true, 1, 0, 'Issues/Bugs', 'viewIssues', clickedNode.id, '#0f0');
-		var viewCommitsNode = displayGraph.createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, '#0f0');
+				'viewDocumentation', clickedNode.id, colorManager);
+		var viewCodeNode = displayGraph.createNewNode(clickedNode, true, 0, 1, 'Code', 'viewCode', clickedNode.id, colorManager);
+		var editNode = displayGraph.createNewNode(clickedNode, true, 1, 1, 'Edit this feature', 'edit', clickedNode.id, colorManager);
+		var viewIssuesNode = displayGraph.createNewNode(clickedNode, true, 1, 0, 'Issues/Bugs', 'viewIssues', clickedNode.id, colorManager);
+		var viewCommitsNode = displayGraph.createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, colorManager);
 
 		// add all nodes to the graph
-		displayGraph.addNode(viewChildNode).addNode(viewDocumentationNode).addNode(viewCodeNode)
-				.addNode(editNode).addNode(viewIssuesNode).addNode(viewCommitsNode);
+		displayGraph.addNodeToDisplay(viewChildNode).addNodeToDisplay(viewDocumentationNode).addNodeToDisplay(viewCodeNode)
+				.addNodeToDisplay(editNode).addNodeToDisplay(viewIssuesNode).addNodeToDisplay(viewCommitsNode);
 
 		// add all edges to the graph
 		displayGraph.addEdge(displayGraph.createNewEdge(clickedNode, viewChildNode, true))
@@ -118,6 +125,7 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 	}
 
 	function viewChildrenAction(e, oldFeature) {
+		refreshNextClick = true;
 		var clickedNode = e.data.node;
 		console.log("clicked view children!");
 
@@ -129,7 +137,7 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 
 		var parentNode = displayGraph.nodes(clickedNode.parentNode);
 		var addNewFeatureNode = displayGraph.createNewNode(parentNode, true, -1, 0, 'Make a new Feature', 'newFeature', parentNode.id, '#00f');
-		displayGraph.addNode(addNewFeatureNode);
+		displayGraph.addNodeToDisplay(addNewFeatureNode);
 
 		displayGraph.addEdge(displayGraph.createNewEdge(parentNode, addNewFeatureNode, true))
 
