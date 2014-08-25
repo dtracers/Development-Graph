@@ -32,10 +32,6 @@
 <script src="graphManager.js"></script>
 <script src="nodeClickManager.js"></script>
 <script src="/web/src/featureManager/featureManager.js"></script>
-<link rel="import" href="nodeClickActions/actionsImport.html" onload = "startGraph()">
-</head>
-<body>
-<div id="graphContainer"></div>
 <script>
 	function startGraph() {
 		var graphManager = new GraphManager();
@@ -45,6 +41,10 @@
 		});
 	}
 </script>
+<link rel="import" href="nodeClickActions/actionsImport.html" onload = "startGraph()">
+</head>
+<body>
+<div id="graphContainer"></div>
  <div id="overlay"></div>
 </body>
 </html>
