@@ -109,8 +109,14 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 		var viewCommitsNode = displayGraph.createNewNode(clickedNode, true, 1, -1, 'Commits', 'viewCommits', clickedNode.id, colorManager);
 
 		// add all nodes to the graph
+		/*
 		displayGraph.addNodeToDisplay(viewChildNode).addNodeToDisplay(viewDocumentationNode).addNodeToDisplay(viewCodeNode)
 				.addNodeToDisplay(editNode).addNodeToDisplay(viewIssuesNode).addNodeToDisplay(viewCommitsNode);
+		*/
+		var children = displayGraph.displaceNodes(clickedNode, viewChildNode, viewDocumentationNode, viewCodeNode, editNode, viewIssuesNode, viewCommitsNode);
+		for (var i = 0; i < children.length; i++) {
+			displayGraph.addNodeToDisplay(children[i]);
+		}
 
 		// add all edges to the graph
 		displayGraph.addEdge(displayGraph.createNewEdge(clickedNode, viewChildNode, true))
@@ -121,7 +127,7 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 				.addEdge(displayGraph.createNewEdge(clickedNode, viewCommitsNode, true));
 
 		managerInstance.refresh();
-		managerInstance.timedForceAtlas2(fa2Runtime);
+		//managerInstance.timedForceAtlas2(fa2Runtime);
 	}
 
 	function viewChildrenAction(e, oldFeature) {
@@ -131,19 +137,26 @@ function NodeClickManager(realGraph, displayGraph, managerInstance) {
 
 		removeNodes(clickedNode, oldFeature);
 
+		var parentNode = displayGraph.nodes(clickedNode.parentNode);
+		var addNewFeatureNode = displayGraph.createNewNode(parentNode, true, -1, 0, 'Make a new Feature', 'newFeature', parentNode.id, '#00f');
+
 		var graph = realGraph.getChildGraph(clickedNode.parentNode);
+		//console.log(graph);
+
+		var nodeArray = graph.nodes;
+		nodeArray.push(addNewFeatureNode);
+		console.log(nodeArray);
+		var newNodeArray = displayGraph.displaceNodes(parentNode, nodeArray);
+		graph.nodes = newNodeArray;
+
+		graph.edges.push(displayGraph.createNewEdge(parentNode, addNewFeatureNode, true));
+
 		console.log(graph);
 		displayGraph.read(graph);
 
-		var parentNode = displayGraph.nodes(clickedNode.parentNode);
-		var addNewFeatureNode = displayGraph.createNewNode(parentNode, true, -1, 0, 'Make a new Feature', 'newFeature', parentNode.id, '#00f');
-		displayGraph.addNodeToDisplay(addNewFeatureNode);
-
-		displayGraph.addEdge(displayGraph.createNewEdge(parentNode, addNewFeatureNode, true))
-
 		managerInstance.refresh();
 
-		managerInstance.timedForceAtlas2(fa2Runtime);
+		//managerInstance.timedForceAtlas2(fa2Runtime);
 	}
 
 	this.addClickListener = function(listener, args) {
