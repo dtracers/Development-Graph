@@ -34,6 +34,7 @@ function saveNewFeature(feature, parentNode, realGraph, displayGraph, callback, 
 		}
 		var graphSaver = new AbstractedFile(getDataDirectoryAsUrl() + "/graph?json&insert" + parameters);
 		graphSaver.writeFileAsJson(writtingObjects, function(result) {
+			realGraph.addNode(newNode);
 			console.log("Data from server 2");
 			console.log(result);
 			// then we load it into the display graph
@@ -41,6 +42,7 @@ function saveNewFeature(feature, parentNode, realGraph, displayGraph, callback, 
 			displayGraph.addNodeToDisplay(newNode);
 			if (newEdge) {
 				displayGraph.addEdge(newEdge);
+				realGraph.addEdge(newEdge);
 			}
 
 			if (callback) {

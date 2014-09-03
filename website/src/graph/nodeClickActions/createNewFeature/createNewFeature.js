@@ -59,7 +59,7 @@ function FeatureCreator(realGraph, displayGraph, managerInstance, clickManager, 
 
 		saveNewFeature(featureData, parentNode, realGraph, displayGraph, function() {
 			managerInstance.refresh();
-			managerInstance.timedForceAtlas2(2000);
+			//managerInstance.timedForceAtlas2(2000);
 			localScope.close(overlayId, shadowRoot);
 		});
 	}
