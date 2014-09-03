@@ -184,7 +184,7 @@ public class StreamingJsonWriter implements ContentHandler {
 			if (first) {
 				write("{");
 			}
-			write("}");
+			write("}\n");
 		}
 		first = false;
 		return true;
