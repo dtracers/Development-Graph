@@ -14,11 +14,12 @@
 </div>
 <br>
 <div id = "existingProjects"></div>
+<!-- Old Projects, script within creates the drop zone for dnd -->
 <div id = "OldProjs">
-	<div class="title"><h3>Give the directory of an existing project at a previously accessed directory</h3></div>
+	<div class="subtitle"><h3>Give the directory of an existing project at a previously accessed directory</h3></div>
 	<div class="formwrapper">
 			<div class="inline" id="drop_zone">
-				<input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
+				<input type="file" id="files" name="files[]" value="You can drop things on me!" multiple mozdirectory="" webkitdirectory="" directory="" />
 
 				<script>
 					// Setup the dnd listeners.
@@ -27,21 +28,20 @@
 					dropZone.addEventListener('drop', handleFileSelect, false);
 					document.getElementById('files').addEventListener('change', handleFileSelect, false);
 				</script>
-
+				
 				<div class="inline">
 					<form action ="loadProject" method="post" >
 						<input id = "directory" type ="text" value = "" name = "directory" hidden>
 						<input id = "existingName" type ="text" value = "" name = "name" hidden>
 						<input class="introbutton" type="submit" value="Submit">
-						Drop things on me!
 					</form>
 				</div>
 			</div>
 	</div>
-
+<!-- Existing Projects -->
 <div>
 	<form action ="newProject" method="post" >
-		<div class="title"><h3>Load an existing project at a new directory (or on a different computer)</h3></div>
+		<div class="subtitle"><h3>Load an existing project at a new directory (or on a different computer)</h3></div>
 		<div class="formwrapper">
 		<input id = "directory" type ="text" value = "" name = "directory" hidden>
 		<input id = "existingName" type ="text" value = "" name = "name" hidden>
@@ -49,17 +49,19 @@
 		</div>
 	</form>
 </div>
-
+<!-- New Projects -->
 <div>
 
 	<form action = "newProject" method="post">
-		<div class="title"><h3>Or make a new project</h3></div>
+		<div class="subtitle"><h3>Or make a new project</h3></div>
 		<div class="formwrapper">
 		<input id = "newName" type ="text" name = "name" placeholder = "Project Name">
 		<input class="introbutton" type="submit" value="Submit">
 		</div>
 	</form>
 </div>
+
+<!-- js function for pulling file information -->
 <script>
 	(function() {
 	var file = new AbstractedFile(null, '/server/projectList');
@@ -107,6 +109,8 @@
 	});
 	})();
 </script>
+
+<!-- Error/Alert Script? (I'm not sure, we have err and err.stack, but error down here.) - Cam -->
 <script>
 	(function() {
 		var message = getParameterByName("message");
