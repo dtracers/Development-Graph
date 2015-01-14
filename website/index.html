@@ -17,30 +17,27 @@
 <div id = "OldProjs">
 	<div class="title"><h3>Give the directory of an existing project at a previously accessed directory</h3></div>
 	<div class="formwrapper">
-	<div class="inline" id="dropzonediv">
-		<div class="inline" id="drop_zone">
-			<input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
+			<div class="inline" id="drop_zone">
+				<input type="file" id="files" name="files[]" multiple mozdirectory="" webkitdirectory="" directory=""/>
 
-		<script>
-			// Setup the dnd listeners.
-			var dropZone = document.getElementById('drop_zone');
-			dropZone.addEventListener('dragover', handleDragOver, false);
-			dropZone.addEventListener('drop', handleFileSelect, false);
-			document.getElementById('files').addEventListener('change', handleFileSelect, false);
-		</script>
+				<script>
+					// Setup the dnd listeners.
+					var dropZone = document.getElementById('drop_zone');
+					dropZone.addEventListener('dragover', handleDragOver, false);
+					dropZone.addEventListener('drop', handleFileSelect, false);
+					document.getElementById('files').addEventListener('change', handleFileSelect, false);
+				</script>
 
-		<div class="inline">
-			<form action ="loadProject" method="post" >
-				<input id = "directory" type ="text" value = "" name = "directory" hidden>
-				<input id = "existingName" type ="text" value = "" name = "name" hidden>
-				<input class="introbutton" type="submit" value="Submit">
-				You can drop things on me!
-			</form>
-		</div>
+				<div class="inline">
+					<form action ="loadProject" method="post" >
+						<input id = "directory" type ="text" value = "" name = "directory" hidden>
+						<input id = "existingName" type ="text" value = "" name = "name" hidden>
+						<input class="introbutton" type="submit" value="Submit">
+						Drop things on me!
+					</form>
+				</div>
+			</div>
 	</div>
-	</div>
-</div>
-<br>
 
 <div>
 	<form action ="newProject" method="post" >
@@ -52,6 +49,7 @@
 		</div>
 	</form>
 </div>
+
 <div>
 
 	<form action = "newProject" method="post">
