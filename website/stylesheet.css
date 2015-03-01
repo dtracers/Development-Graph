@@ -5,7 +5,7 @@ h3{
 }
 
 
-div h3, input {
+div h3, input, button {
   position: relative;
   top: 50%;
   transform: translateY(-50%);

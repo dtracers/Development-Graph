@@ -2,8 +2,14 @@
 	<link rel="import" href="/web/src/fileHandler/fileImporter.html">
 	<script src = "codeFileAttacher.js"></script>
 	<link rel="stylesheet" type="text/css" href="cssHighlights/java.css">
+	<!-- note: the reference for the stylesheet on this page will likely need to be changed 
+	when this is made a website/app for security reasons. someone
+	could select a file that has "../../../../" in the filename 
+	and screw with stuff.-->
+	<link rel="stylesheet" type="text/css" href="../../stylesheet.css">
 </head>
 <body>
+<div class="formwrapper">
 <button id="FileSelector">select File</button>
 <button id="UrlSelector">add Url</button>
 <script>
@@ -37,7 +43,7 @@
 </div>
 <!-- an optional template for loading data from a url -->
 <template id="UrlLoaderTemplate"></template>
-
+</div>
 <div id="fileSelection">
 </div>
 
